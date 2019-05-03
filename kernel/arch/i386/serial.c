@@ -1,3 +1,5 @@
+
+
 #include <kernel/io.h>
 #include <kernel/serial.h>
 #include <limits.h>
@@ -25,7 +27,7 @@ static void serial_print(const char* data, size_t length)
 		serial_printchar(bytes[i]);
 }
 
-int serial_printf(const char* restrict format, ...) 
+int serial_printf(const char* __restrict format, ...) 
 {
 	va_list parameters;
 	va_start(parameters, format);

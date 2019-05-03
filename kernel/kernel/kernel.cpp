@@ -1,11 +1,11 @@
-#include <stdio.h>
 
+
+#include <stdio.h>   
 #include <kernel/tty.h>
 #include <kernel/serial.h>
-#include <kernel/io.h>
+#include <kernel/io.h> 
 #include <kernel/multiboot.h>
 #include <string.h>
-
 #define MULTIBOOT_MAGIC 0x2BADB002
 typedef void (*call_module_t)(void);
 
@@ -62,8 +62,7 @@ static void load_modules(multiboot_info_t *mbinfo)
     }
 }
 
-
-void kernel_main(uint32_t magic, multiboot_info_t *mbinfo) 
+int kernel_main(uint32_t magic, multiboot_info_t *mbinfo) 
 {
 	terminal_initialize();
 	serial_init();
@@ -71,7 +70,7 @@ void kernel_main(uint32_t magic, multiboot_info_t *mbinfo)
     if(magic != MULTIBOOT_MAGIC)
     {
         printf("Booted with an unsupported bootloader\r\n");
-        return;
+        return 0;
     }
     printf("Multiboot magic ok!\r");
     if(mbinfo->mods_count)
@@ -90,7 +89,8 @@ void kernel_main(uint32_t magic, multiboot_info_t *mbinfo)
                 printf("%c", kbdus[x]);
             }
         }
+
     }
-
-
+    return 0;
 }
+
