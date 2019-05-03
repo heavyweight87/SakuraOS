@@ -1,7 +1,6 @@
 
 
 #include <kernel/io.h>
-#include <kernel/serial.h>
 #include <limits.h>
 #include <stdbool.h>
 #include <stdarg.h>

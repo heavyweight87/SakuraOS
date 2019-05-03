@@ -30,6 +30,9 @@ LIBS:=$(LIBS) $(KERNEL_ARCH_LIBS)
 KERNEL_OBJS=\
 $(KERNEL_ARCH_OBJS) \
 kernel/kernel.o \
+kernel/interrupts.o \
+kernel/irq.o \
+kernel/gdt.o
 
 OBJS=\
 $(ARCHDIR)/crti.o \
@@ -60,13 +63,13 @@ $(ARCHDIR)/crtbegin.o $(ARCHDIR)/crtend.o:
 	OBJ=`$(CC) $(CFLAGS) $(LDFLAGS) -print-file-name=$(@F)` && cp "$$OBJ" $@
 
 .c.o:
-	$(CC) -MD -c $< -o $@ -std=gnu11 $(CFLAGS) $(CPPFLAGS)
+	$(CC) -MD -c $< -o $@ -std=gnu11 $(CFLAGS)
 
 .S.o:
-	$(CC) -MD -c $< -o $@ $(CFLAGS) $(CPPFLAGS)
+	$(CC) -MD -c $< -o $@ $(CFLAGS) 
 
 .cpp.o:
-	$(CPP) -MD $(CPPFLAGS) $< -o $@ 
+	$(CC) -MD -c $(CPPFLAGS) $< -o $@ 
 
 clean:
 	rm -f myos.kernel
