@@ -87,8 +87,9 @@ void create_descriptor(uint32_t base, uint32_t limit, uint16_t flag, gdt_entry_t
 
 extern "C" void reload()
 {
-    extern void reloadSegs();
-    reloadSegs();
+    extern void load_gdt();
+    load_gdt();
+   // reloadSegs();
 }
 
 void gdt::init()
@@ -103,10 +104,5 @@ void gdt::init()
     gp.limit =  (sizeof(gdt_entry_t) * 5) - 1;
     asm ( "lgdt %0" : : "m"(gp) );  // let the compiler choose an addressing mode
     reload();
-
-
-
-        
-   // asm volatile("mov %eax, %cr0; and %eax, 0b01111111111111111111111111111111; mov %cr0, %eax;");
       
 }

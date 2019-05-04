@@ -65,23 +65,28 @@ static void load_modules(multiboot_info_t *mbinfo)
 
 extern "C" int kernel_main(uint32_t magic, multiboot_info_t *mbinfo) 
 {
+    gdt::init();
 	terminal_initialize();
 	serial_init();
 	printf("Hello, kernel World!\r\n");
     if(magic != MULTIBOOT_MAGIC)
     {
         printf("Booted with an unsupported bootloader\r\n");
-        return 0;
+       // return 0;
     }
     printf("Multiboot magic ok!\r");
     if(mbinfo->mods_count)
     {
         load_modules(mbinfo);
     }
-    gdt::init();
     interrupts::init();
-
     while(1)
+    { 
+        asm ("hlt");
+      //  printf("got\r");
+    }
+
+ /*   while(1)
     {
         if(inb(0x64) & 0x01)
         {
@@ -92,7 +97,7 @@ extern "C" int kernel_main(uint32_t magic, multiboot_info_t *mbinfo)
             }
         }
 
-    }
+    }*/
     return 0;
 }
 
