@@ -4,6 +4,7 @@
 #include <stdint.h>
 #include <kernel/io.h>
 #include <string.h>
+#include <kernel/scheduler.h>
 
 
 typedef struct  __attribute__((packed)) 
@@ -75,9 +76,12 @@ static uint8_t kbdus[128] = {
 extern "C"
 {
 
+  extern void do_timer_stuff();
+
 void irq0_handler(void) {
 	  // TODO: Add timer handler
 	  outb(0x20, 0x20);
+    do_timer_stuff();
 }
 
 void irq1_handler(void) {
@@ -88,7 +92,7 @@ void irq1_handler(void) {
 	keycode = inb(0x60);
     if(!(keycode & 0x80))
     {
-        printf("%c", kbdus[keycode]);
+       // printf("%c", kbdus[keycode]);
     }
 
 	outb(0x20, 0x20);

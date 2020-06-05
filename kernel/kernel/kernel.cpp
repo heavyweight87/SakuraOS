@@ -6,6 +6,7 @@
 #include <string.h>
 #include <kernel/interrupts.hpp>
 #include <kernel/gdt.hpp>
+#include <kernel/scheduler.h>
 
 #define MULTIBOOT_MAGIC 0x2BADB002
 typedef void (*call_module_t)(void);
@@ -63,6 +64,25 @@ static void load_modules(multiboot_info_t *mbinfo)
     }
 }
 
+void Process()
+{
+    int sleeptime = 1000* currentPCB->PID;
+    while (true) 
+    {
+        Sleep(sleeptime);
+        printf("Slept for %d\r", sleeptime);
+        printf("PID = %d\n", currentPCB->PID);
+        serial_printf("PID = %d\r\n", currentPCB->PID);
+        // -- sanity check for the state -- lower case is broken
+        if (currentPCB->state != RUNNING)
+        {
+            printf("fuck: %d\n", currentPCB->state);
+            serial_printf("fuck: %d\r\n", currentPCB->state);
+        }
+        printf("\n");
+    }
+}
+
 extern "C" int kernel_main(uint32_t magic, multiboot_info_t *mbinfo) 
 {
     gdt::init();
@@ -72,7 +92,7 @@ extern "C" int kernel_main(uint32_t magic, multiboot_info_t *mbinfo)
     if(magic != MULTIBOOT_MAGIC)
     {
         printf("Booted with an unsupported bootloader\r\n");
-       // return 0;
+        return 0;
     }
     printf("Multiboot magic ok!\r");
     if(mbinfo->mods_count)
@@ -80,24 +100,12 @@ extern "C" int kernel_main(uint32_t magic, multiboot_info_t *mbinfo)
         load_modules(mbinfo);
     }
     interrupts::init();
-    while(1)
-    { 
-        asm ("hlt");
-      //  printf("got\r");
-    }
-
- /*   while(1)
-    {
-        if(inb(0x64) & 0x01)
-        {
-            char x = inb(0x60);
-            if(!(x & 0x80))
-            {
-                printf("%c", kbdus[x]);
-            }
-        }
-
-    }*/
+    InitScheduler();
+    InitTimer();
+    __asm__ volatile("sti");
+    CreateProcess(Process);
+    CreateProcess(Process);
+    PerformButler();
     return 0;
 }
 

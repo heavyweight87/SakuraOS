@@ -26,6 +26,44 @@ static void serial_print(const char* data, size_t length)
 		serial_printchar(bytes[i]);
 }
 
+static char * itoa( int value, char * str, int base )
+{
+    char * rc;
+    char * ptr;
+    char * low;
+    // Check for supported base.
+    if ( base < 2 || base > 36 )
+    {
+        *str = '\0';
+        return str;
+    }
+    rc = ptr = str;
+    // Set '-' for negative decimals.
+    if ( value < 0 && base == 10 )
+    {
+        *ptr++ = '-';
+    }
+    // Remember where the numbers start.
+    low = ptr;
+    // The actual conversion.
+    do
+    {
+        // Modulo is negative for negative value. This trick makes abs() unnecessary.
+        *ptr++ = "zyxwvutsrqponmlkjihgfedcba9876543210123456789abcdefghijklmnopqrstuvwxyz"[35 + value % base];
+        value /= base;
+    } while ( value );
+    // Terminating the string.
+    *ptr-- = '\0';
+    // Invert the numbers.
+    while ( low < ptr )
+    {
+        char tmp = *low;
+        *low++ = *ptr;
+        *ptr-- = tmp;
+    }
+    return rc;
+}
+
 int serial_printf(const char* __restrict format, ...) 
 {
 	va_list parameters;
@@ -73,7 +111,21 @@ int serial_printf(const char* __restrict format, ...)
 			}
 			serial_print(str, len);
 			written += len;
-		} else {
+		} 
+		else if(*format == 'd')
+		{
+			char buffer[50];
+			format++;
+			uint32_t c = va_arg(parameters, uint32_t /* char promotes to int */);
+			if (!maxrem) {
+				// TODO: Set errno to EOVERFLOW.
+				return -1;
+			}
+			itoa(c, buffer, 10);
+			serial_print(buffer, strlen(buffer));
+			written++;
+		}
+		else {
 			format = format_begun_at;
 			size_t len = strlen(format);
 			if (maxrem < len) {

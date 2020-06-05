@@ -31,7 +31,9 @@ KERNEL_OBJS=\
 $(KERNEL_ARCH_OBJS) \
 kernel/kernel.o \
 kernel/interrupts.o \
+kernel/scheduler.o \
 kernel/irq.o \
+kernel/SwitchToTask.o \
 kernel/gdt.o
 
 OBJS=\
