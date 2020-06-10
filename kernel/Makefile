@@ -32,9 +32,13 @@ $(KERNEL_ARCH_OBJS) \
 kernel/kernel.o \
 kernel/interrupts.o \
 kernel/scheduler.o \
+kernel/malloc.o \
 kernel/irq.o \
 kernel/SwitchToTask.o \
-kernel/gdt.o
+kernel/gdt.o \
+kernel/paging.o \
+kernel/virtual.o \
+kernel/physical.o \
 
 OBJS=\
 $(ARCHDIR)/crti.o \
@@ -42,6 +46,7 @@ $(ARCHDIR)/crtbegin.o \
 $(KERNEL_OBJS) \
 $(ARCHDIR)/crtend.o \
 $(ARCHDIR)/crtn.o \
+$(ARCHDIR)/paging_as.o \
 
 LINK_LIST=\
 $(LDFLAGS) \

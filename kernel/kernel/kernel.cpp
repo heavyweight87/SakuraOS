@@ -88,20 +88,22 @@ extern "C" int kernel_main(uint32_t magic, multiboot_info_t *mbinfo)
     gdt::init();
 	terminal_initialize();
 	serial_init();
-	printf("Hello, kernel World!\r\n");
+    printf("Hello, kernel World!\r\n");
     if(magic != MULTIBOOT_MAGIC)
     {
         printf("Booted with an unsupported bootloader\r\n");
-        return 0;
+       return 0;
     }
     printf("Multiboot magic ok!\r");
+
     if(mbinfo->mods_count)
     {
         load_modules(mbinfo);
     }
+    InitTimer();
     interrupts::init();
     InitScheduler();
-    InitTimer();
+
     __asm__ volatile("sti");
     CreateProcess(Process);
     CreateProcess(Process);

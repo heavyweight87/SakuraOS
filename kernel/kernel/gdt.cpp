@@ -87,8 +87,8 @@ void create_descriptor(uint32_t base, uint32_t limit, uint16_t flag, gdt_entry_t
 
 extern "C" void reload()
 {
-    extern void load_gdt();
-    load_gdt();
+    extern void gdt_flush(struct gdt_ptr* gdt_ptr_addr);
+    gdt_flush(&gp);
    // reloadSegs();
 }
 

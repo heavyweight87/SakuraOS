@@ -199,7 +199,8 @@ void InitScheduler(void)
 //    -------------------------------------------------------------
 PCB_t *PcbAlloc(void)
 {
-    for (int i = 0; i < MAX_TASKS; i ++) {
+    for (int i = 0; i < MAX_TASKS; i ++) 
+    {
         if (pcbArray[i].used == 0) {
             pcbArray[i].used = 1;
             pcbArray[i].tos = ((0x181 + i) << 12);  // also allocate a stack here
@@ -539,7 +540,8 @@ void TerminateProcess(void)
 //    -----------------------------------
 void PerformButler(void)
 {
-    while (true) {
+    while (true) 
+    {
         LockAndPostpone();
         if (terminatedListHead == (PCB_t *)0) {
             BlockProcess(PAUSED);
@@ -549,7 +551,8 @@ void PerformButler(void)
 
         PCB_t *work = terminatedListHead;
         terminatedListHead = terminatedListHead->next;
-        if (terminatedListHead == (PCB_t *)0) terminatedListTail = terminatedListHead;
+        if (terminatedListHead == (PCB_t *)0)
+            terminatedListTail = terminatedListHead;
 
         PcbFree(work);
 

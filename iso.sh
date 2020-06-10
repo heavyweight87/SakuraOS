@@ -23,6 +23,8 @@ EOF
     cd ..
 else
 	cat > isodir/boot/grub/grub.cfg << EOF
+	set timeout=1
+	set default=0 # Set the default menu entry
 	menuentry "SekuraOs" {
 		multiboot /boot/myos.kernel
 	}
