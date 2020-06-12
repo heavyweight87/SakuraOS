@@ -18,6 +18,8 @@
 
 /* Macros. */
 
+#include <stdint.h>
+
 /* The magic number for the Multiboot header. */
 #define MULTIBOOT_HEADER_MAGIC          0x1BADB002
 
@@ -109,12 +111,10 @@ typedef struct module
   but no size. */
 typedef struct memory_map
 {
- unsigned long size;
- unsigned long base_addr_low;
- unsigned long base_addr_high;
- unsigned long length_low;
- unsigned long length_high;
- unsigned long type;
+  unsigned long size;
+  uint64_t address;
+  uint64_t length;
+  unsigned long type;
 } memory_map_t;
 
 #endif /* ! ASM */

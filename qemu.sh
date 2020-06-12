@@ -2,4 +2,4 @@
 set -e
 . ./iso.sh
     
-qemu-system-$(./target-triplet-to-arch.sh $HOST) -cdrom myos.iso -serial file:serial.log -monitor stdio
+qemu-system-i386 -cdrom myos.iso -serial file:serial.log -monitor stdio -d cpu_reset --no-reboot -m 128M 

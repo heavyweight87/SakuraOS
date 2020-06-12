@@ -1,7 +1,8 @@
 
 #include "kernel/virtual.h"
 #include "kernel/paging.h"
-
+#include "kernel/physical.h"
+#include <stdio.h>
 #include <stddef.h>
 
 #define PD_INDEX(vaddr) ((vaddr) >> 22)
@@ -56,8 +57,8 @@ uint32_t virtual2physical(PageDirectory *pdir, uint32_t vaddr)
     PageDirectoryEntry *pde = &pdir->entries[pdi];
     PageTable *ptable = (PageTable *)(pde->PageFrameNumber * PAGE_SIZE);
     PageTableEntry *p = &ptable->entries[pti];
-
-    return (p->PageFrameNumber * PAGE_SIZE) + (vaddr & 0xfff);
+    uint32_t phys = (p->PageFrameNumber * PAGE_SIZE) + (vaddr & 0xfff);
+    return phys;
 }
 
 int virtual_map(PageDirectory *pdir, uint32_t vaddr, uint32_t paddr, uint32_t count, bool user)

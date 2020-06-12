@@ -3,6 +3,7 @@
 #include <stdbool.h>
 #include <stdint.h>
 #include <stddef.h>
+#include "kernel/multiboot.h"
 
 #define PAGE_TABLE_ENTRY_COUNT 1024
 #define PAGE_DIRECTORY_ENTRY_COUNT 1024
@@ -65,11 +66,12 @@ typedef struct __attribute__((packed))
     PageDirectoryEntry entries[PAGE_DIRECTORY_ENTRY_COUNT];
 } PageDirectory;
 
-extern void paging_enable(void);
+extern "C" void paging_enable(void);
 extern void paging_disable(void);
-extern void paging_load_directory(uintptr_t directory);
-extern void paging_invalidate_tlb(void);
+extern "C" void paging_load_directory(uintptr_t directory);
+extern "C" void paging_invalidate_tlb(void);
+uintptr_t memory_alloc_identity_page(PageDirectory *pdir);
 
-void paging_init();
+void paging_init(multiboot_info_t *info);
 void memory_pdir_switch(PageDirectory *pdir);
 PageDirectory *memory_kpdir(void);
