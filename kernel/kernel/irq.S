@@ -46,7 +46,9 @@
 
 irq0:
   pusha
+  push esp
   call irq0_handler
+  mov eax, esp
   popa
   iret
  

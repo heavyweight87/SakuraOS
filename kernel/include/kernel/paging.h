@@ -5,6 +5,11 @@
 #include <stddef.h>
 #include "kernel/multiboot.h"
 
+#define MEMORY_NONE (0)
+#define MEMORY_USER (1 << 0)
+#define MEMORY_CLEAR (1 << 1)
+typedef unsigned int MemoryFlags;
+
 #define PAGE_TABLE_ENTRY_COUNT 1024
 #define PAGE_DIRECTORY_ENTRY_COUNT 1024
 
@@ -66,12 +71,26 @@ typedef struct __attribute__((packed))
     PageDirectoryEntry entries[PAGE_DIRECTORY_ENTRY_COUNT];
 } PageDirectory;
 
+
+#ifdef __cplusplus
+
 extern "C" void paging_enable(void);
-extern void paging_disable(void);
+extern "C" void paging_disable(void);
 extern "C" void paging_load_directory(uintptr_t directory);
 extern "C" void paging_invalidate_tlb(void);
+
+#else
+extern void paging_enable(void);
+extern void paging_disable(void);
+extern void paging_load_directory(uintptr_t directory);
+extern void paging_invalidate_tlb(void);
+#endif
+
+
+
 uintptr_t memory_alloc_identity_page(PageDirectory *pdir);
 
 void paging_init(multiboot_info_t *info);
 void memory_pdir_switch(PageDirectory *pdir);
 PageDirectory *memory_kpdir(void);
+uintptr_t memory_alloc(PageDirectory *pdir, size_t size, MemoryFlags flags);;

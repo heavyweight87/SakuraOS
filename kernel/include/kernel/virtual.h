@@ -21,6 +21,17 @@ int virtual_map(PageDirectory *pdir, uint32_t vaddr, uint32_t paddr, uint32_t co
 
 void virtual_unmap(PageDirectory *pdir, uint32_t vaddr, uint32_t count);
 
+
+#ifdef __cplusplus
+extern "C" {
+#endif
+
+extern uint32_t virtual_alloc(PageDirectory *pdir, uint32_t paddr, uint32_t count, int user);
+
+#ifdef __cplusplus
+}
+#endif
+
 uint32_t virtual_alloc(PageDirectory *pdir, uint32_t paddr, uint32_t count, int user);
 
 void virtual_free(PageDirectory *pdir, uint32_t vaddr, uint32_t count);

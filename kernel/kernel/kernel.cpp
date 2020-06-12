@@ -83,7 +83,10 @@ extern "C" int kernel_main(uint32_t magic, multiboot_info_t *mbinfo)
         load_modules(mbinfo);
     }
     paging_init(mbinfo);
+    switch_to_virtual();
+    printf("Paging enabled!");
     interrupts::init();
+    tasking_initialize();
     return 0;
 }
 

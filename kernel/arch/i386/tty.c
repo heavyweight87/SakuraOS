@@ -5,6 +5,7 @@
 
 #include <kernel/tty.h>
 #include <kernel/io.h>
+#include <kernel/virtual.h>
 
 #include "vga.h"
 
@@ -42,12 +43,17 @@ void disable_cursor()
 	outb(0x3D5, 0x20);
 }
 
+void switch_to_virtual()
+{
+	terminal_buffer =  (uint16_t *)virtual_alloc(&kpdir, VGA_MEMORY, PAGE_ALIGN_UP(VGA_WIDTH * VGA_HEIGHT * sizeof(uint16_t)) / PAGE_SIZE, false); 
+}
+
 void terminal_initialize(void) 
 {
 	terminal_row = 0;
 	terminal_column = 0;
 	terminal_color = vga_entry_color(VGA_COLOR_LIGHT_GREY, VGA_COLOR_BLACK);
-	terminal_buffer = VGA_MEMORY;
+	terminal_buffer = VGA_MEMORY;	
 	for (size_t y = 0; y < VGA_HEIGHT; y++) 
 	{
 		for (size_t x = 0; x < VGA_WIDTH; x++) 

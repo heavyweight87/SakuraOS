@@ -78,10 +78,10 @@ extern "C"
 
   extern void do_timer_stuff();
 
-void irq0_handler(void) {
+uintptr_t irq0_handler(uintptr_t esp) {
 	  // TODO: Add timer handler
 	  outb(0x20, 0x20);
-   // do_timer_stuff();
+    return schedule(esp);
 }
 
 void irq1_handler(void) {
@@ -436,7 +436,8 @@ extern "C" void init_table()
 	idt_address = (unsigned long)IDT ;
 	idt_ptr[0] = (sizeof (struct IDT_entry) * 256) + ((idt_address & 0xffff) << 16);
 	idt_ptr[1] = idt_address >> 16 ;
-    load_idt((unsigned long)idt_ptr);
+  load_idt((unsigned long)idt_ptr);
+  asm volatile("sti" : : );
 }
 
 

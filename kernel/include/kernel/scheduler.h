@@ -1,112 +1,38 @@
-//===================================================================================================================
-//
-//  scheduler.h -- Strutures and prototypes for takng care of task scheduling
-//
-// -----------------------------------------------------------------------------------------------------------------
-//
-//     Date      Tracker  Version  Pgmr  Description
-//  -----------  -------  -------  ----  --------------------------------------------------------------------------
-//  2019-Sep-21  Initial  step01   ADCL  Initial version
-//  2019-Sep-25  Step 2   step02   ADCL  Add `Schedule()`
-//  2019-Oct-05  Step 3   step03   ADCL  Add a call to `UpdateTimeUsed()`
-//  2019-Oct-05  Step 4   step04   ADCL  Create a process state
-//  2019-Oct-24  Step 5   step05   ADCL  Add rudamentary scheduler lock
-//  2019-Oct-25  Step 6   step06   ADCL  Add the ability to block/unblock
-//  2019-Nov-05  Step 9   step09   ADCL  Add sleeping to the process repetoire
-//  2019-Nov-09  Step10   step10   ADCL  Add idle CPU handling (and clean up the time used)
-//  2019-Nov-10  Step11   step11   ADCL  Add preemption
-//  2019-Nov-20  Step12   step12   ADCL  Add process termination
-//
-//===================================================================================================================
+#pragma once
 
+#include "kernel/task.h"
+#include <stdint.h>
+#include "kernel/paging.h"
 
-#ifndef __SCHEDULER_H__
-#define __SCHEDULER_H__
+#define PROCESS_NAME_SIZE 32
 
+struct Task;
 
-//
-// -- Process States
-//    --------------
-typedef enum {
-    RUNNING = 0,
-    READY = 1,
-    PAUSED = 2,
-    SLEEPING = 3,
-    TERMINATED = 4,
-} ProcessState_t;
+typedef void (*TaskEntry)();
 
-
-
-//
-// -- This is the Process Control Block -- for controlling processes by the scheduler
-//    -------------------------------------------------------------------------------
-typedef struct PCB_t {
-    unsigned int tos;
-    unsigned int virtAddr;
-    struct PCB_t *next;
-    int state;
-    unsigned long used;
-    unsigned long sleepUntil;
-    int quantumLeft;
-    int PID;
-} PCB_t;
-
-
-//
-// -- We need to keep track of the current task
-//    -----------------------------------------
-extern PCB_t *currentPCB;
-
-
-//
-// -- This is the head/tail list of ready to run processes
-//    ----------------------------------------------------
-extern PCB_t *readyListHead;
-extern PCB_t *readyListTail;
-
-
-//
-// -- an array of PCBs that can be used
-//    ---------------------------------
-#define MAX_TASKS       256
-extern PCB_t pcbArray[MAX_TASKS];
-
-
-//
-// -- Funtion prototypes
-//    ------------------
-extern "C" 
+typedef struct Task
 {
-    void SwitchToTask(PCB_t *task) __attribute__((cdecl));
-    unsigned int GetCR3(void);
+    int id;
+    bool user;
+    char name[PROCESS_NAME_SIZE]; // Friendly name of the process
 
-    void AddReady(PCB_t *task);
-    PCB_t *NextReady(void);
-    void UpdateTimeUsed(void);
-    void InitTimer(void);
-    void do_timer_stuff();
-    void InitScheduler(void);
-    void LockScheduler(void); 
-    void UnlockScheduler(void);
-    void LockAndPostpone(void);
-    void UnlockAndSchedule(void);
+    TaskState state;
 
-    void Schedule(void);
-    void IrqTimerHandler(void);
+    uintptr_t stack_pointer;
+    void *stack;     // Kernel stack
+    TaskEntry entry; // Our entry point
+    char fpu_registers[512];
+    PageDirectory *pdir; // Page directory
 
-    PCB_t *CreateProcess(void (*ent)());
-    void BlockProcess(int reason);
-    void UnblockProcess(PCB_t *proc);
+    int exit_value;
+} Task;
 
-    void SleepUntil(unsigned long when);
+#define TASK_STACK_SIZE 16384
 
-    void TerminateProcess(void);
-    void PerformButler(void);
-}
-unsigned long GetCurrentCounter(void) ;
-
-inline void Sleep(unsigned long millis) { SleepUntil(millis + GetCurrentCounter()); }
-
-#endif
-
-
+void tasking_initialize(void);
+Task *task_create(Task *parent, const char *name, bool user);
+Task *task_spawn(Task *parent, const char *name, TaskEntry entry, void *arg, bool user);
+PageDirectory *memory_pdir_create(void);
+void timer_set_frequency(uint16_t hz);
+void task_go(Task *t);
+uintptr_t schedule(uintptr_t);
