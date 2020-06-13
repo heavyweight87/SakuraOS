@@ -87,8 +87,6 @@ extern "C" int kernel_main(uint32_t magic, multiboot_info_t *mbinfo)
     printf("Paging enabled!");
     interrupts::init();
     initTasking();
-    while(1) 
-        printf("fucku  \r\n");
     return 0;
 }
 

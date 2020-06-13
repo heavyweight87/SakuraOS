@@ -8,9 +8,9 @@ static Task mainTask;
 static Task otherTask;
  
 static void otherMain() {
-    while(1){
-    printf("Hello multitasking world!\r\n"); // Not implemented here...
- //   yield();
+    while(1)
+    {
+        printf("Hello multitasking world!\r\n"); // Not implemented here...
     }
 }
  
@@ -25,17 +25,16 @@ void initTasking() {
     otherTask.next = &mainTask;
  
     runningTask = &mainTask;
-        timer_set_frequency(1000);
+    timer_set_frequency(1000);
     while(1)
     {
        printf("Switching to otherTask... \n");
-        //yield();
-      // printf("Returned to mainTask!\n");
     
     }
 }
  
-void createTask(Task *task, void (*main)(), uint32_t flags, uint32_t *pagedir) {
+void createTask(Task *task, void (*main)(), uint32_t flags, uint32_t *pagedir) 
+{
     task->regs.eax = 0;
     task->regs.ebx = 0;
     task->regs.ecx = 0;
@@ -49,7 +48,8 @@ void createTask(Task *task, void (*main)(), uint32_t flags, uint32_t *pagedir) {
     task->next = 0;
 }
  
-void yield() {
+void yield() 
+{
     Task *last = runningTask;
     runningTask = runningTask->next;
     switchTask(&last->regs, &runningTask->regs);
@@ -65,10 +65,8 @@ void schedule()
 void timer_set_frequency(uint16_t hz)
 {
     uint32_t divisor = 1193182 / hz;
-
     outb(0x43, 0x36);
     outb(0x40, divisor & 0xFF);
     outb(0x40, (divisor >> 8) & 0xFF);
-
-    printf("Timer frequency is %dhz.", hz);
+    printf("Timer started with a frewuency of %d hz\r\n", hz);
 }
