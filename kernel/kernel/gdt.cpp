@@ -145,7 +145,7 @@ void gdt::init()
     create_descriptor((uint32_t)&tss, sizeof(TSS), 99, gdTable[5]);
 
     gp.base = gdTable;
-    gp.limit =  (sizeof(gdt_entry_t) * 5) - 1;
+    gp.limit =  (sizeof(gdt_entry_t) * 6) - 1;
     reload();
       
 }

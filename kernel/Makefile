@@ -34,6 +34,7 @@ kernel/interrupts.o \
 kernel/scheduler.o \
 kernel/malloc.o \
 kernel/irq.o \
+kernel/SwitchToTask.o \
 kernel/gdt.o \
 kernel/paging.o \
 kernel/virtual.o \

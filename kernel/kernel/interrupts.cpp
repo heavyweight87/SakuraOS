@@ -76,12 +76,10 @@ static uint8_t kbdus[128] = {
 extern "C"
 {
 
-  extern void do_timer_stuff();
-
-uintptr_t irq0_handler(uintptr_t esp) {
+void irq0_handler() {
 	  // TODO: Add timer handler
 	  outb(0x20, 0x20);
-    return schedule(esp);
+    schedule();
 }
 
 void irq1_handler(void) {
