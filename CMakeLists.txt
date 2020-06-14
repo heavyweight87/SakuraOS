@@ -3,7 +3,7 @@ project(SakuraOS)
 
 # configure
 enable_language(ASM)
-set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/bin)
+set(CMAKE_RUNTIME_OUTPUT_DIRECTORY bin/isodir/boot)
 set(CMAKE_VERBOSE_MAKEFILE ON)
 
 # set properties and variables
@@ -38,12 +38,14 @@ add_executable(kernel.bin ${KERNEL_SRC} ${ARCH_SRC} ${LIBC_SRC})
 
 add_custom_command(
     TARGET kernel.bin PRE_BUILD
-    COMMAND mkdir -p "${CMAKE_CURRENT_SOURCE_DIR}/bin"
+    COMMAND mkdir -p "bin/isodir/boot"
 )
 
 # set target props
 set_target_properties(kernel.bin PROPERTIES LINK_FLAGS "-T ${LINKER_SCRIPT} -nostdlib")              
 
 # run the script to build an iso
-add_custom_command(TARGET kernel.bin POST_BUILD WORKING_DIRECTORY 
-    ${CMAKE_CURRENT_SOURCE_DIR} COMMAND /bin/sh ${CMAKE_CURRENT_SOURCE_DIR}/scripts/iso.sh)
+add_custom_command(TARGET kernel.bin POST_BUILD COMMAND /bin/sh ${CMAKE_CURRENT_SOURCE_DIR}/scripts/iso.sh)
+
+# for qemu
+add_custom_target(qemu COMMAND qemu-system-i386 -cdrom bin/kernel.iso -serial file:serial.log -monitor stdio -d cpu_reset -m 128M)

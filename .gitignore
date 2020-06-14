@@ -57,4 +57,6 @@ dkms.conf
 *.log
 *.bin
 *.kernel
-isodir/boot/grub/grub.cfg
+/sysroot
+bin
+build
