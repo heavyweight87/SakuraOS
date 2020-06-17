@@ -1,7 +1,9 @@
-#include <kernel/scheduler.h>
+#include <scheduler.h>
 #include <stdio.h>
-#include <kernel/virtual.h>
-#include <kernel/io.h>
+#include <virtual.h>
+#include <io.h>
+
+namespace scheduler {
  
 static Task *runningTask;
 static Task mainTask;
@@ -14,7 +16,8 @@ static void otherMain() {
     }
 }
  
-void initTasking() {
+void init() 
+{
 
     // Get EFLAGS and CR3
     asm volatile("movl %%cr3, %%eax; movl %%eax, %0;":"=m"(mainTask.regs.cr3)::"%eax");
@@ -69,4 +72,5 @@ void timer_set_frequency(uint16_t hz)
     outb(0x40, divisor & 0xFF);
     outb(0x40, (divisor >> 8) & 0xFF);
     printf("Timer started with a frewuency of %d hz\r\n", hz);
+}
 }

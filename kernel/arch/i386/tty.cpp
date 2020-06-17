@@ -3,9 +3,9 @@
 #include <stdint.h>
 #include <string.h>
 
-#include <kernel/tty.h>
-#include <kernel/io.h>
-#include <kernel/virtual.h>
+#include <tty.h>
+#include <io.h>
+#include <virtual.h>
 
 #include "vga.h"
 
@@ -43,12 +43,12 @@ void disable_cursor()
 	outb(0x3D5, 0x20);
 }
 
-void switch_to_virtual()
+void terminal_switch_to_virtual()
 {
-	terminal_buffer =  (uint16_t *)virtual_alloc(&kpdir, VGA_MEMORY, PAGE_ALIGN_UP(VGA_WIDTH * VGA_HEIGHT * sizeof(uint16_t)) / PAGE_SIZE, false); 
+	terminal_buffer =  (uint16_t *)virtual_alloc(&kpdir, reinterpret_cast<uint32_t>(VGA_MEMORY), PAGE_ALIGN_UP(VGA_WIDTH * VGA_HEIGHT * sizeof(uint16_t)) / PAGE_SIZE, false); 
 }
 
-void terminal_initialize(void) 
+void terminal_init(void) 
 {
 	terminal_row = 0;
 	terminal_column = 0;

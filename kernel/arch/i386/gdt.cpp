@@ -2,7 +2,7 @@
  
 #include <stdio.h>
 #include <stdint.h>
-#include <kernel/gdt.hpp>
+#include <gdt.h>
 
 
 typedef struct __attribute__((packed))

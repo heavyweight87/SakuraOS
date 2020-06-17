@@ -1,15 +1,14 @@
 #include <stdio.h>   
-#include <kernel/tty.h>
-#include <kernel/serial.h>
-#include <kernel/io.h> 
-#include <kernel/multiboot.h>
+#include <tty.h>
+#include <serial.h>
+#include <io.h> 
+#include <multiboot.h>
 #include <string.h>
-#include <kernel/interrupts.hpp>
-#include <kernel/gdt.hpp>
-#include <kernel/scheduler.h>
-#include <kernel/paging.h>
+#include <interrupts.h>
+#include <gdt.h>
+#include <scheduler.h>
+#include <paging.h>
 
-#define MULTIBOOT_MAGIC 0x2BADB002
 typedef void (*call_module_t)(void);
 
 
@@ -68,25 +67,25 @@ static void load_modules(multiboot_info_t *mbinfo)
 extern "C" int kernel_main(uint32_t magic, multiboot_info_t *mbinfo) 
 {
     gdt::init();
-	terminal_initialize();
+	terminal_init(); //enable early so we have debugging
 	serial_init();
     printf("Hello, kernel World!\r\n");
-    if(magic != MULTIBOOT_MAGIC)
+    if(magic != MULTIBOOT_BOOTLOADER_MAGIC)
     {
-        printf("Booted with an unsupported bootloader\r\n");
+        printf("Booted with an unsupported bootloader %d\r\n", magic);
         return 0;
     }
-    printf("Multiboot magic ok!\r");
 
     if(mbinfo->mods_count)
     {
-        load_modules(mbinfo);
+      //  load_modules(mbinfo);
     }
+
     paging_init(mbinfo);
-    switch_to_virtual();
+    terminal_switch_to_virtual();
     printf("Paging enabled!");
     interrupts::init();
-    initTasking();
+    scheduler::init();
     return 0;
 }
 

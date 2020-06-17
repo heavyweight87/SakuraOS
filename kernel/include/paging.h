@@ -3,7 +3,7 @@
 #include <stdbool.h>
 #include <stdint.h>
 #include <stddef.h>
-#include "kernel/multiboot.h"
+#include "multiboot.h"
 
 #define MEMORY_NONE (0)
 #define MEMORY_USER (1 << 0)

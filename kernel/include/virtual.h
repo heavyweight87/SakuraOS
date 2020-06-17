@@ -1,6 +1,6 @@
 #pragma once
 
-#include "kernel/paging.h"
+#include "paging.h"
 
 typedef struct
 {

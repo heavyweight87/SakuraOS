@@ -1,8 +1,8 @@
 #include <stdio.h>
 #include <stddef.h>
-#include "kernel/paging.h"
-#include "kernel/physical.h"
-#include "kernel/virtual.h"
+#include "paging.h"
+#include "physical.h"
+#include "virtual.h"
 #include <string.h>
 
 

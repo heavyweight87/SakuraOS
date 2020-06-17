@@ -1,7 +1,7 @@
 
-#include "kernel/virtual.h"
-#include "kernel/paging.h"
-#include "kernel/physical.h"
+#include <virtual.h>
+#include <paging.h>
+#include <physical.h>
 #include <stdio.h>
 #include <stddef.h>
 
@@ -150,6 +150,7 @@ uint32_t virtual_alloc(PageDirectory *pdir, uint32_t paddr, uint32_t count, int 
     }
 
     printf("Out of virtual memory!");
+    return 0;
 }
 
 void virtual_free(PageDirectory *pdir, uint32_t vaddr, uint32_t count)

@@ -6,27 +6,30 @@ enable_language(ASM)
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY bin/isodir/boot)
 set(CMAKE_VERBOSE_MAKEFILE ON)
 
+set(CMAKE_BUILD_TYPE Debug)
+
 # set properties and variables
 set(CMAKE_SYSTEM_PROCESSOR i386)
 set(COMPILER_ARCH i686)
 set(ARCH_FOLDER ${CMAKE_CURRENT_SOURCE_DIR}/kernel/arch/${CMAKE_SYSTEM_PROCESSOR})
+set(CROSS_FOLDER /home/gcb/opt/cross/bin/)
 
 # set language variables and flags
-set(CMAKE_C_COMPILER ${COMPILER_ARCH}-elf-gcc)
-set(CMAKE_CXX_COMPILER ${COMPILER_ARCH}-elf-g++)
-set(CMAKE_ASM_COMPILER ${COMPILER_ARCH}-elf-as)
+set(CMAKE_C_COMPILER ${CROSS_FOLDER}/${COMPILER_ARCH}-elf-gcc)
+set(CMAKE_CXX_COMPILER ${CROSS_FOLDER}/${COMPILER_ARCH}-elf-g++)
+set(CMAKE_ASM_COMPILER ${CROSS_FOLDER}/${COMPILER_ARCH}-elf-as)
 
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_C_STANDARD 11)
-set(CMAKE_CXX_FLAGS "-ffreestanding -O2 -Wall -Wextra -fno-exceptions -fno-rtti")
-set(CMAKE_C_FLAGS "-ffreestanding -O2 -Wall -Wextra")
+set(CMAKE_CXX_FLAGS "-ffreestanding -O0 -Wall -Wextra -fno-exceptions -fno-rtti")
+set(CMAKE_C_FLAGS "-ffreestanding -O0 -Wall -Wextra")
 
 # set the linker script
 set(LINKER_SCRIPT ${ARCH_FOLDER}/linker.ld)
 
 # get the files to compile
 file(GLOB_RECURSE KERNEL_SRC kernel/*.c kernel/*.cpp)
-file(GLOB_RECURSE ARCH_SRC ${ARCH_FOLDER}/*.c ${ARCH_FOLDER}/*.S)
+file(GLOB_RECURSE ARCH_SRC ${ARCH_FOLDER}/*.cpp ${ARCH_FOLDER}/*.S)
 file(GLOB_RECURSE LIBC_SRC libc/*.c)
 
 # add include directories
@@ -49,3 +52,4 @@ add_custom_command(TARGET kernel.bin POST_BUILD COMMAND /bin/sh ${CMAKE_CURRENT_
 
 # for qemu
 add_custom_target(qemu COMMAND qemu-system-i386 -cdrom bin/kernel.iso -serial file:serial.log -monitor stdio -d cpu_reset -m 128M)
+add_custom_target(qemu-debug COMMAND qemu-system-i386 -cdrom bin/kernel.iso -serial file:serial.log -monitor stdio -d cpu_reset -m 128M -S -gdb tcp::1234)

@@ -1,10 +1,9 @@
 #include <stdio.h>
 #include <stdint.h>
-#include <kernel/interrupts.hpp>
-#include <stdint.h>
-#include <kernel/io.h>
+#include <interrupts.h>
+#include <io.h>
 #include <string.h>
-#include <kernel/scheduler.h>
+#include <scheduler.h>
 
 
 typedef struct  __attribute__((packed)) 
@@ -79,7 +78,7 @@ extern "C"
 void irq0_handler() {
 	  // TODO: Add timer handler
 	  outb(0x20, 0x20);
-    schedule();
+    scheduler::schedule();
 }
 
 void irq1_handler(void) {

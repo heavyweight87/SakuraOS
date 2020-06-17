@@ -1,6 +1,6 @@
 
-#include "kernel/physical.h"
-#include "kernel/paging.h"
+#include <paging.h>
+#include <physical.h>
 #include "stdio.h"
 
 uint32_t TOTAL_MEMORY = 0;
