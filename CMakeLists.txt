@@ -52,4 +52,4 @@ add_custom_command(TARGET kernel.bin POST_BUILD COMMAND /bin/sh ${CMAKE_CURRENT_
 
 # for qemu
 add_custom_target(qemu COMMAND qemu-system-i386 -cdrom bin/kernel.iso -serial file:serial.log -monitor stdio -d cpu_reset -m 128M)
-add_custom_target(qemu-debug COMMAND qemu-system-i386 -cdrom bin/kernel.iso -serial file:serial.log -monitor stdio -d cpu_reset -m 128M -S -gdb tcp::1234)
+add_custom_target(qemu-debug COMMAND qemu-system-i386 -cdrom bin/kernel.iso -serial file:serial.log -monitor stdio -m 128M -S -gdb tcp::1234)
