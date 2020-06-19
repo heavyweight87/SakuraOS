@@ -5,6 +5,8 @@
 #include <stddef.h>
 #include "Multiboot.h"
 
+namespace MemoryManager {
+
 #define MEMORY_NONE (0)
 #define MEMORY_USER (1 << 0)
 #define MEMORY_CLEAR (1 << 1)
@@ -90,7 +92,9 @@ extern void paging_invalidate_tlb(void);
 
 uintptr_t memory_alloc_identity_page(PageDirectory *pdir);
 
-void paging_init(Multiboot::MultibootInfo *info);
+void InitPaging(Multiboot::Multiboot& multiboot);
 void memory_pdir_switch(PageDirectory *pdir);
 PageDirectory *memory_kpdir(void);
-uintptr_t memory_alloc(PageDirectory *pdir, size_t size, MemoryFlags flags);;
+uintptr_t memory_alloc(PageDirectory *pdir, size_t size, MemoryFlags flags);
+
+}

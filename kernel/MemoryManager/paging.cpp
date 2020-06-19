@@ -1,6 +1,6 @@
 #include <stdio.h>
 #include <stddef.h>
-#include "paging.h"
+#include "Paging.h"
 #include "PhysicalAllocator.h"
 #include "virtual.h"
 #include <string.h>
@@ -9,6 +9,8 @@
 
 extern uint32_t kernel_end;
 extern int __start;
+
+namespace MemoryManager {
 
 static inline MemoryRange memory_range_around_non_aligned_address(uintptr_t base, size_t size)
 {
@@ -27,36 +29,10 @@ static MemoryRange kernel_memory_range(void)
     return memory_range_around_non_aligned_address((uintptr_t)&__start, (size_t)&kernel_end - (size_t)&__start);
 }
 
-static void get_map(Multiboot::MultibootInfo *multi)
-{
-    Multiboot::MemoryMap *map = (Multiboot::MemoryMap*)multi->mmapAddress;
 
-    while((uint64_t)map < multi->mmapAddress + multi->mmapAddress)
-    {
-        if(map->type == 1)
-        {
-            MemoryRange range = memory_range_around_non_aligned_address(map->address, map->length);
-            physical_set_free(range.base, range.size / PAGE_SIZE);
-            TOTAL_MEMORY += map->length;
-        }
-        else
-        {
-            printf("Got type = %d\r\n", map->type);
-        }
-        
-        map = (Multiboot::MemoryMap*)((uint64_t)map + map->size + sizeof(map->size));
-    }
-}
-
-
-void paging_init(Multiboot::MultibootInfo *multi)
+void InitPaging(Multiboot::Multiboot& multiboot)
 {
     printf("Initializing memory management...");
-
-    for (size_t i = 0; i < 1024 * 1024 / 8; i++)
-    {
-        MEMORY[i] = 0xff;
-    }
 
     // Setup the kernel pagedirectory.
     for (int i = 0; i < 256; i++)
@@ -67,10 +43,7 @@ void paging_init(Multiboot::MultibootInfo *multi)
         entry->Present = 1;
         entry->PageFrameNumber = (uint32_t)&kptable[i] / PAGE_SIZE;
     }
-    get_map(multi);
-    USED_MEMORY = 0;
-
-    printf("Mapping kernel...");
+    InitPhysicalAllocator(multiboot);
     memory_map_eternal(&kpdir, kernel_memory_range());
 
     virtual_unmap(memory_kpdir(), 0, 1); // Unmap the 0 page
@@ -149,7 +122,7 @@ uintptr_t memory_alloc(PageDirectory *page_directory, size_t size, MemoryFlags f
 
     if (!virtual_address)
     {
-        physical_free(physical_address, page_count);
+        FreePhysical(physical_address, page_count);
     //    atomic_end();
 
         printf("Failled to allocate memory: not enough virtual memory!");
@@ -192,4 +165,6 @@ PageDirectory *memory_pdir_create() //for user
    // atomic_end();
 
     return pdir;
+}
+
 }

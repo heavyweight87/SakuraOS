@@ -7,7 +7,7 @@
 #include <interrupts.h>
 #include <gdt.h>
 #include <scheduler.h>
-#include <paging.h>
+#include "Paging.h"
 
 
 uint8_t kbdus[128] = {
@@ -60,10 +60,9 @@ extern "C" int kernel_main(uint32_t magic, Multiboot::MultibootInfo *mbinfo)
         printf("Booted with an unsupported bootloader %d\r\n", magic);
         return 0;
     }
-
-    paging_init(mbinfo);
+    Multiboot::Multiboot multiboot(*mbinfo);
+    MemoryManager::InitPaging(multiboot);
     terminal_switch_to_virtual();
-    printf("Paging enabled!");
     interrupts::init();
     scheduler::init();
     return 0;

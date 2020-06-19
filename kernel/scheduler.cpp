@@ -47,7 +47,7 @@ void createTask(Task *task, void (*main)(), uint32_t flags, uint32_t *pagedir)
     task->regs.eflags = flags;
     task->regs.eip = (uint32_t) main;
     task->regs.cr3 = (uint32_t) pagedir;
-    task->regs.esp = (uint32_t)memory_alloc(&kpdir, TASK_STACK_SIZE, MEMORY_CLEAR) + 0x4000;
+    task->regs.esp = (uint32_t)MemoryManager::memory_alloc(&MemoryManager::kpdir, TASK_STACK_SIZE, MEMORY_CLEAR) + 0x4000;
     task->next = 0;
 }
  

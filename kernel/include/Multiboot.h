@@ -100,6 +100,7 @@ struct MemoryMap
 class Multiboot {
 public:
   Multiboot(MultibootInfo& info);
+  std::uint32_t LoadMemoryMap();
 private:
   void LoadModules();
 

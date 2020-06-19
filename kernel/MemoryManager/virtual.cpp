@@ -1,9 +1,11 @@
 
 #include <virtual.h>
-#include <paging.h>
+#include "Paging.h"
 #include <PhysicalAllocator.h>
 #include <stdio.h>
 #include <stddef.h>
+
+namespace MemoryManager {
 
 #define PD_INDEX(vaddr) ((vaddr) >> 22)
 #define PT_INDEX(vaddr) (((vaddr) >> 12) & 0x03ff)
@@ -169,4 +171,5 @@ int memory_map_eternal(PageDirectory *pdir, MemoryRange range)
    // atomic_end();
 
     return 0;
+}
 }

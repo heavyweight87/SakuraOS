@@ -45,7 +45,7 @@ void disable_cursor()
 
 void terminal_switch_to_virtual()
 {
-	terminal_buffer =  (uint16_t *)virtual_alloc(&kpdir, reinterpret_cast<uint32_t>(VGA_MEMORY), PAGE_ALIGN_UP(VGA_WIDTH * VGA_HEIGHT * sizeof(uint16_t)) / PAGE_SIZE, false); 
+	terminal_buffer =  (uint16_t *)MemoryManager::virtual_alloc(&MemoryManager::kpdir, reinterpret_cast<uint32_t>(VGA_MEMORY), PAGE_ALIGN_UP(VGA_WIDTH * VGA_HEIGHT * sizeof(uint16_t)) / PAGE_SIZE, false); 
 }
 
 void terminal_init(void) 

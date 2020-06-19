@@ -2,16 +2,20 @@
 
 #include <cstdint>
 
-extern uint32_t TOTAL_MEMORY;
-extern uint32_t USED_MEMORY;
-extern uint8_t MEMORY[1024 * 1024 / 8];
+namespace MemoryManager {
 
+
+struct MemoryManagerData
+{
+    std::uint32_t TotalMemory;
+    std::uint32_t UsedMemory;
+    std::uint8_t PhysicalAllocation[1024 * 1024 / 8];
+};
+
+void InitPhysicalAllocator(Multiboot::Multiboot& multiboot);
 uint32_t physical_alloc(uint32_t count);
-
-void physical_free(uint32_t addr, uint32_t count);
-
 int physical_is_used(uint32_t addr, uint32_t count);
-
 void physical_set_used(uint32_t addr, uint32_t caount);
+void FreePhysical(uint32_t addr, uint32_t count);
 
-void physical_set_free(uint32_t addr, uint32_t count);
+}
