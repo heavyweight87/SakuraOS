@@ -4,7 +4,6 @@ project(SakuraOS)
 # configure
 enable_language(ASM)
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY bin/isodir/boot)
-set(CMAKE_VERBOSE_MAKEFILE ON)
 
 set(CMAKE_BUILD_TYPE Debug)
 

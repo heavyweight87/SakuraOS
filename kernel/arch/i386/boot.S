@@ -29,7 +29,6 @@ _start:
 	push %eax  # push magic number
 	# Call the global constructors.
 	call _init
-	# call load_gdt
 	# Transfer control to the main kernel
 	call kernel_main
 

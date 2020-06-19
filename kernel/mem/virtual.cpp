@@ -1,7 +1,7 @@
 
 #include <virtual.h>
 #include <paging.h>
-#include <physical.h>
+#include <PhysicalAllocator.h>
 #include <stdio.h>
 #include <stddef.h>
 

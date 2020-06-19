@@ -1,7 +1,7 @@
 #include <stdio.h>
 #include <stddef.h>
 #include "paging.h"
-#include "physical.h"
+#include "PhysicalAllocator.h"
 #include "virtual.h"
 #include <string.h>
 
@@ -27,12 +27,11 @@ static MemoryRange kernel_memory_range(void)
     return memory_range_around_non_aligned_address((uintptr_t)&__start, (size_t)&kernel_end - (size_t)&__start);
 }
 
-static void get_map(multiboot_info_t *multi)
+static void get_map(Multiboot::MultibootInfo *multi)
 {
-    uint32_t mapsize = 0;
-    memory_map_t *map = (memory_map_t*)multi->mmap_addr;
+    Multiboot::MemoryMap *map = (Multiboot::MemoryMap*)multi->mmapAddress;
 
-    while((uint64_t)map < multi->mmap_addr + multi->mmap_length)
+    while((uint64_t)map < multi->mmapAddress + multi->mmapAddress)
     {
         if(map->type == 1)
         {
@@ -45,12 +44,12 @@ static void get_map(multiboot_info_t *multi)
             printf("Got type = %d\r\n", map->type);
         }
         
-        map = (memory_map_t*)((uint64_t)map + map->size + sizeof(map->size));
+        map = (Multiboot::MemoryMap*)((uint64_t)map + map->size + sizeof(map->size));
     }
 }
 
 
-void paging_init(multiboot_info_t *multi)
+void paging_init(Multiboot::MultibootInfo *multi)
 {
     printf("Initializing memory management...");
 

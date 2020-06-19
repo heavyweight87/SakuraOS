@@ -1,6 +1,6 @@
 #pragma once
 
-#include <stdint.h>
+#include <cstdint>
 
 extern uint32_t TOTAL_MEMORY;
 extern uint32_t USED_MEMORY;

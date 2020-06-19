@@ -1,7 +1,11 @@
 {
     "files.associations": {
         "cstring": "cpp",
-        "cstdint": "cpp"
+        "cstdint": "cpp",
+        "*.tcc": "cpp",
+        "atomic": "cpp",
+        "random": "cpp",
+        "vector": "cpp"
     },
     "C_Cpp.default.configurationProvider": "ms-vscode.cmake-tools"
 }

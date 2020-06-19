@@ -3,7 +3,7 @@
 #include <stdbool.h>
 #include <stdint.h>
 #include <stddef.h>
-#include "multiboot.h"
+#include "Multiboot.h"
 
 #define MEMORY_NONE (0)
 #define MEMORY_USER (1 << 0)
@@ -90,7 +90,7 @@ extern void paging_invalidate_tlb(void);
 
 uintptr_t memory_alloc_identity_page(PageDirectory *pdir);
 
-void paging_init(multiboot_info_t *info);
+void paging_init(Multiboot::MultibootInfo *info);
 void memory_pdir_switch(PageDirectory *pdir);
 PageDirectory *memory_kpdir(void);
 uintptr_t memory_alloc(PageDirectory *pdir, size_t size, MemoryFlags flags);;

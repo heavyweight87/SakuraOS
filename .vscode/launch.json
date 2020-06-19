@@ -23,7 +23,7 @@
         ],
         "setupCommands": [
             {
-                "text": "file ${workspaceRoot}/build/bin/isodir/kernel.bin",
+                "text": "file ${command:cmake.launchTargetPath}",
                 "description": "Load binary."
             },
             {

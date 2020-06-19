@@ -2,14 +2,12 @@
 #include <tty.h>
 #include <serial.h>
 #include <io.h> 
-#include <multiboot.h>
+#include <Multiboot.h>
 #include <string.h>
 #include <interrupts.h>
 #include <gdt.h>
 #include <scheduler.h>
 #include <paging.h>
-
-typedef void (*call_module_t)(void);
 
 
 uint8_t kbdus[128] = {
@@ -51,20 +49,7 @@ uint8_t kbdus[128] = {
     0,  /* All other keys are undefined */
 };
 
-static void load_modules(multiboot_info_t *mbinfo)
-{
-    unsigned long moduleNum = 0;
-    module_t *module = (module_t*)mbinfo->mods_addr;
-    printf("Loading %d modules\r", mbinfo->mods_count);
-    while(moduleNum < mbinfo->mods_count)
-    {
-        call_module_t start_program = (call_module_t) module->mod_start;
-        module++;
-        start_program();
-    }
-}
-
-extern "C" int kernel_main(uint32_t magic, multiboot_info_t *mbinfo) 
+extern "C" int kernel_main(uint32_t magic, Multiboot::MultibootInfo *mbinfo) 
 {
     gdt::init();
 	terminal_init(); //enable early so we have debugging
@@ -76,11 +61,6 @@ extern "C" int kernel_main(uint32_t magic, multiboot_info_t *mbinfo)
         return 0;
     }
 
-    if(mbinfo->mods_count)
-    {
-      //  load_modules(mbinfo);
-    }
-
     paging_init(mbinfo);
     terminal_switch_to_virtual();
     printf("Paging enabled!");
@@ -88,4 +68,3 @@ extern "C" int kernel_main(uint32_t magic, multiboot_info_t *mbinfo)
     scheduler::init();
     return 0;
 }
-
