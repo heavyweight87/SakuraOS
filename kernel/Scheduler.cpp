@@ -32,7 +32,6 @@ void init()
     while(1)
     {
        printf("Switching to otherTask... \n");
-    
     }
 }
  

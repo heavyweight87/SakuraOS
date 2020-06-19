@@ -36,20 +36,22 @@ std::uint32_t Multiboot::LoadMemoryMap()
         std::uint32_t size = map->length;
         if(map->type == 1)
         {
-          //  MemoryRange range = memory_range_around_non_aligned_address(map->address, map->length);
-            size_t align = PAGE_SIZE - base % PAGE_SIZE;
+            std::uint32_t startAddress = map->address;
+            std::uint32_t length = map->length;
 
-            if (base % PAGE_SIZE == 0)
+            /**
+             * If the address is not page aligned then we need to align up to the
+             * next page. 
+            */
+            if (startAddress % PAGE_SIZE > 0)
             {
-                align = 0;
+                uint32_t alignUp = PAGE_SIZE - base % PAGE_SIZE;
+                startAddress += alignUp;
+                length -= alignUp;
             }
-
-            base += align;
-            size -= align;
-
-            size -= size % PAGE_SIZE;
-            MemoryManager::FreePhysical(base, size / PAGE_SIZE);
-            totalFreeMemory += map->length;
+            length -= size % PAGE_SIZE; //make sure the last page is aligned down
+            MemoryManager::FreePhysical(startAddress, length / PAGE_SIZE);
+            totalFreeMemory += length;
         }
         
         map = (MemoryMap*)((uint64_t)map + map->size + sizeof(map->size));

@@ -6,11 +6,10 @@
 #include <string.h>
 
 
-
-extern uint32_t kernel_end;
-extern int __start;
-
 namespace MemoryManager {
+
+extern "C" uint32_t kernel_end;
+extern "C" int __start;
 
 static inline MemoryRange memory_range_around_non_aligned_address(uintptr_t base, size_t size)
 {
