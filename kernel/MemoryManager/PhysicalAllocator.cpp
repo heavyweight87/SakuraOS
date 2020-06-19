@@ -26,6 +26,7 @@ void InitPhysicalAllocator(Multiboot::Multiboot& multiboot)
     }
     memManData.UsedMemory = 0;
     memManData.TotalMemory = multiboot.LoadMemoryMap();
+
     printf("Total physical memory: %dmb\r\n", memManData.TotalMemory / 1024 /1024 );
 }
 

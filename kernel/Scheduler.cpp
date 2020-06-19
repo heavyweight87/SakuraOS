@@ -1,6 +1,6 @@
 #include <scheduler.h>
 #include <stdio.h>
-#include <virtual.h>
+#include "VirtualMemoryManager.h"
 #include <io.h>
 
 namespace scheduler {

@@ -14,6 +14,7 @@ typedef unsigned int MemoryFlags;
 
 #define PAGE_TABLE_ENTRY_COUNT 1024
 #define PAGE_DIRECTORY_ENTRY_COUNT 1024
+#define MAX_NUM_PHYSICAL_PAGES (2^32 / PAGE_SIZE)
 
 #define PAGE_SIZE 0x1000
 #define PAGE_ALIGN(__x) ((__x) + PAGE_SIZE - ((__x) % PAGE_SIZE))

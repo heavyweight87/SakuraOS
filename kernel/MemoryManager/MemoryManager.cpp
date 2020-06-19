@@ -2,17 +2,20 @@
 #include <stddef.h>
 #include "Paging.h"
 #include "PhysicalAllocator.h"
-#include "virtual.h"
+#include "VirtualMemoryManager.h"
 #include <string.h>
 
 
 namespace MemoryManager {
 
-extern "C" uint32_t kernel_end;
-extern "C" int __start;
+//these can be found in the linker
+extern "C" uint32_t __start;
+extern "C" uint32_t _kernel_end;
 
-static inline MemoryRange memory_range_around_non_aligned_address(uintptr_t base, size_t size)
+static inline void kernel_map()
 {
+    uint32_t base = __start;
+    uint32_t size = _kernel_end - __start;
     size_t align = base % PAGE_SIZE;
 
     base -= align;
@@ -20,19 +23,25 @@ static inline MemoryRange memory_range_around_non_aligned_address(uintptr_t base
 
     size += PAGE_SIZE - size % PAGE_SIZE;
 
-    return (MemoryRange){base, size};
+    memory_map_eternal(&kpdir, base, size);
 }
 
-static MemoryRange kernel_memory_range(void)
+void MapKernelMemory()
 {
-    return memory_range_around_non_aligned_address((uintptr_t)&__start, (size_t)&kernel_end - (size_t)&__start);
+    
+    uint32_t kernelStart = __start;
+    uint32_t kernelSize = _kernel_end - __start;
+    printf("kernelSize %d", __start);
+    kernelStart -= __start % PAGE_SIZE;
+    kernelSize += __start % PAGE_SIZE;
+    kernelSize += PAGE_SIZE - (kernelSize % PAGE_SIZE);
+
+    memory_map_eternal(&kpdir, kernelStart, kernelSize);
 }
 
 
 void InitPaging(Multiboot::Multiboot& multiboot)
 {
-    printf("Initializing memory management...");
-
     // Setup the kernel pagedirectory.
     for (int i = 0; i < 256; i++)
     {
@@ -43,8 +52,8 @@ void InitPaging(Multiboot::Multiboot& multiboot)
         entry->PageFrameNumber = (uint32_t)&kptable[i] / PAGE_SIZE;
     }
     InitPhysicalAllocator(multiboot);
-    memory_map_eternal(&kpdir, kernel_memory_range());
-
+  //  kernel_map();
+    MapKernelMemory();
     virtual_unmap(memory_kpdir(), 0, 1); // Unmap the 0 page
     physical_set_used(0, 1);
 

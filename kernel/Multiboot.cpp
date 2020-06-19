@@ -30,7 +30,7 @@ std::uint32_t Multiboot::LoadMemoryMap()
 {
     std::uint32_t totalFreeMemory = 0;
     MemoryMap *map = (MemoryMap*)m_multibootInfo.mmapAddress;
-    while((uint64_t)map < m_multibootInfo.mmapAddress + m_multibootInfo.mmapLength)
+    while((uint64_t)map < (m_multibootInfo.mmapAddress + m_multibootInfo.mmapLength))
     {
         std::uint32_t base = map->address;
         std::uint32_t size = map->length;

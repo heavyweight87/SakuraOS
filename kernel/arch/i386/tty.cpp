@@ -5,7 +5,7 @@
 
 #include <tty.h>
 #include <io.h>
-#include <virtual.h>
+#include "VirtualMemoryManager.h"
 
 #include "vga.h"
 

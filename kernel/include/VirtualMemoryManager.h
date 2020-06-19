@@ -4,12 +4,6 @@
 
 namespace MemoryManager {
 
-typedef struct
-{
-    uintptr_t base;
-    size_t size;
-} MemoryRange;
-
 extern PageDirectory kpdir;
 extern PageTable kptable[256];
 
@@ -38,6 +32,6 @@ uint32_t virtual_alloc(PageDirectory *pdir, uint32_t paddr, uint32_t count, int 
 
 void virtual_free(PageDirectory *pdir, uint32_t vaddr, uint32_t count);
 
-int memory_map_eternal(PageDirectory *pdir, MemoryRange range);
+int memory_map_eternal(PageDirectory *pdir, uint32_t address, uint32_t size);
 
 }

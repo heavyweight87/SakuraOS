@@ -1,5 +1,5 @@
 
-#include <virtual.h>
+#include "VirtualMemoryManager.h"
 #include "Paging.h"
 #include <PhysicalAllocator.h>
 #include <stdio.h>
@@ -161,15 +161,15 @@ void virtual_free(PageDirectory *pdir, uint32_t vaddr, uint32_t count)
     virtual_unmap(pdir, vaddr, count);
 }
 
-int memory_map_eternal(PageDirectory *pdir, MemoryRange range)
+int memory_map_eternal(PageDirectory *pdir, uint32_t address, uint32_t size)
 {
-    size_t page_count = PAGE_ALIGN_UP(range.size) / PAGE_SIZE;
+    size_t page_count = PAGE_ALIGN_UP(size) / PAGE_SIZE;
 
     //atomic_begin();
-    physical_set_used(range.base, page_count);
-    virtual_map(pdir, range.base, range.base, page_count, 0);
+    physical_set_used(address, page_count);
+    virtual_map(pdir, address, address, page_count, 0);
    // atomic_end();
-
+   
     return 0;
 }
 }

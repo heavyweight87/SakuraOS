@@ -5,11 +5,14 @@
 namespace MemoryManager {
 
 
+#define ALLOCATION_BYTES (MAX_NUM_PHYSICAL_PAGES / 8)
+
+
 struct MemoryManagerData
 {
     std::uint32_t TotalMemory;
     std::uint32_t UsedMemory;
-    std::uint8_t PhysicalAllocation[1024 * 1024 / 8];
+    std::uint8_t PhysicalAllocation[ALLOCATION_BYTES];
 };
 
 void InitPhysicalAllocator(Multiboot::Multiboot& multiboot);
