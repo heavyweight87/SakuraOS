@@ -22,10 +22,10 @@ static void MapKernelPageTable(PageDirectory& pageDirectory)
     for (int index = 0; index < NUM_KERNEL_PAGETABLES; index++)
     {
         PageDirectoryEntry *entry = &pageDirectory.entries[index];
-        entry->User = 0;
-        entry->Write = 1;
-        entry->Present = 1;
-        entry->PageFrameNumber = (uint32_t)&kernelPageTable[index] / PAGE_SIZE;
+        entry->user = 0;
+        entry->write = 1;
+        entry->present = 1;
+        entry->pageFrameNumber = (uint32_t)&kernelPageTable[index] / PAGE_SIZE;
     }
 }
 
@@ -69,11 +69,11 @@ uintptr_t memory_alloc_identity_page(PageDirectory *pdir)
     {
         int address = i * PAGE_SIZE;
 
-        if (!page_present(pdir, address) &&
+        if (!IsPagePresent(*pdir, address) &&
             !physical_is_used(address, 1))
         {
             PhysicalAllocate(address, 1);
-            virtual_map(pdir, address, address, 1, false);
+            VirtualMap(*pdir, address, address, 1, false);
 
           //  atomic_end();
 
@@ -95,9 +95,9 @@ uintptr_t MemoryAllocate(PageDirectory *page_directory, size_t size, MemoryFlags
 
   ///  atomic_begin();
 
-    uintptr_t physical_address = PhysicalAllocate(numPages);
+    uintptr_t physicalAddress = PhysicalAllocate(numPages);
 
-    if (!physical_address)
+    if (!physicalAddress)
     {
        // atomic_end();
 
@@ -108,13 +108,13 @@ uintptr_t MemoryAllocate(PageDirectory *page_directory, size_t size, MemoryFlags
 
     uintptr_t virtual_address = virtual_alloc(
         page_directory,
-        physical_address,
+        physicalAddress,
         numPages,
         flags & MEMORY_USER);
 
     if (!virtual_address)
     {
-        PhysicalFree(physical_address, numPages);
+        PhysicalFree(physicalAddress, numPages);
     //    atomic_end();
 
         printf("Failled to allocate memory: not enough virtual memory!");

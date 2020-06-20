@@ -23,51 +23,51 @@ typedef unsigned int MemoryFlags;
 
 #define IS_PAGE_ALIGN(__x) (__x % PAGE_SIZE == 0)
 
-typedef union __attribute__((packed)) // page table entry
+typedef union __attribute__((packed)) PageTableEntry
 {
     struct __attribute__((packed))
     {
-        bool Present : 1;
-        bool Write : 1;
-        bool User : 1;
-        bool PageLevelWriteThrough : 1;
-        bool PageLevelCacheDisable : 1;
-        bool Accessed : 1;
-        bool Dirty : 1;
-        bool Pat : 1;
-        uint32_t Ignored : 4;
-        uint32_t PageFrameNumber : 20;
+        bool present : 1;
+        bool write : 1;
+        bool user : 1;
+        bool pageLevelWriteThrough : 1;
+        bool pageLevelCacheDisable : 1;
+        bool accessed : 1;
+        bool dirty : 1;
+        bool pat : 1;
+        uint32_t ignored : 4;
+        uint32_t pageFrameNumber : 20;
     };
-
-    uint32_t as_uint32;
-} PageTableEntry;
+    uint32_t pageTableEntry;
+} ;
 
 typedef struct __attribute__((packed))
 {
     PageTableEntry entries[PAGE_TABLE_ENTRY_COUNT];
 } PageTable;
 
-typedef union __attribute__((packed)) {
+union __attribute__((packed)) PageDirectoryEntry
+{
     struct __attribute__((packed))
     {
-        bool Present : 1;
-        bool Write : 1;
-        bool User : 1;
-        bool PageLevelWriteThrough : 1;
-        bool PageLevelCacheDisable : 1;
-        bool Accessed : 1;
-        bool Ignored1 : 1;
-        bool LargePage : 1;
-        uint32_t Ignored2 : 4;
-        uint32_t PageFrameNumber : 20;
+        bool present : 1;
+        bool write : 1;
+        bool user : 1;
+        bool pageLevelWriteThrough : 1;
+        bool pageLevelCacheDisable : 1;
+        bool accessed : 1;
+        bool ignored1 : 1;
+        bool largePage : 1;
+        uint32_t ignored : 4;
+        uint32_t pageFrameNumber : 20;
     };
-    uint32_t as_uint32;
-} PageDirectoryEntry;
+    uint32_t pageDirectoryEntry;
+} ;
 
-typedef struct __attribute__((packed))
+struct __attribute__((packed)) PageDirectory
 {
     PageDirectoryEntry entries[PAGE_DIRECTORY_ENTRY_COUNT];
-} PageDirectory;
+};
 
 
 

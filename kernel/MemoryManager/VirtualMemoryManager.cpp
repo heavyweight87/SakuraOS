@@ -7,30 +7,27 @@
 
 namespace MemoryManager {
 
-#define PD_INDEX(vaddr) ((vaddr) >> 22)
-#define PT_INDEX(vaddr) (((vaddr) >> 12) & 0x03ff)
+/**
+ * A virtual address is made up of the following:
+ * 12 bits for the offset within the page (4096 bytes)
+ * 10 bits for the page directory offset
+ * 10 bits for the page table offset
+ */
 
-int page_present(PageDirectory *pdir, uint32_t vaddr)
+#define PAGE_DIR_INDEX(vaddress) ((vaddress) >> 22)
+#define PAGE_TABLE_INDEX(vaddress) (((vaddress) >> 12) & 0x03ff)
+
+bool IsPagePresent(PageDirectory &pageDirectory, uint32_t virtualAddress)
 {
-    uint32_t pdi = PD_INDEX(vaddr);
-    uint32_t pti = PT_INDEX(vaddr);
+    PageDirectoryEntry *directoryEntry = &pageDirectory.entries[PAGE_DIR_INDEX(virtualAddress)];
 
-    PageDirectoryEntry *pde = &pdir->entries[pdi];
-
-    if (!pde->Present)
+    if (directoryEntry->present)
     {
-        return 0;
+        PageTable *pageTable = (PageTable *)(directoryEntry->pageFrameNumber * PAGE_SIZE);
+        PageTableEntry *pageTableEntry = &pageTable->entries[PAGE_TABLE_INDEX(virtualAddress)];
+        return pageTableEntry->present;
     }
-
-    PageTable *ptable = (PageTable *)(pde->PageFrameNumber * PAGE_SIZE);
-    PageTableEntry *p = &ptable->entries[pti];
-
-    if (!p->Present)
-    {
-        return 0;
-    }
-
-    return 1;
+    return false;
 }
 
 int virtual_present(PageDirectory *pdir, uint32_t vaddr, uint32_t count)
@@ -39,7 +36,7 @@ int virtual_present(PageDirectory *pdir, uint32_t vaddr, uint32_t count)
     {
         uint32_t offset = i * PAGE_SIZE;
 
-        if (!page_present(pdir, vaddr + offset))
+        if (!IsPagePresent(*pdir, vaddr + offset))
         {
             return 0;
         }
@@ -50,48 +47,46 @@ int virtual_present(PageDirectory *pdir, uint32_t vaddr, uint32_t count)
 
 uint32_t virtual2physical(PageDirectory *pdir, uint32_t vaddr)
 {
-    uint32_t pdi = PD_INDEX(vaddr);
-    uint32_t pti = PT_INDEX(vaddr);
+    uint32_t pdi = PAGE_DIR_INDEX(vaddr);
+    uint32_t pti = PAGE_TABLE_INDEX(vaddr);
 
     PageDirectoryEntry *pde = &pdir->entries[pdi];
-    PageTable *ptable = (PageTable *)(pde->PageFrameNumber * PAGE_SIZE);
+    PageTable *ptable = (PageTable *)(pde->pageFrameNumber * PAGE_SIZE);
     PageTableEntry *p = &ptable->entries[pti];
-    uint32_t phys = (p->PageFrameNumber * PAGE_SIZE) + (vaddr & 0xfff);
+    uint32_t phys = (p->pageFrameNumber * PAGE_SIZE) + (vaddr & 0xfff);
     return phys;
 }
 
-int virtual_map(PageDirectory *pdir, uint32_t vaddr, uint32_t paddr, uint32_t count, bool user)
+void VirtualMap(PageDirectory& pageDirectory, uint32_t virtualAddress, uint32_t physicalAddress, uint32_t numPages, bool isUser)
 {
-    for (uint32_t i = 0; i < count; i++)
+    for (uint32_t index = 0; index < numPages; index++)
     {
-        uint32_t offset = i * PAGE_SIZE;
+        uint32_t offset = index * PAGE_SIZE;
 
-        uint32_t pdi = PD_INDEX(vaddr + offset);
-        uint32_t pti = PT_INDEX(vaddr + offset);
+        uint32_t pdi = PAGE_DIR_INDEX(virtualAddress + offset);
+        uint32_t pti = PAGE_TABLE_INDEX(virtualAddress + offset);
 
-        PageDirectoryEntry *pde = &pdir->entries[pdi];
-        PageTable *ptable = (PageTable *)(pde->PageFrameNumber * PAGE_SIZE);
+        PageDirectoryEntry *pde = &pageDirectory.entries[pdi];
+        PageTable *ptable = (PageTable *)(pde->pageFrameNumber * PAGE_SIZE);
 
-        if (!pde->Present)
+        if (!pde->present)
         {
-            ptable = (PageTable *)memory_alloc_identity_page(pdir);
+            ptable = (PageTable *)memory_alloc_identity_page(&pageDirectory);
 
-            pde->Present = 1;
-            pde->Write = 1;
-            pde->User = user;
-            pde->PageFrameNumber = (uint32_t)(ptable) >> 12;
+            pde->present = 1;
+            pde->write = 1;
+            pde->user = isUser;
+            pde->pageFrameNumber = (uint32_t)(ptable) >> 12;
         }
 
         PageTableEntry *p = &ptable->entries[pti];
-        p->Present = 1;
-        p->Write = 1;
-        p->User = user;
-        p->PageFrameNumber = (paddr + offset) >> 12;
+        p->present = 1;
+        p->write = 1;
+        p->user = isUser;
+        p->pageFrameNumber = (physicalAddress + offset) >> 12;
     }
 
     paging_invalidate_tlb();
-
-    return 0;
 }
 
 void VirtualFree(PageDirectory *pdir, uint32_t virtualAddress, uint32_t numPages)
@@ -100,15 +95,15 @@ void VirtualFree(PageDirectory *pdir, uint32_t virtualAddress, uint32_t numPages
     {
         uint32_t offset = i * PAGE_SIZE;
 
-        uint32_t pdi = PD_INDEX(virtualAddress + offset);
-        uint32_t pti = PT_INDEX(virtualAddress + offset);
+        uint32_t pdi = PAGE_DIR_INDEX(virtualAddress + offset);
+        uint32_t pti = PAGE_TABLE_INDEX(virtualAddress + offset);
 
         PageDirectoryEntry *pde = &pdir->entries[pdi];
-        PageTable *ptable = (PageTable *)(pde->PageFrameNumber * PAGE_SIZE);
+        PageTable *ptable = (PageTable *)(pde->pageFrameNumber * PAGE_SIZE);
         PageTableEntry *p = &ptable->entries[pti];
 
-        if (pde->Present)
-            p->as_uint32 = 0;
+        if (pde->present)
+            p->pageFrameNumber = 0;
     }
 
     paging_invalidate_tlb();
@@ -127,7 +122,7 @@ uint32_t virtual_alloc(PageDirectory *pdir, uint32_t paddr, uint32_t count, int 
     {
         int vaddr = i * PAGE_SIZE;
 
-        if (!page_present(pdir, vaddr))
+        if (!IsPagePresent(*pdir, vaddr))
         {
             if (current_size == 0)
             {
@@ -138,7 +133,7 @@ uint32_t virtual_alloc(PageDirectory *pdir, uint32_t paddr, uint32_t count, int 
 
             if (current_size == count)
             {
-                virtual_map(pdir, startaddr, paddr, count, user);
+                VirtualMap(*pdir, startaddr, paddr, count, user);
                 return startaddr;
             }
         }
@@ -158,7 +153,7 @@ int IdentityMap(PageDirectory *pdir, uintptr_t address, size_t size)
 
     //atomic_begin();
     PhysicalAllocate(address, page_count);
-    virtual_map(pdir, address, address, page_count, false);
+    VirtualMap(*pdir, address, address, page_count, false);
    // atomic_end();
    
     return 0;

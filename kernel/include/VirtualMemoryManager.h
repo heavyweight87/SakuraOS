@@ -5,13 +5,13 @@
 namespace MemoryManager {
 
 
-int page_present(PageDirectory *pdir, uint32_t vaddr);
+bool IsPagePresent(PageDirectory& pageDirectory, uint32_t virtualAddress);
 
 int virtual_present(PageDirectory *pdir, uint32_t vaddr, uint32_t count);
 
 uint32_t virtual2physical(PageDirectory *pdir, uint32_t vaddr);
 
-int virtual_map(PageDirectory *pdir, uint32_t vaddr, uint32_t paddr, uint32_t count, bool user);
+void VirtualMap(PageDirectory& pageDirectory, uint32_t virtualAddress, uint32_t physicalAddress, uint32_t numPages, bool isUser);
 
 
 

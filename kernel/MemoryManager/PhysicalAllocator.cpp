@@ -48,7 +48,7 @@ uint32_t PhysicalAllocate(uint32_t numPages)
         }
     }
 
-    printf("Out of physical memory!\n\tTrying to allocat %d pages but free memory is %d pages !", numPages, (memManData.TotalMemory - memManData.UsedMemory) / PAGE_SIZE);
+    printf("Out of memory! Trying to allocated %d pages but we hae only % left", numPages, (memManData.TotalMemory - memManData.UsedMemory) / PAGE_SIZE);
     return 0;
 }
 
