@@ -96,7 +96,8 @@ int printf(const char* __restrict format, ...)
 				return -1;
 			written++;
 		}
-		else if (*format == 'd') {
+		else if (*format == 'd') 
+		{
 			char buffer[50];
 			format++;
 			uint32_t c = va_arg(parameters, uint32_t /* char promotes to int */);

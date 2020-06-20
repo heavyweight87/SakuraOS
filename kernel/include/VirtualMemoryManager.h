@@ -32,6 +32,6 @@ uint32_t virtual_alloc(PageDirectory *pdir, uint32_t paddr, uint32_t count, int 
 
 void virtual_free(PageDirectory *pdir, uint32_t vaddr, uint32_t count);
 
-int memory_map_eternal(PageDirectory *pdir, uint32_t address, uint32_t size);
+int memory_map_eternal(PageDirectory *pdir, uintptr_t address, uint32_t size);
 
 }

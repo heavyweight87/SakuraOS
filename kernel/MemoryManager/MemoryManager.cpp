@@ -12,28 +12,13 @@ namespace MemoryManager {
 extern "C" uint32_t __start;
 extern "C" uint32_t _kernel_end;
 
-static inline void kernel_map()
-{
-    uint32_t base = __start;
-    uint32_t size = _kernel_end - __start;
-    size_t align = base % PAGE_SIZE;
-
-    base -= align;
-    size += align;
-
-    size += PAGE_SIZE - size % PAGE_SIZE;
-
-    memory_map_eternal(&kpdir, base, size);
-}
-
 void MapKernelMemory()
 {
     
-    uint32_t kernelStart = __start;
-    uint32_t kernelSize = _kernel_end - __start;
-    printf("kernelSize %d", __start);
-    kernelStart -= __start % PAGE_SIZE;
-    kernelSize += __start % PAGE_SIZE;
+    uintptr_t kernelStart = (uintptr_t)&__start;
+    size_t kernelSize = (size_t)&_kernel_end - (size_t)&__start;
+    kernelStart -= (uintptr_t)&__start % PAGE_SIZE;
+    kernelSize += (uintptr_t)&__start % PAGE_SIZE;
     kernelSize += PAGE_SIZE - (kernelSize % PAGE_SIZE);
 
     memory_map_eternal(&kpdir, kernelStart, kernelSize);
@@ -52,8 +37,8 @@ void InitPaging(Multiboot::Multiboot& multiboot)
         entry->PageFrameNumber = (uint32_t)&kptable[i] / PAGE_SIZE;
     }
     InitPhysicalAllocator(multiboot);
-  //  kernel_map();
     MapKernelMemory();
+  //  MapKernelMemory();
     virtual_unmap(memory_kpdir(), 0, 1); // Unmap the 0 page
     physical_set_used(0, 1);
 

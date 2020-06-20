@@ -20,6 +20,7 @@ MemoryManagerData memManData;
 
 void InitPhysicalAllocator(Multiboot::Multiboot& multiboot)
 {
+    printf("pp = %d", MAX_NUM_PHYSICAL_PAGES);
     for (size_t i = 0; i < 1024 * 1024 / 8; i++)
     {
         memManData.PhysicalAllocation[i] = 0xff;

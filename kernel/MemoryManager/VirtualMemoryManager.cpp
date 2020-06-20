@@ -161,7 +161,7 @@ void virtual_free(PageDirectory *pdir, uint32_t vaddr, uint32_t count)
     virtual_unmap(pdir, vaddr, count);
 }
 
-int memory_map_eternal(PageDirectory *pdir, uint32_t address, uint32_t size)
+int memory_map_eternal(PageDirectory *pdir, uintptr_t address, size_t size)
 {
     size_t page_count = PAGE_ALIGN_UP(size) / PAGE_SIZE;
 
