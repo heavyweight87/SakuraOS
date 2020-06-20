@@ -70,27 +70,16 @@ typedef struct __attribute__((packed))
 } PageDirectory;
 
 
-#ifdef __cplusplus
 
 extern "C" void paging_enable(void);
-extern "C" void paging_disable(void);
 extern "C" void paging_load_directory(uintptr_t directory);
 extern "C" void paging_invalidate_tlb(void);
 
-#else
-extern void paging_enable(void);
-extern void paging_disable(void);
-extern void paging_load_directory(uintptr_t directory);
-extern void paging_invalidate_tlb(void);
-#endif
-
-
-
 uintptr_t memory_alloc_identity_page(PageDirectory *pdir);
 
-void InitPaging(Multiboot::Multiboot& multiboot);
+void Init(Multiboot::Multiboot& multiboot);
 void memory_pdir_switch(PageDirectory *pdir);
 PageDirectory *memory_kpdir(void);
-uintptr_t memory_alloc(PageDirectory *pdir, size_t size, MemoryFlags flags);
+uintptr_t MemoryAllocate(PageDirectory *pdir, size_t size, MemoryFlags flags);
 
 }

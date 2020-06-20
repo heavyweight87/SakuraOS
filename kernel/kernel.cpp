@@ -61,7 +61,7 @@ extern "C" int kernel_main(uint32_t magic, Multiboot::MultibootInfo *mbinfo)
         return 0;
     }
     Multiboot::Multiboot multiboot(*mbinfo);
-    MemoryManager::InitPaging(multiboot);
+    MemoryManager::Init(multiboot);
     terminal_switch_to_virtual();
     interrupts::init();
     scheduler::init();
