@@ -10,9 +10,6 @@ namespace MemoryManager {
 #define PD_INDEX(vaddr) ((vaddr) >> 22)
 #define PT_INDEX(vaddr) (((vaddr) >> 12) & 0x03ff)
 
-PageDirectory kpdir __attribute__ ((aligned(PAGE_SIZE))) = {};
-PageTable kptable[256] __attribute__ ((aligned(PAGE_SIZE))) = {};
-
 int page_present(PageDirectory *pdir, uint32_t vaddr)
 {
     uint32_t pdi = PD_INDEX(vaddr);
@@ -97,14 +94,14 @@ int virtual_map(PageDirectory *pdir, uint32_t vaddr, uint32_t paddr, uint32_t co
     return 0;
 }
 
-void virtual_unmap(PageDirectory *pdir, uint32_t vaddr, uint32_t count)
+void VirtualFree(PageDirectory *pdir, uint32_t virtualAddress, uint32_t numPages)
 {
-    for (uint32_t i = 0; i < count; i++)
+    for (uint32_t i = 0; i < numPages; i++)
     {
         uint32_t offset = i * PAGE_SIZE;
 
-        uint32_t pdi = PD_INDEX(vaddr + offset);
-        uint32_t pti = PT_INDEX(vaddr + offset);
+        uint32_t pdi = PD_INDEX(virtualAddress + offset);
+        uint32_t pti = PT_INDEX(virtualAddress + offset);
 
         PageDirectoryEntry *pde = &pdir->entries[pdi];
         PageTable *ptable = (PageTable *)(pde->PageFrameNumber * PAGE_SIZE);
@@ -155,19 +152,13 @@ uint32_t virtual_alloc(PageDirectory *pdir, uint32_t paddr, uint32_t count, int 
     return 0;
 }
 
-void virtual_free(PageDirectory *pdir, uint32_t vaddr, uint32_t count)
-{
-    // TODO: Check if the memory was allocated with ´virtual_alloc´.
-    virtual_unmap(pdir, vaddr, count);
-}
-
 int IdentityMap(PageDirectory *pdir, uintptr_t address, size_t size)
 {
     size_t page_count = PAGE_ALIGN(size) / PAGE_SIZE;
 
     //atomic_begin();
     PhysicalAllocate(address, page_count);
-    virtual_map(pdir, address, address, page_count, 0);
+    virtual_map(pdir, address, address, page_count, false);
    // atomic_end();
    
     return 0;

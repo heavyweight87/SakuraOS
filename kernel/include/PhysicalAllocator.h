@@ -4,8 +4,14 @@
 
 namespace MemoryManager {
 
+/**
+ * The physical allocator is a really simple bitmap of 
+ * all the possible pages. Its wasteful, yet efficient and simple. 
+ * It uses about 130kb for the 1048576 pages that are possible with
+ * x86 
+ */
 
-#define ALLOCATION_BYTES (MAX_NUM_PHYSICAL_PAGES / 8)
+#define ALLOCATION_BYTES (MAX_NUM_PHYSICAL_PAGES / 8) 
 
 
 struct MemoryManagerData

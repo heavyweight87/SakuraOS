@@ -4,8 +4,6 @@
 
 namespace MemoryManager {
 
-extern PageDirectory kpdir;
-extern PageTable kptable[256];
 
 int page_present(PageDirectory *pdir, uint32_t vaddr);
 
@@ -15,7 +13,6 @@ uint32_t virtual2physical(PageDirectory *pdir, uint32_t vaddr);
 
 int virtual_map(PageDirectory *pdir, uint32_t vaddr, uint32_t paddr, uint32_t count, bool user);
 
-void virtual_unmap(PageDirectory *pdir, uint32_t vaddr, uint32_t count);
 
 
 #ifdef __cplusplus
@@ -30,7 +27,7 @@ extern uint32_t virtual_alloc(PageDirectory *pdir, uint32_t paddr, uint32_t coun
 
 uint32_t virtual_alloc(PageDirectory *pdir, uint32_t paddr, uint32_t count, int user);
 
-void virtual_free(PageDirectory *pdir, uint32_t vaddr, uint32_t count);
+void VirtualFree(PageDirectory *pdir, uint32_t vaddr, uint32_t count);
 
 int IdentityMap(PageDirectory *pdir, uintptr_t address, uint32_t size);
 

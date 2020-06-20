@@ -12,6 +12,9 @@ namespace MemoryManager {
 extern "C" uint32_t __start;
 extern "C" uint32_t _kernel_end;
 
+PageDirectory kernelPageDirectory __attribute__ ((aligned(PAGE_SIZE))) = {};
+PageTable kptable[256] __attribute__ ((aligned(PAGE_SIZE))) = {};
+
 void MapKernelMemory()
 {
     
@@ -20,7 +23,10 @@ void MapKernelMemory()
     kernelStart -= (uintptr_t)&__start % PAGE_SIZE;
     kernelSize += (uintptr_t)&__start % PAGE_SIZE;
     kernelSize += PAGE_SIZE - (kernelSize % PAGE_SIZE);
-    IdentityMap(&kpdir, kernelStart, kernelSize);
+    IdentityMap(&kernelPageDirectory, kernelStart, kernelSize);
+    //the first page directory entry is reserved for bootloader and other things
+    VirtualFree(&kernelPageDirectory, 0, 1); // free first 1mb
+    PhysicalAllocate(0, 1); 
 }
 
 
@@ -29,7 +35,7 @@ void InitPaging(Multiboot::Multiboot& multiboot)
     // Setup the kernel pagedirectory.
     for (int i = 0; i < 256; i++)
     {
-        PageDirectoryEntry *entry = &kpdir.entries[i];
+        PageDirectoryEntry *entry = &kernelPageDirectory.entries[i];
         entry->User = 0;
         entry->Write = 1;
         entry->Present = 1;
@@ -37,11 +43,8 @@ void InitPaging(Multiboot::Multiboot& multiboot)
     }
     PhysicalAllocatorInit(multiboot);
     MapKernelMemory();
-  //  MapKernelMemory();
-    virtual_unmap(memory_kpdir(), 0, 1); // Unmap the 0 page
-    PhysicalAllocate(0, 1);
 
-    memory_pdir_switch(&kpdir);
+    memory_pdir_switch(&kernelPageDirectory);
     paging_enable();
 
    // printf("%uKio of memory detected", TOTAL_MEMORY / 1024);
@@ -50,12 +53,12 @@ void InitPaging(Multiboot::Multiboot& multiboot)
 
 void memory_pdir_switch(PageDirectory *pdir)
 {
-    paging_load_directory(virtual2physical(&kpdir, (uintptr_t)pdir));
+    paging_load_directory(virtual2physical(&kernelPageDirectory, (uintptr_t)pdir));
 }
 
 PageDirectory *memory_kpdir(void)
 {
-    return &kpdir;
+    return &kernelPageDirectory;
 }
 
 uintptr_t memory_alloc_identity_page(PageDirectory *pdir)
@@ -134,7 +137,7 @@ PageDirectory *memory_pdir_create() //for user
 {
    // atomic_begin();
 
-    PageDirectory *pdir = (PageDirectory *)memory_alloc(&kpdir, sizeof(PageDirectory), MEMORY_CLEAR);
+    PageDirectory *pdir = (PageDirectory *)memory_alloc(&kernelPageDirectory, sizeof(PageDirectory), MEMORY_CLEAR);
 
     if (pdir == NULL)
     {
