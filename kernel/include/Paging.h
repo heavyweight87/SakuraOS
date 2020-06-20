@@ -17,12 +17,7 @@ typedef unsigned int MemoryFlags;
 #define MAX_NUM_PHYSICAL_PAGES (0x100000000ULL / PAGE_SIZE)
 
 #define PAGE_SIZE 0x1000
-#define PAGE_ALIGN(__x) ((__x) + PAGE_SIZE - ((__x) % PAGE_SIZE))
-
-#define PAGE_ALIGN_UP(__x)  \
-    ((__x % PAGE_SIZE == 0) \
-         ? (__x)            \
-         : (__x) + PAGE_SIZE - ((__x) % PAGE_SIZE))
+#define PAGE_ALIGN(size) ((size) + PAGE_SIZE - ((size) % PAGE_SIZE))
 
 #define PAGE_ALIGN_DOWN(__x) ((__x) - ((__x) % PAGE_SIZE))
 

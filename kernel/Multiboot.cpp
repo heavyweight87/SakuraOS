@@ -50,7 +50,7 @@ std::uint32_t Multiboot::LoadMemoryMap()
                 length -= alignUp;
             }
             length -= size % PAGE_SIZE; //make sure the last page is aligned down
-            MemoryManager::FreePhysical(startAddress, length / PAGE_SIZE);
+            MemoryManager::PhysicalFree(startAddress, length / PAGE_SIZE);
             totalFreeMemory += length;
         }
         

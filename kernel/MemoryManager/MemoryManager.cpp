@@ -20,8 +20,7 @@ void MapKernelMemory()
     kernelStart -= (uintptr_t)&__start % PAGE_SIZE;
     kernelSize += (uintptr_t)&__start % PAGE_SIZE;
     kernelSize += PAGE_SIZE - (kernelSize % PAGE_SIZE);
-
-    memory_map_eternal(&kpdir, kernelStart, kernelSize);
+    IdentityMap(&kpdir, kernelStart, kernelSize);
 }
 
 
@@ -36,11 +35,11 @@ void InitPaging(Multiboot::Multiboot& multiboot)
         entry->Present = 1;
         entry->PageFrameNumber = (uint32_t)&kptable[i] / PAGE_SIZE;
     }
-    InitPhysicalAllocator(multiboot);
+    PhysicalAllocatorInit(multiboot);
     MapKernelMemory();
   //  MapKernelMemory();
     virtual_unmap(memory_kpdir(), 0, 1); // Unmap the 0 page
-    physical_set_used(0, 1);
+    PhysicalAllocate(0, 1);
 
     memory_pdir_switch(&kpdir);
     paging_enable();
@@ -70,7 +69,7 @@ uintptr_t memory_alloc_identity_page(PageDirectory *pdir)
         if (!page_present(pdir, address) &&
             !physical_is_used(address, 1))
         {
-            physical_set_used(address, 1);
+            PhysicalAllocate(address, 1);
             virtual_map(pdir, address, address, 1, false);
 
           //  atomic_end();
@@ -92,11 +91,11 @@ uintptr_t memory_alloc(PageDirectory *page_directory, size_t size, MemoryFlags f
     if (!size)
         return 0;
 
-    size_t page_count = PAGE_ALIGN_UP(size) / PAGE_SIZE;
+    size_t page_count = PAGE_ALIGN(size) / PAGE_SIZE;
 
   ///  atomic_begin();
 
-    uintptr_t physical_address = physical_alloc(page_count);
+    uintptr_t physical_address = PhysicalAllocate(page_count);
 
     if (!physical_address)
     {
@@ -115,7 +114,7 @@ uintptr_t memory_alloc(PageDirectory *page_directory, size_t size, MemoryFlags f
 
     if (!virtual_address)
     {
-        FreePhysical(physical_address, page_count);
+        PhysicalFree(physical_address, page_count);
     //    atomic_end();
 
         printf("Failled to allocate memory: not enough virtual memory!");
