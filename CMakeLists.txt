@@ -5,8 +5,6 @@ project(SakuraOS)
 enable_language(ASM)
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY bin/isodir/boot)
 
-set(CMAKE_BUILD_TYPE Debug)
-
 # set properties and variables
 set(CMAKE_SYSTEM_PROCESSOR i386)
 set(COMPILER_ARCH i686)
@@ -21,7 +19,9 @@ set(CMAKE_ASM_COMPILER ${CROSS_FOLDER}/${COMPILER_ARCH}-elf-as)
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_C_STANDARD 11)
 set(CMAKE_CXX_FLAGS "-ffreestanding -O0 -Wall -Wextra -fno-exceptions -fno-rtti")
+set(CMAKE_CXX_FLAGS_DEBUG "-g -O0")
 set(CMAKE_C_FLAGS "-ffreestanding -O0 -Wall -Wextra")
+set(CMAKE_C_FLAGS_DEBUG "-g -O0")
 
 # set the linker script
 set(LINKER_SCRIPT ${ARCH_FOLDER}/linker.ld)

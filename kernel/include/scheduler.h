@@ -2,7 +2,7 @@
 
 #include "task.h"
 #include <stdint.h>
-#include "Paging.h"
+#include "MemoryManager.h"
 #include <stdint.h>
 
 namespace scheduler {

@@ -1,6 +1,6 @@
 #include <stdio.h>
 #include <stddef.h>
-#include "Paging.h"
+#include "MemoryManager.h"
 #include "PhysicalAllocator.h"
 #include "VirtualMemoryManager.h"
 #include <string.h>
@@ -12,20 +12,18 @@ namespace MemoryManager {
 extern "C" uint32_t __start;
 extern "C" uint32_t _kernel_end;
 
-#define NUM_KERNEL_PAGETABLES 256 //!< Equates to 1gb. Reserved for the kernel
-
-PageDirectory kernelPageDirectory __attribute__ ((aligned(PAGE_SIZE))) = {};
-PageTable kernelPageTable[NUM_KERNEL_PAGETABLES] __attribute__ ((aligned(PAGE_SIZE))) = {};
+PageDirectory kernelPageDirectory __attribute__ ((aligned(PAGE_SIZE)));
+PageTable kernelPageTable[NUM_KERNEL_PAGETABLES] __attribute__ ((aligned(PAGE_SIZE)));
 
 static void MapKernelPageTable(PageDirectory& pageDirectory)
 {
     for (int index = 0; index < NUM_KERNEL_PAGETABLES; index++)
     {
-        PageDirectoryEntry *entry = &pageDirectory.entries[index];
-        entry->user = 0;
-        entry->write = 1;
-        entry->present = 1;
-        entry->pageFrameNumber = (uint32_t)&kernelPageTable[index] / PAGE_SIZE;
+        PageDirectoryEntry *directoryEntry = &pageDirectory.entries[index];
+        directoryEntry->user = 0;
+        directoryEntry->write = 1;
+        directoryEntry->present = 1;
+        directoryEntry->pageFrameNumber = (uint32_t)&kernelPageTable[index] / PAGE_SIZE; //we only need the page number
     }
 }
 
@@ -39,16 +37,18 @@ static void MapKernelMemory()
     MapKernelPageTable(kernelPageDirectory); //map the kernel page directory
     IdentityMap(&kernelPageDirectory, kernelStart, kernelSize);
     //the first page directory entry is reserved for bootloader and other things
-    VirtualFree(&kernelPageDirectory, 0, 1); // free first 1mb
-    PhysicalAllocate(0, 1); 
+  //  VirtualFree(kernelPageDirectory, 0, 1); // free first 4mb
+    //PhysicalAllocate(0, 1); 
 }
 
 void Init(Multiboot::Multiboot& multiboot)
 {
     PhysicalAllocatorInit(multiboot);
     MapKernelMemory();
+    IdentityMap(&kernelPageDirectory, 0, (size_t)&__start); //its much easier to indentity map first 1mb for hardware bound addresses
     memory_pdir_switch(&kernelPageDirectory);
     paging_enable();
+    //IdentityMap(&kernelPageDirectory, 4096, 0x100000 - 4096);
 }
 
 void memory_pdir_switch(PageDirectory *pdir)
@@ -56,12 +56,12 @@ void memory_pdir_switch(PageDirectory *pdir)
     paging_load_directory(virtual2physical(&kernelPageDirectory, (uintptr_t)pdir));
 }
 
-PageDirectory *memory_kpdir(void)
+PageDirectory& memory_kpdir(void)
 {
-    return &kernelPageDirectory;
+    return kernelPageDirectory;
 }
 
-uintptr_t memory_alloc_identity_page(PageDirectory *pdir)
+uintptr_t AllocatePageTable(PageDirectory *pdir)
 {
    // atomic_begin();
 
@@ -89,52 +89,41 @@ uintptr_t memory_alloc_identity_page(PageDirectory *pdir)
     return 0;
 }
 
-uintptr_t MemoryAllocate(PageDirectory *page_directory, size_t size, MemoryFlags flags)
+uintptr_t MemoryAllocate(PageDirectory& pageDirectory, size_t size, bool user)
 {
     std::uint32_t numPages = PAGE_ALIGN(size) / PAGE_SIZE;
 
   ///  atomic_begin();
-
+    //firstly allocate physical memory
     uintptr_t physicalAddress = PhysicalAllocate(numPages);
 
-    if (!physicalAddress)
+    if (physicalAddress > 0)
     {
-       // atomic_end();
+        uintptr_t virtual_address = VirtualAllocate(pageDirectory, physicalAddress, numPages, user);
+        if (!virtual_address)
+        {
+            PhysicalFree(physicalAddress, numPages);
+        //    atomic_end();
 
-        printf("Failled to allocate memory: not enough physical memory!");
+            printf("Failled to allocate memory: not enough virtual memory!");
 
-        return 0;
-    }
+            return 0;
+        }
 
-    uintptr_t virtual_address = virtual_alloc(
-        page_directory,
-        physicalAddress,
-        numPages,
-        flags & MEMORY_USER);
+    // atomic_end();
 
-    if (!virtual_address)
-    {
-        PhysicalFree(physicalAddress, numPages);
-    //    atomic_end();
-
-        printf("Failled to allocate memory: not enough virtual memory!");
-
-        return 0;
-    }
-
-   // atomic_end();
-
-    if (flags & MEMORY_CLEAR)
         memset((void *)virtual_address, 0, numPages * PAGE_SIZE);
+        return virtual_address;
+    }
+    return 0; 
 
-    return virtual_address;
 }
 
 PageDirectory *CreateUserPageDirectory() //for user
 {
    // atomic_begin();
 
-    PageDirectory *pageDirectory = (PageDirectory *)MemoryAllocate(&kernelPageDirectory, sizeof(PageDirectory), MEMORY_CLEAR);
+    PageDirectory *pageDirectory = (PageDirectory *)MemoryAllocate(kernelPageDirectory, sizeof(PageDirectory), false);
 
     if (pageDirectory == NULL)
     {

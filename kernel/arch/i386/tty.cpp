@@ -43,11 +43,6 @@ void disable_cursor()
 	outb(0x3D5, 0x20);
 }
 
-void terminal_switch_to_virtual()
-{
-	terminal_buffer =  (uint16_t *)MemoryManager::virtual_alloc(MemoryManager::memory_kpdir(), reinterpret_cast<uint32_t>(VGA_MEMORY), PAGE_ALIGN(VGA_WIDTH * VGA_HEIGHT * sizeof(uint16_t)) / PAGE_SIZE, false); 
-}
-
 void terminal_init(void) 
 {
 	terminal_row = 0;
@@ -84,7 +79,7 @@ void terminal_putentryat(unsigned char c, uint8_t color, size_t x, size_t y)
 		index = 0;
 		terminal_clear();
 		terminal_row = 0;
-	terminal_column = 0;
+		terminal_column = 0;
 	}
 	terminal_buffer[index] = vga_entry(c, color);
 }

@@ -1,5 +1,5 @@
 
-#include <Paging.h>
+#include "MemoryManager.h"
 #include <PhysicalAllocator.h>
 #include "stdio.h"
 #include "Multiboot.h"

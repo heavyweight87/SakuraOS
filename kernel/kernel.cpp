@@ -7,7 +7,7 @@
 #include <interrupts.h>
 #include <gdt.h>
 #include <scheduler.h>
-#include "Paging.h"
+#include "MemoryManager.h"
 
 
 uint8_t kbdus[128] = {
@@ -62,7 +62,6 @@ extern "C" int kernel_main(uint32_t magic, Multiboot::MultibootInfo *mbinfo)
     }
     Multiboot::Multiboot multiboot(*mbinfo);
     MemoryManager::Init(multiboot);
-    terminal_switch_to_virtual();
     interrupts::init();
     scheduler::init();
     return 0;

@@ -1,6 +1,6 @@
 #include <vector>
 #include "Multiboot.h"
-#include "Paging.h"
+#include "MemoryManager.h"
 #include "PhysicalAllocator.h"
 
 namespace Multiboot {

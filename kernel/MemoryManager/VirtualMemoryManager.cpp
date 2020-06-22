@@ -1,6 +1,6 @@
 
 #include "VirtualMemoryManager.h"
-#include "Paging.h"
+#include "MemoryManager.h"
 #include <PhysicalAllocator.h>
 #include <stdio.h>
 #include <stddef.h>
@@ -17,10 +17,9 @@ namespace MemoryManager {
 #define PAGE_DIR_INDEX(vaddress) ((vaddress) >> 22)
 #define PAGE_TABLE_INDEX(vaddress) (((vaddress) >> 12) & 0x03ff)
 
-bool IsPagePresent(PageDirectory &pageDirectory, uint32_t virtualAddress)
+bool IsPagePresent(PageDirectory& pageDirectory, uint32_t virtualAddress)
 {
     PageDirectoryEntry *directoryEntry = &pageDirectory.entries[PAGE_DIR_INDEX(virtualAddress)];
-
     if (directoryEntry->present)
     {
         PageTable *pageTable = (PageTable *)(directoryEntry->pageFrameNumber * PAGE_SIZE);
@@ -71,8 +70,7 @@ void VirtualMap(PageDirectory& pageDirectory, uint32_t virtualAddress, uint32_t 
 
         if (!pde->present)
         {
-            ptable = (PageTable *)memory_alloc_identity_page(&pageDirectory);
-
+            ptable = (PageTable *)MemoryAllocate(pageDirectory, 1, 0);
             pde->present = 1;
             pde->write = 1;
             pde->user = isUser;
@@ -89,7 +87,7 @@ void VirtualMap(PageDirectory& pageDirectory, uint32_t virtualAddress, uint32_t 
     paging_invalidate_tlb();
 }
 
-void VirtualFree(PageDirectory *pdir, uint32_t virtualAddress, uint32_t numPages)
+void VirtualFree(PageDirectory& pdir, uint32_t virtualAddress, uint32_t numPages)
 {
     for (uint32_t i = 0; i < numPages; i++)
     {
@@ -98,7 +96,7 @@ void VirtualFree(PageDirectory *pdir, uint32_t virtualAddress, uint32_t numPages
         uint32_t pdi = PAGE_DIR_INDEX(virtualAddress + offset);
         uint32_t pti = PAGE_TABLE_INDEX(virtualAddress + offset);
 
-        PageDirectoryEntry *pde = &pdir->entries[pdi];
+        PageDirectoryEntry *pde = &pdir.entries[pdi];
         PageTable *ptable = (PageTable *)(pde->pageFrameNumber * PAGE_SIZE);
         PageTableEntry *p = &ptable->entries[pti];
 
@@ -109,20 +107,23 @@ void VirtualFree(PageDirectory *pdir, uint32_t virtualAddress, uint32_t numPages
     paging_invalidate_tlb();
 }
 
-uint32_t virtual_alloc(PageDirectory *pdir, uint32_t paddr, uint32_t count, int user)
+uint32_t VirtualAllocate(PageDirectory& pageDirectory, uint32_t physicalAddress, uint32_t numPages, bool user)
 {
-    if (count == 0)
-        return 0;
-
     uint32_t current_size = 0;
     uint32_t startaddr = 0;
 
-    // we skip the first page to make null deref trigger a page fault
-    for (size_t i = (user ? 256 : 1) * 1024; i < (user ? 1024 : 256) * 1024; i++)
+    uint32_t virtualAddress = 1; //page 0 is reserved
+    if(user)
+    {
+       // i = NUM_KERNEL_PAGETABLES * ; //place it after kernel memory
+    }
+
+    // try to find a range of free virtual address - this is horribly inefficient TODO: improve
+    for (uint32_t i = (user ? 256 : 1) * 1024; i < (user ? 1024 : 256) * 1024; i++)
     {
         int vaddr = i * PAGE_SIZE;
 
-        if (!IsPagePresent(*pdir, vaddr))
+        if (!IsPagePresent(pageDirectory, vaddr))
         {
             if (current_size == 0)
             {
@@ -131,9 +132,9 @@ uint32_t virtual_alloc(PageDirectory *pdir, uint32_t paddr, uint32_t count, int 
 
             current_size++;
 
-            if (current_size == count)
+            if (current_size == numPages)
             {
-                VirtualMap(*pdir, startaddr, paddr, count, user);
+                VirtualMap(pageDirectory, startaddr, physicalAddress, numPages, user);
                 return startaddr;
             }
         }

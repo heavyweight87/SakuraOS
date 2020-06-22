@@ -12,7 +12,14 @@ static Task otherTask;
 static void otherMain() {
     while(1)
     {
-        printf("Hello multitasking world!\r\n"); // Not implemented here...
+        printf("Requesting 16kb\r\n"); 
+        uint8_t *buffer = (uint8_t*)MemoryManager::MemoryAllocate(MemoryManager::memory_kpdir(), TASK_STACK_SIZE, false);
+        for(int i = 0; i < TASK_STACK_SIZE; i++)
+        {
+            buffer[i] = i;
+        }
+        MemoryManager::VirtualFree(MemoryManager::memory_kpdir(), (uint32_t)buffer, TASK_STACK_SIZE);
+        printf("freeing 16kb\r\n"); 
     }
 }
  
@@ -31,7 +38,7 @@ void init()
     timer_set_frequency(1000);
     while(1)
     {
-       printf("Switching to otherTask... \n");
+      // printf("Switching to otherTask... \n");
     }
 }
  
@@ -46,7 +53,7 @@ void createTask(Task *task, void (*main)(), uint32_t flags, uint32_t *pagedir)
     task->regs.eflags = flags;
     task->regs.eip = (uint32_t) main;
     task->regs.cr3 = (uint32_t) pagedir;
-    task->regs.esp = (uint32_t)MemoryManager::MemoryAllocate(MemoryManager::memory_kpdir(), TASK_STACK_SIZE, MEMORY_CLEAR) + 0x4000;
+    task->regs.esp = (uint32_t)MemoryManager::MemoryAllocate(MemoryManager::memory_kpdir(), TASK_STACK_SIZE, false) + 0x4000;
     task->next = 0;
 }
  
