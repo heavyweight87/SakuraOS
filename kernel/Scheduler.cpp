@@ -12,14 +12,18 @@ static Task otherTask;
 static void otherMain() {
     while(1)
     {
-        printf("Requesting 16kb\r\n"); 
-        uint8_t *buffer = (uint8_t*)MemoryManager::MemoryAllocate(MemoryManager::memory_kpdir(), TASK_STACK_SIZE, false);
-        for(int i = 0; i < TASK_STACK_SIZE; i++)
+        uint32_t mem = TASK_STACK_SIZE*1000;
+        printf("Requesting %d bytes\r\n", mem); 
+        uint8_t *buffer = (uint8_t*)MemoryManager::MemoryAllocate(MemoryManager::memory_kpdir(), mem, false);
+        if(buffer)
         {
-            buffer[i] = i;
+            //for(int i = 0; i < mem; i++)
+            {
+              //  buffer[i] = i;
+            }
+            MemoryManager::MemoryFree(MemoryManager::memory_kpdir(), (uint32_t)buffer, mem);
+            printf("freeing 16kb\r\n"); 
         }
-        MemoryManager::VirtualFree(MemoryManager::memory_kpdir(), (uint32_t)buffer, TASK_STACK_SIZE);
-        printf("freeing 16kb\r\n"); 
     }
 }
  

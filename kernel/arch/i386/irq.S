@@ -189,3 +189,4 @@ load_idt:
 	lidt [edx]
 	sti
 	ret
+  

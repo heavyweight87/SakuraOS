@@ -47,6 +47,6 @@ uint32_t PhysicalAllocate(uint32_t numPages);
  * @param startAddress the address to start freeing at 
  * @param numPages the number of pages to free 
  */
-void PhysicalFree(uint32_t addr, uint32_t count);
+void PhysicalFree(uint32_t startAddress, uint32_t numPages);
 
 }

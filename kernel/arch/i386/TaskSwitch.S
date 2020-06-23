@@ -47,3 +47,5 @@ switchTask:
     xchg (%esp), %eax #We do not have any more registers to use as tmp storage
     mov (%eax), %eax #EAX
     ret #This ends all!
+
+    

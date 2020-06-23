@@ -96,6 +96,23 @@ int printf(const char* __restrict format, ...)
 				return -1;
 			written++;
 		}
+		else if (*format == 'u') 
+		{
+			char buffer[50];
+			format++;
+			uint32_t c = va_arg(parameters, uint32_t /* char promotes to int */);
+			if (!maxrem) {
+				// TODO: Set errno to EOVERFLOW.
+				return -1;
+			}
+			char *s = &buffer[49];
+			*--s = 0;
+			if (!c) *--s = '0';
+			for (; c; c/=10) *--s = '0'+c%10;
+			if (!print(s, strlen(s)))
+				return -1;
+			written++;
+		}
 		else if (*format == 'd') 
 		{
 			char buffer[50];
@@ -110,7 +127,8 @@ int printf(const char* __restrict format, ...)
 				return -1;
 			written++;
 		}
-		 else if (*format == 's') {
+		else if (*format == 's') 
+		{
 			format++;
 			const char* str = va_arg(parameters, const char*);
 			size_t len = strlen(str);
@@ -121,7 +139,9 @@ int printf(const char* __restrict format, ...)
 			if (!print(str, len))
 				return -1;
 			written += len;
-		} else {
+		} 
+		else
+		{
 			format = format_begun_at;
 			size_t len = strlen(format);
 			if (maxrem < len) {

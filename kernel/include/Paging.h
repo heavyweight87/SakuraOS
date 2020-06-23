@@ -7,7 +7,7 @@ namespace MemoryManager{
 #define PAGE_SIZE 0x1000
 #define PAGE_TABLE_ENTRY_COUNT 1024
 #define PAGE_DIRECTORY_ENTRY_COUNT 1024
-#define MAX_NUM_PHYSICAL_PAGES (0x100000000ULL / PAGE_SIZE)
+#define MAX_NUM_PHYSICAL_PAGES (TOTAL_MEMORY / PAGE_SIZE)
 
 #define PAGE_ALIGN(size) ((size) + PAGE_SIZE - ((size) % PAGE_SIZE))
 
@@ -56,5 +56,9 @@ struct __attribute__((packed)) PageDirectory
 {
     PageDirectoryEntry entries[PAGE_DIRECTORY_ENTRY_COUNT];
 };
+
+extern "C" void EnablePaging(void);
+extern "C" void ChangePageDirectory(uintptr_t directory);
+extern "C" void FlushCurrentPageDirectory(void);
 
 }

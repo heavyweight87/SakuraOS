@@ -17,131 +17,108 @@ namespace MemoryManager {
 #define PAGE_DIR_INDEX(vaddress) ((vaddress) >> 22)
 #define PAGE_TABLE_INDEX(vaddress) (((vaddress) >> 12) & 0x03ff)
 
+static PageDirectoryEntry& GetPageDirectoryEntry(PageDirectory& pageDirectory, uint32_t virtualAddress)
+{
+    uint32_t directoryIndex = PAGE_DIR_INDEX(virtualAddress);
+    return pageDirectory.entries[directoryIndex];
+}
+
+static PageTable& GetPageTable(PageDirectory& pageDirectory, uint32_t virtualAddress)
+{
+    return *(PageTable*)(GetPageDirectoryEntry(pageDirectory, virtualAddress).pageFrameNumber * PAGE_SIZE);
+}
+
+static PageTableEntry& GetPageTableEntry(PageDirectory& pageDirectory, uint32_t virtualAddress)
+{
+    uint32_t pageTableIndex = PAGE_TABLE_INDEX(virtualAddress);
+    return GetPageTable(pageDirectory, virtualAddress).entries[pageTableIndex];
+}
+
 bool IsPagePresent(PageDirectory& pageDirectory, uint32_t virtualAddress)
 {
-    PageDirectoryEntry *directoryEntry = &pageDirectory.entries[PAGE_DIR_INDEX(virtualAddress)];
-    if (directoryEntry->present)
+    PageDirectoryEntry directoryEntry = GetPageDirectoryEntry(pageDirectory, virtualAddress);
+    if (directoryEntry.present)
     {
-        PageTable *pageTable = (PageTable *)(directoryEntry->pageFrameNumber * PAGE_SIZE);
-        PageTableEntry *pageTableEntry = &pageTable->entries[PAGE_TABLE_INDEX(virtualAddress)];
-        return pageTableEntry->present;
+        return GetPageTableEntry(pageDirectory, virtualAddress).present;
     }
     return false;
 }
 
-int virtual_present(PageDirectory *pdir, uint32_t vaddr, uint32_t count)
+uint32_t GetPhysicalAddress(PageDirectory& pageDirectory, uint32_t virtualAddress)
 {
-    for (uint32_t i = 0; i < count; i++)
-    {
-        uint32_t offset = i * PAGE_SIZE;
-
-        if (!IsPagePresent(*pdir, vaddr + offset))
-        {
-            return 0;
-        }
-    }
-
-    return 1;
-}
-
-uint32_t virtual2physical(PageDirectory *pdir, uint32_t vaddr)
-{
-    uint32_t pdi = PAGE_DIR_INDEX(vaddr);
-    uint32_t pti = PAGE_TABLE_INDEX(vaddr);
-
-    PageDirectoryEntry *pde = &pdir->entries[pdi];
-    PageTable *ptable = (PageTable *)(pde->pageFrameNumber * PAGE_SIZE);
-    PageTableEntry *p = &ptable->entries[pti];
-    uint32_t phys = (p->pageFrameNumber * PAGE_SIZE) + (vaddr & 0xfff);
-    return phys;
+    PageTableEntry& pageTableEntry = GetPageTableEntry(pageDirectory, virtualAddress);
+    return (pageTableEntry.pageFrameNumber * PAGE_SIZE) + (virtualAddress&0xFFF);
 }
 
 void VirtualMap(PageDirectory& pageDirectory, uint32_t virtualAddress, uint32_t physicalAddress, uint32_t numPages, bool isUser)
 {
-    for (uint32_t index = 0; index < numPages; index++)
+    for (uint32_t pageIndex = 0; pageIndex < numPages; pageIndex++)
     {
-        uint32_t offset = index * PAGE_SIZE;
+        PageDirectoryEntry& pageDirectoryEntry = GetPageDirectoryEntry(pageDirectory, virtualAddress);
 
-        uint32_t pdi = PAGE_DIR_INDEX(virtualAddress + offset);
-        uint32_t pti = PAGE_TABLE_INDEX(virtualAddress + offset);
-
-        PageDirectoryEntry *pde = &pageDirectory.entries[pdi];
-        PageTable *ptable = (PageTable *)(pde->pageFrameNumber * PAGE_SIZE);
-
-        if (!pde->present)
+        if (pageDirectoryEntry.present == false)
         {
-            ptable = (PageTable *)MemoryAllocate(pageDirectory, 1, 0);
-            pde->present = 1;
-            pde->write = 1;
-            pde->user = isUser;
-            pde->pageFrameNumber = (uint32_t)(ptable) >> 12;
+            PageTable *pageTable = (PageTable*)MemoryAllocate(pageDirectory, 1, false);
+            pageDirectoryEntry.present = 1;
+            pageDirectoryEntry.write = 1;
+            pageDirectoryEntry.user = isUser;
+            pageDirectoryEntry.pageFrameNumber = (uint32_t)pageTable >> 12;
         }
 
-        PageTableEntry *p = &ptable->entries[pti];
-        p->present = 1;
-        p->write = 1;
-        p->user = isUser;
-        p->pageFrameNumber = (physicalAddress + offset) >> 12;
+        PageTableEntry& pageTableEntry = GetPageTableEntry(pageDirectory, virtualAddress);
+        pageTableEntry.present = 1;
+        pageTableEntry.write = 1;
+        pageTableEntry.user = isUser;
+        pageTableEntry.pageFrameNumber = physicalAddress >> 12;
+
+        virtualAddress += PAGE_SIZE;
+        physicalAddress += PAGE_SIZE;
     }
 
-    paging_invalidate_tlb();
+    FlushCurrentPageDirectory();
 }
 
-void VirtualFree(PageDirectory& pdir, uint32_t virtualAddress, uint32_t numPages)
+void VirtualFree(PageDirectory& pageDirectory, uint32_t virtualAddress, uint32_t numPages)
 {
-    for (uint32_t i = 0; i < numPages; i++)
+    for (uint32_t address = virtualAddress; address < virtualAddress + (numPages * PAGE_SIZE); address += PAGE_SIZE)
     {
-        uint32_t offset = i * PAGE_SIZE;
-
-        uint32_t pdi = PAGE_DIR_INDEX(virtualAddress + offset);
-        uint32_t pti = PAGE_TABLE_INDEX(virtualAddress + offset);
-
-        PageDirectoryEntry *pde = &pdir.entries[pdi];
-        PageTable *ptable = (PageTable *)(pde->pageFrameNumber * PAGE_SIZE);
-        PageTableEntry *p = &ptable->entries[pti];
-
-        if (pde->present)
-            p->pageFrameNumber = 0;
+        GetPageTableEntry(pageDirectory, address).pageTableEntry = 0;
     }
-
-    paging_invalidate_tlb();
+    FlushCurrentPageDirectory();
 }
 
 uint32_t VirtualAllocate(PageDirectory& pageDirectory, uint32_t physicalAddress, uint32_t numPages, bool user)
 {
-    uint32_t current_size = 0;
-    uint32_t startaddr = 0;
-
-    uint32_t virtualAddress = 1; //page 0 is reserved
-    if(user)
+    uint32_t startAddr = 0;
+    uint32_t userStartAddress = NUM_KERNEL_PAGETABLES * PAGE_SIZE * 1024;
+    uint32_t virtualAddress = KERNEL_START_ADDRESS; 
+    uint32_t maxAddress =  userStartAddress;
+    uint32_t pageIndex = 0;
+    if(user) //user memory starts after kernel TODO: higher half kernel
     {
-       // i = NUM_KERNEL_PAGETABLES * ; //place it after kernel memory
+       virtualAddress =  userStartAddress; //after kernel memory
+       maxAddress = TOTAL_MEMORY;
     }
 
     // try to find a range of free virtual address - this is horribly inefficient TODO: improve
-    for (uint32_t i = (user ? 256 : 1) * 1024; i < (user ? 1024 : 256) * 1024; i++)
+    while(virtualAddress < maxAddress)
     {
-        int vaddr = i * PAGE_SIZE;
-
-        if (!IsPagePresent(pageDirectory, vaddr))
+        //we need the virtual address to be in a continious sequence
+        if (!IsPagePresent(pageDirectory, virtualAddress)) //this page is free
         {
-            if (current_size == 0)
+            pageIndex++;
+            if (pageIndex == numPages)
             {
-                startaddr = vaddr;
-            }
-
-            current_size++;
-
-            if (current_size == numPages)
-            {
-                VirtualMap(pageDirectory, startaddr, physicalAddress, numPages, user);
-                return startaddr;
+                VirtualMap(pageDirectory, startAddr, physicalAddress, numPages, user);
+                return startAddr;
             }
         }
-        else
+        else //page is taken, reset
         {
-            current_size = 0;
+            pageIndex = 0;
+            startAddr = virtualAddress + PAGE_SIZE;
         }
+        virtualAddress += PAGE_SIZE;
     }
 
     printf("Out of virtual memory!");

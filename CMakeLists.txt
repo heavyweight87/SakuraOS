@@ -50,5 +50,5 @@ set_target_properties(kernel.bin PROPERTIES LINK_FLAGS "-T ${LINKER_SCRIPT} -nos
 add_custom_command(TARGET kernel.bin POST_BUILD COMMAND /bin/sh ${CMAKE_CURRENT_SOURCE_DIR}/scripts/iso.sh)
 
 # for qemu
-add_custom_target(qemu COMMAND qemu-system-i386 -cdrom bin/kernel.iso -serial file:serial.log -monitor stdio -d cpu_reset -m 256M -no-reboot)
+add_custom_target(qemu COMMAND qemu-system-i386 -cdrom bin/kernel.iso -serial mon:stdio  -d cpu_reset -m 256M -no-reboot)
 add_custom_target(qemu-debug COMMAND qemu-system-i386 -cdrom bin/kernel.iso -serial file:serial.log -monitor stdio -m 256M -S -gdb tcp::1234)

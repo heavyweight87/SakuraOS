@@ -36,24 +36,21 @@ static void MapKernelMemory()
     kernelSize += PAGE_SIZE - (kernelSize % PAGE_SIZE);
     MapKernelPageTable(kernelPageDirectory); //map the kernel page directory
     IdentityMap(&kernelPageDirectory, kernelStart, kernelSize);
-    //the first page directory entry is reserved for bootloader and other things
-  //  VirtualFree(kernelPageDirectory, 0, 1); // free first 4mb
-    //PhysicalAllocate(0, 1); 
 }
 
 void Init(Multiboot::Multiboot& multiboot)
 {
     PhysicalAllocatorInit(multiboot);
     MapKernelMemory();
-    IdentityMap(&kernelPageDirectory, 0, (size_t)&__start); //its much easier to indentity map first 1mb for hardware bound addresses
+    //its much easier to indentity map first 1mb for hardware bound addresses
+    IdentityMap(&kernelPageDirectory, 0, (size_t)&__start); 
     memory_pdir_switch(&kernelPageDirectory);
-    paging_enable();
-    //IdentityMap(&kernelPageDirectory, 4096, 0x100000 - 4096);
+    EnablePaging();
 }
 
 void memory_pdir_switch(PageDirectory *pdir)
 {
-    paging_load_directory(virtual2physical(&kernelPageDirectory, (uintptr_t)pdir));
+    ChangePageDirectory(GetPhysicalAddress(kernelPageDirectory, (uintptr_t)pdir));
 }
 
 PageDirectory& memory_kpdir(void)
@@ -61,62 +58,56 @@ PageDirectory& memory_kpdir(void)
     return kernelPageDirectory;
 }
 
-uintptr_t AllocatePageTable(PageDirectory *pdir)
-{
-   // atomic_begin();
-
-    for (size_t i = 1; i < 256 * 1024; i++)
-    {
-        int address = i * PAGE_SIZE;
-
-        if (!IsPagePresent(*pdir, address) &&
-            !physical_is_used(address, 1))
-        {
-            PhysicalAllocate(address, 1);
-            VirtualMap(*pdir, address, address, 1, false);
-
-          //  atomic_end();
-
-            memset((void *)address, 0, PAGE_SIZE);
-
-            return address;
-        }
-    }
-
-   // atomic_end();
-
-    printf("Failled to allocate identity mapped page!");
-    return 0;
-}
-
 uintptr_t MemoryAllocate(PageDirectory& pageDirectory, size_t size, bool user)
 {
-    std::uint32_t numPages = PAGE_ALIGN(size) / PAGE_SIZE;
+    std::uint32_t numPages = size / PAGE_SIZE;
+    if(size % PAGE_SIZE)
+    {
+        numPages = PAGE_ALIGN(size) / PAGE_SIZE;
+    }
 
-  ///  atomic_begin();
+    //  atomic_begin();
     //firstly allocate physical memory
     uintptr_t physicalAddress = PhysicalAllocate(numPages);
 
     if (physicalAddress > 0)
     {
-        uintptr_t virtual_address = VirtualAllocate(pageDirectory, physicalAddress, numPages, user);
-        if (!virtual_address)
+        uintptr_t virtualAddress = VirtualAllocate(pageDirectory, physicalAddress, numPages, user);
+        if (virtualAddress == 0)
         {
             PhysicalFree(physicalAddress, numPages);
         //    atomic_end();
 
-            printf("Failled to allocate memory: not enough virtual memory!");
-
+            printf("Out of vmem!\r\n");
             return 0;
         }
 
     // atomic_end();
 
-        memset((void *)virtual_address, 0, numPages * PAGE_SIZE);
-        return virtual_address;
+        memset((void *)virtualAddress, 0, numPages * PAGE_SIZE); //clear the memory
+        return virtualAddress;
     }
     return 0; 
+}
 
+void MemoryFree(PageDirectory& pageDirectory, uint32_t startAddress, size_t size)
+{
+   // atomic_begin();
+    uint32_t numPages = 0;
+    for (uint32_t i = 0; i < size/ PAGE_SIZE; i++)
+    {
+        uint32_t virtual_address = startAddress + i * PAGE_SIZE;
+
+        if (IsPagePresent(pageDirectory, virtual_address))
+        {
+            PhysicalFree(GetPhysicalAddress(pageDirectory, virtual_address), 1);
+            VirtualFree(pageDirectory, virtual_address, 1);
+            numPages++;
+        }
+    }
+    printf("Num pages = %d\r\n", numPages);
+
+ //   atomic_end();
 }
 
 PageDirectory *CreateUserPageDirectory() //for user
@@ -124,17 +115,14 @@ PageDirectory *CreateUserPageDirectory() //for user
    // atomic_begin();
 
     PageDirectory *pageDirectory = (PageDirectory *)MemoryAllocate(kernelPageDirectory, sizeof(PageDirectory), false);
-
     if (pageDirectory == NULL)
     {
-        printf("Page directory allocation failled!");
+        printf("Could not allocate page directory...\r\n");
         return NULL;
     }
 
     memset(pageDirectory, 0, sizeof(PageDirectory));
-
     MapKernelPageTable(*pageDirectory);
-
 
    // atomic_end();
 

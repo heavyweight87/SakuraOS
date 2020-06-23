@@ -98,11 +98,11 @@ struct gdt_ptr
     void *base;
 } __attribute__((packed));
 
-gdt_entry_t gdTable[5] __attribute__((aligned(8)));
+gdt_entry_t gdTable[6] __attribute__((aligned(8)));
 struct gdt_ptr gp;                     
 
 
-void create_descriptor(uint32_t base, uint32_t limit, uint16_t flag, gdt_entry_t &desc)
+void create_descriptor(uint32_t base, uint32_t limit, uint16_t flag, gdt_entry_t& desc)
 {
     uint64_t *descriptor = (uint64_t*)&desc;
     // Create the high 32 bit segment
