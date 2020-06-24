@@ -34,22 +34,15 @@ static PageTableEntry& GetPageTableEntry(PageDirectory& pageDirectory, uint32_t 
     return GetPageTable(pageDirectory, virtualAddress).entries[pageTableIndex];
 }
 
-bool IsPagePresent(PageDirectory& pageDirectory, uint32_t virtualAddress)
-{
-    PageDirectoryEntry directoryEntry = GetPageDirectoryEntry(pageDirectory, virtualAddress);
-    if (directoryEntry.present)
-    {
-        return GetPageTableEntry(pageDirectory, virtualAddress).present;
-    }
-    return false;
-}
-
-uint32_t GetPhysicalAddress(PageDirectory& pageDirectory, uint32_t virtualAddress)
-{
-    PageTableEntry& pageTableEntry = GetPageTableEntry(pageDirectory, virtualAddress);
-    return (pageTableEntry.pageFrameNumber * PAGE_SIZE) + (virtualAddress&0xFFF);
-}
-
+/**
+ * @brief maps a physical address to a virtual one
+ * 
+ * @param pageDirectory page directory to use
+ * @param virtualAddress the virtual address to map 
+ * @param physicalAddress the physical address to map
+ * @param numPages the number of pages to map
+ * @param isUser true if we are mapping user memory
+ */
 void VirtualMap(PageDirectory& pageDirectory, uint32_t virtualAddress, uint32_t physicalAddress, uint32_t numPages, bool isUser)
 {
     for (uint32_t pageIndex = 0; pageIndex < numPages; pageIndex++)
@@ -76,6 +69,22 @@ void VirtualMap(PageDirectory& pageDirectory, uint32_t virtualAddress, uint32_t 
     }
 
     FlushCurrentPageDirectory();
+}
+
+bool IsPagePresent(PageDirectory& pageDirectory, uint32_t virtualAddress)
+{
+    PageDirectoryEntry directoryEntry = GetPageDirectoryEntry(pageDirectory, virtualAddress);
+    if (directoryEntry.present)
+    {
+        return GetPageTableEntry(pageDirectory, virtualAddress).present;
+    }
+    return false;
+}
+
+uint32_t GetPhysicalAddress(PageDirectory& pageDirectory, uint32_t virtualAddress)
+{
+    PageTableEntry& pageTableEntry = GetPageTableEntry(pageDirectory, virtualAddress);
+    return (pageTableEntry.pageFrameNumber * PAGE_SIZE) + (virtualAddress&0xFFF);
 }
 
 void VirtualFree(PageDirectory& pageDirectory, uint32_t virtualAddress, uint32_t numPages)
@@ -125,15 +134,13 @@ uint32_t VirtualAllocate(PageDirectory& pageDirectory, uint32_t physicalAddress,
     return 0;
 }
 
-int IdentityMap(PageDirectory *pdir, uintptr_t address, size_t size)
+void IdentityMap(PageDirectory& pageDirectory, uintptr_t address, size_t size)
 {
     size_t page_count = PAGE_ALIGN(size) / PAGE_SIZE;
 
     //atomic_begin();
     PhysicalAllocate(address, page_count);
-    VirtualMap(*pdir, address, address, page_count, false);
+    VirtualMap(pageDirectory, address, address, page_count, false);
    // atomic_end();
-   
-    return 0;
 }
 }

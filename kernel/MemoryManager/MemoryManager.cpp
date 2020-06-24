@@ -36,7 +36,7 @@ static void MapKernelMemory()
     kernelSize += (uintptr_t)&__start % PAGE_SIZE;
     kernelSize += PAGE_SIZE - (kernelSize % PAGE_SIZE);
     MapKernelPageTable(kernelPageDirectory); //map the kernel page directory
-    IdentityMap(&kernelPageDirectory, kernelStart, kernelSize);
+    IdentityMap(kernelPageDirectory, kernelStart, kernelSize);
 }
 
 void Init(Multiboot::Multiboot& multiboot)
@@ -44,7 +44,7 @@ void Init(Multiboot::Multiboot& multiboot)
     PhysicalAllocatorInit(multiboot);
     MapKernelMemory();
     //its much easier to indentity map first 1mb for hardware bound addresses
-    IdentityMap(&kernelPageDirectory, 0, (size_t)&__start); 
+    IdentityMap(kernelPageDirectory, 0, (size_t)&__start); 
     ChangePageDirectory(GetPhysicalAddress(kernelPageDirectory, (uintptr_t)&kernelPageDirectory));
     EnablePaging();
 }

@@ -16,7 +16,8 @@ void SetTimerFrequency(uint16_t hz)
     outb(0x40, (div >> 8) & 0xFF);
 }
  
-static void otherMain() {
+static void otherMain() 
+{
     while(1)
     {
         uint32_t mem = TASK_STACK_SIZE*1000;
