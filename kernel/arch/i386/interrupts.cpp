@@ -3,7 +3,7 @@
 #include <interrupts.h>
 #include <io.h>
 #include <string.h>
-#include <scheduler.h>
+#include <Scheduler.h>
 
 
 typedef struct  __attribute__((packed)) 
@@ -78,7 +78,7 @@ extern "C"
 void irq0_handler() {
 	  // TODO: Add timer handler
 	  outb(0x20, 0x20);
-    scheduler::schedule();
+    Scheduler::Schedule();
 }
 
 void irq1_handler(void) {

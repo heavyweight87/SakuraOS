@@ -4,6 +4,7 @@
 #include "PhysicalAllocator.h"
 #include "VirtualMemoryManager.h"
 #include <string.h>
+#include "Scheduler.h"
 
 
 namespace MemoryManager {
@@ -44,18 +45,14 @@ void Init(Multiboot::Multiboot& multiboot)
     MapKernelMemory();
     //its much easier to indentity map first 1mb for hardware bound addresses
     IdentityMap(&kernelPageDirectory, 0, (size_t)&__start); 
-    memory_pdir_switch(&kernelPageDirectory);
+    ChangePageDirectory(GetPhysicalAddress(kernelPageDirectory, (uintptr_t)&kernelPageDirectory));
     EnablePaging();
 }
 
-void memory_pdir_switch(PageDirectory *pdir)
+uintptr_t MemoryAllocate(size_t size, bool user)
 {
-    ChangePageDirectory(GetPhysicalAddress(kernelPageDirectory, (uintptr_t)pdir));
-}
-
-PageDirectory& memory_kpdir(void)
-{
-    return kernelPageDirectory;
+    PageDirectory *pageDirectory = (PageDirectory*)Scheduler::GetRunningTask().regs.cr3;
+    return MemoryAllocate(*pageDirectory, size, user);
 }
 
 uintptr_t MemoryAllocate(PageDirectory& pageDirectory, size_t size, bool user)
@@ -72,7 +69,8 @@ uintptr_t MemoryAllocate(PageDirectory& pageDirectory, size_t size, bool user)
 
     if (physicalAddress > 0)
     {
-        uintptr_t virtualAddress = VirtualAllocate(pageDirectory, physicalAddress, numPages, user);
+
+        uintptr_t virtualAddress = VirtualAllocate(pageDirectory ,physicalAddress, numPages, user);
         if (virtualAddress == 0)
         {
             PhysicalFree(physicalAddress, numPages);
@@ -105,8 +103,6 @@ void MemoryFree(PageDirectory& pageDirectory, uint32_t startAddress, size_t size
             numPages++;
         }
     }
-    printf("Num pages = %d\r\n", numPages);
-
  //   atomic_end();
 }
 
@@ -114,7 +110,7 @@ PageDirectory *CreateUserPageDirectory() //for user
 {
    // atomic_begin();
 
-    PageDirectory *pageDirectory = (PageDirectory *)MemoryAllocate(kernelPageDirectory, sizeof(PageDirectory), false);
+    PageDirectory *pageDirectory = (PageDirectory *)MemoryAllocate(sizeof(PageDirectory), false);
     if (pageDirectory == NULL)
     {
         printf("Could not allocate page directory...\r\n");
@@ -127,6 +123,11 @@ PageDirectory *CreateUserPageDirectory() //for user
    // atomic_end();
 
     return pageDirectory;
+}
+
+PageDirectory& GetKerkelPageDirectory()
+{
+    return kernelPageDirectory;
 }
 
 }

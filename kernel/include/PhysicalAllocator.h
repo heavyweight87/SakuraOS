@@ -21,6 +21,12 @@ struct MemoryManagerData
     std::uint8_t PhysicalAllocation[ALLOCATION_BYTES];
 };
 
+/**
+ * @brief Initializes the physical allocator
+ * 
+ * @param multiboot multiboot structure containing the memmory map
+ * and other goodiesx   
+ */
 void PhysicalAllocatorInit(Multiboot::Multiboot& multiboot);
 
 int physical_is_used(uint32_t addr, uint32_t count);

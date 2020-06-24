@@ -1,31 +1,33 @@
 #pragma once
 
-#include "task.h"
 #include <stdint.h>
 #include "MemoryManager.h"
 #include <stdint.h>
 
-namespace scheduler {
+namespace Scheduler {
 
 #define PROCESS_NAME_SIZE 32
 #define TASK_STACK_SIZE 16384
 
 typedef void (*TaskEntry)();
  
-typedef struct {
+struct Registers
+{
     uint32_t eax, ebx, ecx, edx, esi, edi, esp, ebp, eip, eflags, cr3;
-} Registers;
+};
  
-typedef struct Task {
+struct Task 
+{
     Registers regs;
+    MemoryManager::PageDirectory* pageDirectory;
     Task *next;
-}Task;
+};
  
-void init();
-void createTask(Task*, void(*)(), uint32_t, uint32_t*);
-void timer_set_frequency(uint16_t hz);
+void Init();
+void CreateTask(Task& task, void(*)(), uint32_t, uint32_t*);
+Task& GetRunningTask();
  
 extern void yield(); // Switch task frontend
-void schedule(void);
+void Schedule(void);
 extern "C" void switchTask(Registers *old, Registers *n); // The function which actually switches
 }

@@ -15,9 +15,9 @@ namespace MemoryManager {
 uintptr_t memory_alloc_identity_page(PageDirectory *pdir);
 
 void Init(Multiboot::Multiboot& multiboot);
-void memory_pdir_switch(PageDirectory *pdir);
-PageDirectory& memory_kpdir();
-uintptr_t MemoryAllocate(PageDirectory& page_directory, size_t size, bool user);
+uintptr_t MemoryAllocate(size_t size, bool user);
+uintptr_t MemoryAllocate(PageDirectory& pageDirectory, size_t size, bool user);
 void MemoryFree(PageDirectory& pageDirectory, uint32_t physicalAddress, size_t size);
+PageDirectory& GetKerkelPageDirectory();
 
 }

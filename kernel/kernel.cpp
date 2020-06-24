@@ -6,7 +6,7 @@
 #include <string.h>
 #include <interrupts.h>
 #include <gdt.h>
-#include <scheduler.h>
+#include <Scheduler.h>
 #include "MemoryManager.h"
 
 
@@ -63,6 +63,6 @@ extern "C" int kernel_main(uint32_t magic, Multiboot::MultibootInfo *mbinfo)
     Multiboot::Multiboot multiboot(*mbinfo);
     MemoryManager::Init(multiboot);
     interrupts::init();
-    scheduler::init();
+    Scheduler::Init();
     return 0;
 }
