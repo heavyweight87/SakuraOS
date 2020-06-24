@@ -52,9 +52,10 @@ Mkfile.old
 dkms.conf
 
 # project specific
-.vscode/
 *.iso
 *.log
 *.bin
 *.kernel
-isodir/boot/grub/grub.cfg
+/sysroot
+bin
+build
