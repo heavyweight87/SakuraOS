@@ -17,5 +17,5 @@ make install
 
 
 cd ../..
-rm -rf binutils-2.24
+rm -rf binutils-2.34
 rm binutils-2.34.tar.xz

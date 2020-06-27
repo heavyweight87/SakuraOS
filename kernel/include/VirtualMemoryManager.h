@@ -49,6 +49,6 @@ void VirtualFree(PageDirectory& pageDirectory, uint32_t virtualAddress, uint32_t
  * @param address the start address to use
  * @param size how much memory to map
  */
-void IdentityMap(PageDirectory& pageDirectory, uintptr_t address, uint32_t size);
+void IdentityMap(PageDirectory& pageDirectory, uintptr_t address, size_t size);
 
 }

@@ -8,7 +8,7 @@ static Task *runningTask;
 static Task mainTask;
 static Task otherTask;
 
-void SetTimerFrequency(uint16_t hz)
+static void SetTimerFrequency(uint16_t hz)
 {
     uint32_t div = 1193182 / hz;
     outb(0x43, 0x36);

@@ -79,7 +79,7 @@ diff -Naur binutils-2.34/ld/emulparams/elf_x86_64_sakura.sh binutils-2.34-sakura
 \ No newline at end of file
 diff -Naur binutils-2.34/ld/Makefile.am binutils-2.34-sakura/ld/Makefile.am
 --- binutils-2.34/ld/Makefile.am	2020-01-30 09:15:56.000000000 +0200
-+++ binutils-2.34-sakura/ld/Makefile.am	2020-06-27 11:34:42.614016976 +0300
++++ binutils-2.34-sakura/ld/Makefile.am	2020-06-27 14:47:11.934124178 +0300
 @@ -385,7 +385,8 @@
  	exgateelf.c \
  	ez80.c \
@@ -106,18 +106,18 @@ diff -Naur binutils-2.34/ld/Makefile.am binutils-2.34-sakura/ld/Makefile.am
  
 +eelf_i386_sakura.c: $(srcdir)/emulparams/elf_i386_sakura.sh \
 +  $(ELF_DEPS) $(srcdir)/scripttempl/elf.sc ${GEN_DEPENDS}
-+       ${GENSCRIPTS} elf_i386_sakura "$(tdir_elf_i386_sakura)"
++	${GENSCRIPTS} elf_i386_sakura "$(tdir_elf_i386_sakura)"
 + 
 +eelf_x86_64_sakura.c: $(srcdir)/emulparams/elf_x86_64_sakura.sh \
 +  $(ELF_DEPS) $(srcdir)/scripttempl/elf.sc ${GEN_DEPENDS}
-+       ${GENSCRIPTS} elf_x86_64_sakura "$(tdir_elf_x86_64_sakura)"
++	${GENSCRIPTS} elf_x86_64_sakura "$(tdir_elf_x86_64_sakura)"
 +
  # We can't use pattern rules as we don't want to depend on GNU
  # make, or else these rules could have been expressed in one
  # two-liner: 'e%.c:' and '	${GENSCRIPTS} $* "$(tdir_$*)"'.
 diff -Naur binutils-2.34/ld/Makefile.in binutils-2.34-sakura/ld/Makefile.in
 --- binutils-2.34/ld/Makefile.in	2020-02-01 13:50:25.000000000 +0200
-+++ binutils-2.34-sakura/ld/Makefile.in	2020-06-27 11:34:44.978116569 +0300
++++ binutils-2.34-sakura/ld/Makefile.in	2020-06-27 14:47:36.526213785 +0300
 @@ -522,6 +522,7 @@
  prefix = @prefix@
  program_transform_name = @program_transform_name@
@@ -168,11 +168,11 @@ diff -Naur binutils-2.34/ld/Makefile.in binutils-2.34-sakura/ld/Makefile.in
  
 +eelf_i386_sakura.c: $(srcdir)/emulparams/elf_i386_sakura.sh \
 +  $(ELF_DEPS) $(srcdir)/scripttempl/elf.sc ${GEN_DEPENDS}
-+       ${GENSCRIPTS} elf_i386_sakura "$(tdir_elf_i386_sakura)"
++	${GENSCRIPTS} elf_i386_sakura "$(tdir_elf_i386_sakura)"
 +
 +eelf_x86_64_sakura.c: $(srcdir)/emulparams/elf_x86_64_sakura.sh \
 +  $(ELF_DEPS) $(srcdir)/scripttempl/elf.sc ${GEN_DEPENDS}
-+       ${GENSCRIPTS} elf_x86_64_sakura "$(tdir_elf_x86_64_sakura)"
++	${GENSCRIPTS} elf_x86_64_sakura "$(tdir_elf_x86_64_sakura)"
 +
  # We can't use pattern rules as we don't want to depend on GNU
  # make, or else these rules could have been expressed in one
