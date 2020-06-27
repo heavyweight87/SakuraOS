@@ -40,7 +40,7 @@ void Init()
     asm volatile("movl %%cr3, %%eax; movl %%eax, %0;":"=m"(mainTask.regs.cr3)::"%eax");
     asm volatile("pushfl; movl (%%esp), %%eax; movl %%eax, %0; popfl;":"=m"(mainTask.regs.eflags)::"%eax");
     runningTask = &mainTask;
-    CreateTask(otherTask, otherMain, mainTask.regs.eflags, (uint32_t*)mainTask.regs.cr3);
+    CreateTask(otherTask, otherMain, mainTask.regs.eflags);
     mainTask.next = &otherTask;
     otherTask.next = &mainTask;
  
@@ -52,7 +52,7 @@ void Init()
     }
 }
  
-void CreateTask(Task& task, void (*main)(), uint32_t flags, uint32_t *pagedir) 
+void CreateTask(Task& task, void (*main)(), uint32_t flags) 
 {
     task.regs.eax = 0;
     task.regs.ebx = 0;

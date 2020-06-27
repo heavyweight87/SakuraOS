@@ -9,7 +9,7 @@ set(CMAKE_RUNTIME_OUTPUT_DIRECTORY bin/isodir/boot)
 set(CMAKE_SYSTEM_PROCESSOR i386)
 set(COMPILER_ARCH i686)
 set(ARCH_FOLDER ${CMAKE_CURRENT_SOURCE_DIR}/kernel/arch/${CMAKE_SYSTEM_PROCESSOR})
-set(CROSS_FOLDER opt/cross/sakura/bin/)
+set(CROSS_FOLDER $ENV{HOME}/opt/cross/sakura/bin)
 
 # set language variables and flags
 set(CMAKE_C_COMPILER ${CROSS_FOLDER}/${COMPILER_ARCH}-sakura-gcc)
@@ -33,11 +33,10 @@ file(GLOB_RECURSE ARCH_SRC ${ARCH_FOLDER}/*.cpp ${ARCH_FOLDER}/*.S)
 # add include directories
 include_directories(sysroot/usr/include)
 include_directories(kernel/include)
+include_directories(kernel/libk/include)
 
 # define the binary to build with our source files
 add_executable(kernel.bin ${KERNEL_SRC} ${ARCH_SRC} ${LIBC_SRC})
-
-target_link_libraries(kernel.bin ${CMAKE_SOURCE_DIR}/sysroot/usr/lib/libc.a)
 
 add_custom_command(
     TARGET kernel.bin PRE_BUILD

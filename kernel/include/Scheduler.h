@@ -23,7 +23,7 @@ struct Task
 };
  
 void Init();
-void CreateTask(Task& task, void(*)(), uint32_t, uint32_t*);
+void CreateTask(Task& task, void(*)(), uint32_t flags);
 Task& GetRunningTask();
  
 void Schedule(void);
