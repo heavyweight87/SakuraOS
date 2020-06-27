@@ -1,0 +1,179 @@
+diff -Naur binutils-2.34/bfd/config.bfd binutils-2.34-sakura/bfd/config.bfd
+--- binutils-2.34/bfd/config.bfd	2020-01-18 15:55:47.000000000 +0200
++++ binutils-2.34-sakura/bfd/config.bfd	2020-06-27 12:05:05.235942078 +0300
+@@ -1419,6 +1419,19 @@
+     targ_underscore=yes
+     ;;
+ 
++  i[3-7]86-*-sakura*)
++    targ_defvec=i386_elf32_vec
++    targ_selvecs=
++    targ64_selvecs=x86_64_elf64_vec
++    ;;
++#ifdef BFD64
++  x86_64-*-sakura*)
++    targ_defvec=x86_64_elf64_vec
++    targ_selvecs=i386_elf32_vec
++    want64=true
++    ;;
++#endif
++
+ # END OF targmatch.h
+   bpf-*-*)
+     echo "*** Configuration $targ is not fully supported." >&2
+diff -Naur binutils-2.34/config.sub binutils-2.34-sakura/config.sub
+--- binutils-2.34/config.sub	2020-01-18 15:55:47.000000000 +0200
++++ binutils-2.34-sakura/config.sub	2020-06-27 11:56:52.599762856 +0300
+@@ -1366,7 +1366,7 @@
+ 	     | skyos* | haiku* | rdos* | toppers* | drops* | es* \
+ 	     | onefs* | tirtos* | phoenix* | fuchsia* | redox* | bme* \
+ 	     | midnightbsd* | amdhsa* | unleashed* | emscripten* | wasi* \
+-	     | nsk* | powerunix)
++	     | nsk* | powerunix | sakura*)
+ 	# Remember, each alternative MUST END IN *, to match a version number.
+ 		;;
+ 	qnx*)
+diff -Naur binutils-2.34/gas/configure.tgt binutils-2.34-sakura/gas/configure.tgt
+--- binutils-2.34/gas/configure.tgt	2020-01-18 15:55:47.000000000 +0200
++++ binutils-2.34-sakura/gas/configure.tgt	2020-06-27 11:27:31.079953148 +0300
+@@ -435,6 +435,7 @@
+   *-*-solaris*)				fmt=elf em=solaris ;;
+   *-*-aros*)				fmt=elf em=linux ;;
+   *-*-vxworks* | *-*-windiss)		fmt=elf em=vxworks ;;
++  i386-*-sakura*)    fmt=elf ;;
+ esac
+ 
+ case ${cpu_type} in
+diff -Naur binutils-2.34/ld/configure.tgt binutils-2.34-sakura/ld/configure.tgt
+--- binutils-2.34/ld/configure.tgt	2020-01-18 15:55:48.000000000 +0200
++++ binutils-2.34-sakura/ld/configure.tgt	2020-06-27 11:28:47.559133517 +0300
+@@ -1022,6 +1022,15 @@
+ 			targ_extra_emuls=z8001
+ 			targ_extra_ofiles=
+ 			;;
++i[3-7]86-*-sakura*)
++			targ_emul=elf_i386_sakura
++			targ_extra_emuls=elf_i386
++			targ64_extra_emuls="elf_x86_64_sakura elf_x86_64"
++			;;
++x86_64-*-sakura*)
++			targ_emul=elf_x86_64_sakura
++			targ_extra_emuls="elf_i386_sakura elf_x86_64 elf_i386"
++			;;
+ *-*-ieee*)		targ_emul=vanilla
+ 			targ_extra_ofiles=
+ 			;;
+diff -Naur binutils-2.34/ld/emulparams/elf_i386_sakura.sh binutils-2.34-sakura/ld/emulparams/elf_i386_sakura.sh
+--- binutils-2.34/ld/emulparams/elf_i386_sakura.sh	1970-01-01 02:00:00.000000000 +0200
++++ binutils-2.34-sakura/ld/emulparams/elf_i386_sakura.sh	2020-06-27 11:30:36.803694622 +0300
+@@ -0,0 +1,3 @@
++. ${srcdir}/emulparams/elf_i386.sh
++GENERATE_SHLIB_SCRIPT=yes
++GENERATE_PIE_SCRIPT=yes
+\ No newline at end of file
+diff -Naur binutils-2.34/ld/emulparams/elf_x86_64_sakura.sh binutils-2.34-sakura/ld/emulparams/elf_x86_64_sakura.sh
+--- binutils-2.34/ld/emulparams/elf_x86_64_sakura.sh	1970-01-01 02:00:00.000000000 +0200
++++ binutils-2.34-sakura/ld/emulparams/elf_x86_64_sakura.sh	2020-06-27 11:31:06.784949622 +0300
+@@ -0,0 +1 @@
++. ${srcdir}/emulparams/elf_x86_64.sh
+\ No newline at end of file
+diff -Naur binutils-2.34/ld/Makefile.am binutils-2.34-sakura/ld/Makefile.am
+--- binutils-2.34/ld/Makefile.am	2020-01-30 09:15:56.000000000 +0200
++++ binutils-2.34-sakura/ld/Makefile.am	2020-06-27 14:47:11.934124178 +0300
+@@ -385,7 +385,8 @@
+ 	exgateelf.c \
+ 	ez80.c \
+ 	ez8001.c \
+-	ez8002.c
++	ez8002.c \
++	eelf_i386_sakura.c
+ 
+ ALL_EMULATIONS = $(ALL_EMULATION_SOURCES:.c=.@OBJEXT@)
+ 
+@@ -465,7 +466,8 @@
+ 	eelf_x86_64_sol2.c \
+ 	ehppa64linux.c \
+ 	ei386pep.c \
+-	emmo.c
++	emmo.c \
++	eelf_x86_64_sakura.c
+ 
+ ALL_64_EMULATIONS = $(ALL_64_EMULATION_SOURCES:.c=.@OBJEXT@)
+ 
+@@ -629,6 +631,14 @@
+ 
+ @TDIRS@
+ 
++eelf_i386_sakura.c: $(srcdir)/emulparams/elf_i386_sakura.sh \
++  $(ELF_DEPS) $(srcdir)/scripttempl/elf.sc ${GEN_DEPENDS}
++	${GENSCRIPTS} elf_i386_sakura "$(tdir_elf_i386_sakura)"
++ 
++eelf_x86_64_sakura.c: $(srcdir)/emulparams/elf_x86_64_sakura.sh \
++  $(ELF_DEPS) $(srcdir)/scripttempl/elf.sc ${GEN_DEPENDS}
++	${GENSCRIPTS} elf_x86_64_sakura "$(tdir_elf_x86_64_sakura)"
++
+ # We can't use pattern rules as we don't want to depend on GNU
+ # make, or else these rules could have been expressed in one
+ # two-liner: 'e%.c:' and '	${GENSCRIPTS} $* "$(tdir_$*)"'.
+diff -Naur binutils-2.34/ld/Makefile.in binutils-2.34-sakura/ld/Makefile.in
+--- binutils-2.34/ld/Makefile.in	2020-02-01 13:50:25.000000000 +0200
++++ binutils-2.34-sakura/ld/Makefile.in	2020-06-27 14:47:36.526213785 +0300
+@@ -522,6 +522,7 @@
+ prefix = @prefix@
+ program_transform_name = @program_transform_name@
+ psdir = @psdir@
++runstatedir = @runstatedir@
+ sbindir = @sbindir@
+ sharedstatedir = @sharedstatedir@
+ srcdir = @srcdir@
+@@ -875,7 +876,8 @@
+ 	exgateelf.c \
+ 	ez80.c \
+ 	ez8001.c \
+-	ez8002.c
++	ez8002.c \
++	eelf_i386_sakura.c
+ 
+ ALL_EMULATIONS = $(ALL_EMULATION_SOURCES:.c=.@OBJEXT@)
+ ALL_64_EMULATION_SOURCES = \
+@@ -954,7 +956,8 @@
+ 	eelf_x86_64_sol2.c \
+ 	ehppa64linux.c \
+ 	ei386pep.c \
+-	emmo.c
++	emmo.c \
++	eelf_x86_64_sakura.c
+ 
+ ALL_64_EMULATIONS = $(ALL_64_EMULATION_SOURCES:.c=.@OBJEXT@)
+ ALL_EMUL_EXTRA_OFILES = \
+@@ -1389,6 +1392,7 @@
+ @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/eelf_i386_fbsd.Po@am__quote@
+ @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/eelf_i386_ldso.Po@am__quote@
+ @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/eelf_i386_nacl.Po@am__quote@
++@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/eelf_i386_sakura.Po@am__quote@
+ @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/eelf_i386_sol2.Po@am__quote@
+ @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/eelf_i386_vxworks.Po@am__quote@
+ @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/eelf_iamcu.Po@am__quote@
+@@ -1401,6 +1405,7 @@
+ @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/eelf_x86_64_cloudabi.Po@am__quote@
+ @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/eelf_x86_64_fbsd.Po@am__quote@
+ @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/eelf_x86_64_nacl.Po@am__quote@
++@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/eelf_x86_64_sakura.Po@am__quote@
+ @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/eelf_x86_64_sol2.Po@am__quote@
+ @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/eh8300elf.Po@am__quote@
+ @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/eh8300elf_linux.Po@am__quote@
+@@ -2233,6 +2238,14 @@
+ 
+ @TDIRS@
+ 
++eelf_i386_sakura.c: $(srcdir)/emulparams/elf_i386_sakura.sh \
++  $(ELF_DEPS) $(srcdir)/scripttempl/elf.sc ${GEN_DEPENDS}
++	${GENSCRIPTS} elf_i386_sakura "$(tdir_elf_i386_sakura)"
++
++eelf_x86_64_sakura.c: $(srcdir)/emulparams/elf_x86_64_sakura.sh \
++  $(ELF_DEPS) $(srcdir)/scripttempl/elf.sc ${GEN_DEPENDS}
++	${GENSCRIPTS} elf_x86_64_sakura "$(tdir_elf_x86_64_sakura)"
++
+ # We can't use pattern rules as we don't want to depend on GNU
+ # make, or else these rules could have been expressed in one
+ # two-liner: 'e%.c:' and '	${GENSCRIPTS} $* "$(tdir_$*)"'.
