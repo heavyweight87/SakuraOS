@@ -1,8 +1,8 @@
-export PREFIX="$HOME/opt/cross"
-export TARGET=i686-elf
+export PREFIX="$HOME/opt/cross/sakura"
+export TARGET=i686-sakura
 export PATH="$PREFIX/bin:$PATH"
-i686-elf-as program.s -o program.o
+i686-sakura-gcc program.c -o program.o
 objcopy program.o -O binary program.bin
-cp program.bin ../isodir/boot/grub
+#cp program.bin ../isodir/boot/grub
 
 
