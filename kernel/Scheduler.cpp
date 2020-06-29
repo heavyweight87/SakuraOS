@@ -1,6 +1,7 @@
 #include "Scheduler.h"
 #include <stdio.h>
 #include <io.h>
+#include "SysCall.h"
 
 namespace Scheduler {
  
@@ -45,10 +46,13 @@ void Init()
     otherTask.next = &mainTask;
  
     SetTimerFrequency(1000);
+    int ret = __syscall(SYSCALL_OPEN, 1,2,3,4,5);
+    printf("Does it work? ret = %d\r\n", ret);
     while(1)
     {
         //kernel backgronud task
       // printf("Switching to otherTask... \n");
+      
     }
 }
  

@@ -6,7 +6,6 @@
 .global isr3
 .global isr4
 .global isr5
-.global isr6
 
 .global irq0
 .global irq1
@@ -24,6 +23,7 @@
 .global irq13
 .global irq14
 .global irq15
+.global irq128
 
 .global load_idt
 
@@ -43,6 +43,7 @@
 .global irq13_handler
 .global irq14_handler
 .global irq15_handler
+.global irq128_handler
 
 irq0:
   pusha
@@ -142,47 +143,6 @@ irq15:
   popa
   iret
 
-isr0:
-  pusha
-  call isr_handler0
-  popa
-  iret
-
-isr1:
-  pusha
-  call isr_handler
-  popa
-  iret
-
-isr2:
-  pusha
-  call isr_handler
-  popa
-  iret
-
-isr3:
-  pusha
-  call isr_handler
-  popa
-  iret
-
-isr4:
-  pusha
-  call isr_handler
-  popa
-  iret
-isr5:
-  pusha
-  call isr_handler
-  popa
-  iret
-
-isr6:
-  pusha
-  call isr_handler
-  popa
-  iret
-  
 
 load_idt:
 	mov edx, [esp + 4]
