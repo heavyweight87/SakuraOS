@@ -6,25 +6,11 @@
 #include <sys/errno.h>
 #include <sys/time.h>
 #include <stdio.h>
- 
-/*void _exit();
-int close(int file);
-char **environ; // pointer to array of char * strings that define the current environment variables 
-int execve(char *name, char **argv, char **env);
-int fork();
-int getpid();
-int kill(int pid, int sig);
-int link(char *old, char *new);
-
-
-int stat(const char *file, struct stat *st);
-clock_t times(struct tms *buf);
-int unlink(char *name);
-int wait(int *status);
-int gettimeofday(struct timeval *p, struct timezone *z);*/
+#include "Syscalls.h"
 
 int write(int file, char *ptr, int len)
 {
+	syscall(SYSCALL_WRITE, 12, 13, 14, 15, 16);
 	return 0;
 }
 
@@ -45,6 +31,7 @@ int read(int file, char *ptr, int len)
 
 int open(const char *name, int flags, ...)
 {
+	syscall(SYSCALL_OPEN, 11, 22, 33, 44, 55);
 	return 0;
 }
 

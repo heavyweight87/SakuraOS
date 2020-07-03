@@ -1,7 +1,8 @@
 #include <stdio.h>
+#include<fcntl.h> 
 
 int main()
 {
-	printf("hello boobins\r\n");
-	return 0;
+	int fd = open("foo.txt", O_RDONLY | O_CREAT);  
+	return fd;
 }

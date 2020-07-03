@@ -22,6 +22,7 @@ else
 	set default=0 # Set the default menu entry
 	menuentry "SekuraOs" {
 		multiboot /boot/kernel.bin
+		module /boot/program.bin
 	}
 EOF
 fi

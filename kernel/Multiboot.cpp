@@ -2,6 +2,8 @@
 #include "Multiboot.h"
 #include "MemoryManager.h"
 #include "PhysicalAllocator.h"
+#include <stdio.h>
+#include <string.h>
 
 namespace Multiboot {
     
@@ -16,12 +18,16 @@ void Multiboot::LoadModules()
     std::uint32_t moduleNum = 0;
     if(m_multibootInfo.modsCount > 0)
     {
+        printf("Loading %d modules\r\n", m_multibootInfo.modsCount);
         ModuleInfo *module = (ModuleInfo*)m_multibootInfo.modsAddress;
+        char str[20];
+        memcpy(str, (char*)module->string, 20);
+        printf("string = %s\r\n", str);
         while(moduleNum < m_multibootInfo.modsCount)
         {
             callModule start_program = (callModule) module->modStart;
-            module++;
             start_program();
+            module++;
         }
     }
 }

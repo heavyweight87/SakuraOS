@@ -4,7 +4,7 @@
 #include <io.h>
 #include <string.h>
 #include "Scheduler.h"
-#include "SysCall.h"
+#include "Syscalls.h"
 
 
 typedef struct  __attribute__((packed)) 

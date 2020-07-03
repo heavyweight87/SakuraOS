@@ -7,7 +7,7 @@ CFLAGS = -O0 -g   -Wall -Wextra
 LIBS = /home/gcb/SakuraOS/sysroot/usr/lib/libc.a
 
 all:
-	$(CC) $(CFILES) $(CFLAGS) $(LIBS)
+	$(CC) $(LIBS) $(CFILES) $(CFLAGS) -o program.o
 
 clean:
 	rm -f *.o
