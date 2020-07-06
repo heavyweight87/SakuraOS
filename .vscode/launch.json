@@ -13,6 +13,7 @@
         "args": [],
         "targetArchitecture": "x86",
         "MIMode": "gdb",
+        "preLaunchTask": "qemu",
         "miDebuggerPath": "/bin/gdb",
         "miDebuggerArgs": "",
         "customLaunchSetupCommands": [

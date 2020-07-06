@@ -37,7 +37,7 @@ int physical_is_used(uint32_t addr, uint32_t count);
  * @param startAddress the address to start allocation from
  * @param numPages the number of pages to allocate
  */
-void PhysicalAllocate(uint32_t startAddress, uint32_t numPages);
+void PhysicalAllocate(uint32_t startAddress, std::uint32_t numPages);
 
 /**
  * @brief Allocates a number of pages at the next free location
@@ -45,7 +45,7 @@ void PhysicalAllocate(uint32_t startAddress, uint32_t numPages);
  * @param numPages the number of pages to allocate
  * @return uint32_t the physical address at which the pages were allocated
  */
-uint32_t PhysicalAllocate(uint32_t numPages);
+uint32_t PhysicalAllocate(std::uint32_t numPages);
 
 /**
  * @brief Frees physical pages at the specified address

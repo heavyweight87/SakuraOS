@@ -9,6 +9,8 @@ export PATH="$PREFIX/bin:$PATH"
 make all -j4
 make DESTDIR=${SYSROOT} install
 
+echo "Copying to rootfs"
 cp -ar $SYSROOT/usr/i686-sakura/* $SYSROOT/usr/
 rm -rf $SYSROOT/usr/i686-sakura/
+echo "Done"
 

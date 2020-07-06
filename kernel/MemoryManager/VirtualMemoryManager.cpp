@@ -34,15 +34,6 @@ static PageTableEntry& GetPageTableEntry(PageDirectory& pageDirectory, uint32_t 
     return GetPageTable(pageDirectory, virtualAddress).entries[pageTableIndex];
 }
 
-/**
- * @brief maps a physical address to a virtual one
- * 
- * @param pageDirectory page directory to use
- * @param virtualAddress the virtual address to map 
- * @param physicalAddress the physical address to map
- * @param numPages the number of pages to map
- * @param isUser true if we are mapping user memory
- */
 void VirtualMap(PageDirectory& pageDirectory, uint32_t virtualAddress, uint32_t physicalAddress, uint32_t numPages, bool isUser)
 {
     for (uint32_t pageIndex = 0; pageIndex < numPages; pageIndex++)
@@ -51,11 +42,13 @@ void VirtualMap(PageDirectory& pageDirectory, uint32_t virtualAddress, uint32_t 
 
         if (pageDirectoryEntry.present == false)
         {
-            PageTable *pageTable = (PageTable*)MemoryAllocate(pageDirectory, 1, false);
+            uint32_t pageTablePhysicalAddress = PhysicalAllocate(1);
+            IdentityMap(pageDirectory, pageTablePhysicalAddress, false);
+            PageTable *pageTable = (PageTable*)pageTablePhysicalAddress;
             pageDirectoryEntry.present = 1;
             pageDirectoryEntry.write = 1;
             pageDirectoryEntry.user = isUser;
-            pageDirectoryEntry.pageFrameNumber = (uint32_t)pageTable >> 12;
+            pageDirectoryEntry.pageFrameNumber = (uint32_t)(pageTable) >> 12;
         }
 
         PageTableEntry& pageTableEntry = GetPageTableEntry(pageDirectory, virtualAddress);
@@ -108,6 +101,7 @@ uint32_t VirtualAllocate(PageDirectory& pageDirectory, uint32_t physicalAddress,
        virtualAddress =  userStartAddress; //after kernel memory
        maxAddress = TOTAL_MEMORY;
     }
+    startAddr = virtualAddress;
 
     // try to find a range of free virtual address - this is horribly inefficient TODO: improve
     while(virtualAddress < maxAddress)
@@ -132,15 +126,5 @@ uint32_t VirtualAllocate(PageDirectory& pageDirectory, uint32_t physicalAddress,
 
     printf("Out of virtual memory!");
     return 0;
-}
-
-void IdentityMap(PageDirectory& pageDirectory, uintptr_t address, size_t size)
-{
-    size_t page_count = PAGE_ALIGN(size) / PAGE_SIZE;
-
-    //atomic_begin();
-    PhysicalAllocate(address, page_count);
-    VirtualMap(pageDirectory, address, address, page_count, false);
-   // atomic_end();
 }
 }

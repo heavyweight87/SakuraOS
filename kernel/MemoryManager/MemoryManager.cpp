@@ -44,7 +44,7 @@ void Init(Multiboot::Multiboot& multiboot)
     PhysicalAllocatorInit(multiboot);
     MapKernelMemory();
     //its much easier to indentity map first 1mb for hardware bound addresses
-    IdentityMap(kernelPageDirectory, 0, (size_t)&__start); 
+    IdentityMap(kernelPageDirectory, 0, (size_t)&__start);
     ChangePageDirectory(GetPhysicalAddress(kernelPageDirectory, (uintptr_t)&kernelPageDirectory));
     EnablePaging();
 }
@@ -69,7 +69,6 @@ uintptr_t MemoryAllocate(PageDirectory& pageDirectory, size_t size, bool user)
 
     if (physicalAddress > 0)
     {
-
         uintptr_t virtualAddress = VirtualAllocate(pageDirectory ,physicalAddress, numPages, user);
         if (virtualAddress == 0)
         {
@@ -86,6 +85,17 @@ uintptr_t MemoryAllocate(PageDirectory& pageDirectory, size_t size, bool user)
         return virtualAddress;
     }
     return 0; 
+}
+
+void MemoryMap(PageDirectory& pageDirectory, uint32_t virtualAddress, size_t size, bool isUser)
+{
+    std::uint32_t numPages = size / PAGE_SIZE;
+    if(size % PAGE_SIZE)
+    {
+        numPages = PAGE_ALIGN(size) / PAGE_SIZE;
+    }
+    std::uint32_t physicalAddress = PhysicalAllocate(numPages);
+    VirtualMap(pageDirectory, virtualAddress, physicalAddress, numPages, isUser);
 }
 
 void MemoryFree(PageDirectory& pageDirectory, uint32_t startAddress, size_t size)
@@ -106,7 +116,7 @@ void MemoryFree(PageDirectory& pageDirectory, uint32_t startAddress, size_t size
  //   atomic_end();
 }
 
-PageDirectory *CreateUserPageDirectory() //for user
+PageDirectory *CreateUserPageDirectory() 
 {
    // atomic_begin();
 
@@ -116,13 +126,21 @@ PageDirectory *CreateUserPageDirectory() //for user
         printf("Could not allocate page directory...\r\n");
         return NULL;
     }
-
-    memset(pageDirectory, 0, sizeof(PageDirectory));
     MapKernelPageTable(*pageDirectory);
 
    // atomic_end();
 
     return pageDirectory;
+}
+
+void IdentityMap(PageDirectory& pageDirectory, uintptr_t address, size_t size)
+{
+    size_t page_count = PAGE_ALIGN(size) / PAGE_SIZE;
+
+    //atomic_begin();
+    PhysicalAllocate(address, page_count);
+    VirtualMap(pageDirectory, address, address, page_count, false);
+   // atomic_end();
 }
 
 PageDirectory& GetKerkelPageDirectory()

@@ -38,7 +38,7 @@ static bool PhysicalIsFree(uint32_t startAddress, uint32_t numPages)
     return true;
 }
 
-uint32_t PhysicalAllocate(uint32_t numPages)
+uint32_t PhysicalAllocate(std::uint32_t numPages)
 {
     for (uint32_t pageIndex = 0; pageIndex < (memManData.TotalMemory / PAGE_SIZE); pageIndex++)
     {
@@ -53,7 +53,7 @@ uint32_t PhysicalAllocate(uint32_t numPages)
     return 0;
 }
 
-void PhysicalAllocate(uint32_t startAddress, uint32_t numPages)
+void PhysicalAllocate(uint32_t startAddress, std::uint32_t numPages)
 {
     for (uint32_t pageIndex = 0; pageIndex < numPages; pageIndex++)
     {
@@ -62,6 +62,10 @@ void PhysicalAllocate(uint32_t startAddress, uint32_t numPages)
         {
             memManData.UsedMemory += PAGE_SIZE;
             PHYSICAL_ALLOCATOR_SET(address);
+        }
+        else
+        {
+            printf("Physical allocate failed, address already used\r\n");
         }
     }
 }

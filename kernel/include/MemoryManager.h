@@ -48,6 +48,19 @@ uintptr_t MemoryAllocate(PageDirectory& pageDirectory, size_t size, bool user);
 void MemoryFree(PageDirectory& pageDirectory, uint32_t startAddress, size_t size);
 
 /**
+ * @brief Maps memory so the physical and virtual addresses are the same
+ * 
+ * @param pageDirectory the page directory to use
+ * @param address the start address to use
+ * @param size how much memory to map
+ */
+void IdentityMap(PageDirectory& pageDirectory, uintptr_t address, size_t size);
+
+void MemoryMap(PageDirectory& pageDirectory, uint32_t virtualAddress, size_t size, bool isUser);
+
+PageDirectory *CreateUserPageDirectory();
+
+/**
  * @brief returns the kernel page directory
  * 
  * @return PageDirectory& reference to the kernel page directory

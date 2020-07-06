@@ -34,6 +34,17 @@ uint32_t GetPhysicalAddress(PageDirectory& pageDirectory, uint32_t virtualAddres
 uint32_t VirtualAllocate(PageDirectory& pageDirectory, uint32_t physicalAddress, uint32_t numPages, bool user);
 
 /**
+ * @brief maps a physical address to a virtual one
+ * 
+ * @param pageDirectory page directory to use
+ * @param virtualAddress the virtual address to map 
+ * @param physicalAddress the physical address to map
+ * @param numPages the number of pages to map
+ * @param isUser true if we are mapping user memory
+ */
+void VirtualMap(PageDirectory& pageDirectory, uint32_t virtualAddress, uint32_t physicalAddress, uint32_t numPages, bool isUser);
+
+/**
  * @brief Frees up virtual memory
  * 
  * @param pageDirectory the page directory to use
@@ -41,14 +52,5 @@ uint32_t VirtualAllocate(PageDirectory& pageDirectory, uint32_t physicalAddress,
  * @param numPages the number of pages to free 
  */
 void VirtualFree(PageDirectory& pageDirectory, uint32_t virtualAddress, uint32_t numPages);
-
-/**
- * @brief Maps memory so the physical and virtual addresses are the same
- * 
- * @param pageDirectory the page directory to use
- * @param address the start address to use
- * @param size how much memory to map
- */
-void IdentityMap(PageDirectory& pageDirectory, uintptr_t address, size_t size);
 
 }
