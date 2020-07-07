@@ -10,7 +10,7 @@
 
 int write(int file, char *ptr, int len)
 {
-	syscall(SYSCALL_WRITE, 12, 13, 14, 15, 16);
+	syscall(SYSCALL_WRITE, file, (int)ptr, len, 15, 16);
 	return 0;
 }
 
@@ -31,12 +31,13 @@ int read(int file, char *ptr, int len)
 
 int open(const char *name, int flags, ...)
 {
-	syscall(SYSCALL_OPEN, 11, 22, 33, 44, 55);
+	syscall(SYSCALL_OPEN, (int)name, flags, 33, 44, 55);
 	return 0;
 }
 
 int close(int file)
 {
+	syscall(SYSCALL_CLOSE, file, 0, 0, 0, 6);
 	return 0;
 }
 
@@ -54,6 +55,11 @@ void _exit()
 }
 
 int getpid()
+{
+	return 0;
+}
+
+int kill(int pid, int sig)
 {
 	return 0;
 }

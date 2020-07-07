@@ -169,8 +169,7 @@ struct regs {
 
 void irq128_handler(struct regs *r) 
 {
-  printf("syscall = %d, p1 = %d, p2 = %d, p3 = %d, p4 = %d, p5 = %d\r\n", r->eax, r->ebx, r->ecx, r->edx, r->esi, r->edi);
-  r->eax = 55;
+  r->eax = Syscalls::Handle((Syscalls::Syscall)r->eax, r->ebx, r->ecx, r->edx, r->esi, r->edi);
 }
 
 }
