@@ -6,7 +6,7 @@
 #include <sys/errno.h>
 #include <sys/time.h>
 #include <stdio.h>
-#include "Syscalls.h"
+#include "syscalls.h"
 
 int write(int file, char *ptr, int len)
 {

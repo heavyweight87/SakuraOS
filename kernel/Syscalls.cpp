@@ -16,28 +16,28 @@ uint32_t SyscallWrite(int file, char *data, uint32_t len)
     return 0;
 }
 
-uint32_t SyscallClose(int file, char *data, uint32_t len)
+uint32_t SyscallClose(int file)
 {
-    printf("syscall write. file = %d, data = %s, len = %d\r\n", file, data, len);
+    printf("syscall close. file = %d\r\n", file);
     return 0;
 }
 
-std::uint32_t Syscalls::Handle(Syscall syscall, std::uint32_t p1, std::uint32_t p2, std::uint32_t p3, std::uint32_t p4, std::uint32_t p5)
+std::uint32_t Handle(Syscall syscall, std::uint32_t p1, std::uint32_t p2, std::uint32_t p3, std::uint32_t p4, std::uint32_t p5)
 {
     switch(syscall)
     {
         case SYSCALL_OPEN:
-            SyscallOpen((char*)p1, p2);
+            return SyscallOpen((char*)p1, p2);
             break;
         case SYSCALL_WRITE:
-            SyscallWrite(p1, (char*)p2, p3);
+            return SyscallWrite(p1, (char*)p2, p3);
             break;
         case SYSCALL_CLOSE:
-
-        
+            return SyscallClose(p1);
+        default: 
+            printf("Unknown syscall %d\r\n", syscall);
+            return 1;        
     }
-      
-    return 0;
 }
 
 
