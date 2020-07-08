@@ -1,9 +1,7 @@
+DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null 2>&1 && pwd )"
+
 export PREFIX="$HOME/opt/cross/sakura"
 export TARGET=i686-sakura
 export PATH="$PREFIX/bin:$PATH"
-make
-objcopy program.o -O binary program.bin -S 
-cp program.o ../build/bin/isodir/boot/
-
-
-
+cd ${DIR} && make
+cp ${DIR}/program.o ${DIR}/../build/bin/isodir/boot/

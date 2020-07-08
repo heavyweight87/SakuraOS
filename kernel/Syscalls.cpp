@@ -10,9 +10,12 @@ uint32_t SyscallOpen(char *fileName, uint32_t flags)
     return 1;
 }
 
-uint32_t SyscallWrite(int file, char *data, uint32_t len)
+uint32_t SyscallWrite(int fd, char* data, uint32_t len)
 {
-    printf("syscall write. file = %d, data = %s, len = %d\r\n", file, data, len);
+    if(fd == 1)
+    {
+        printf(data);
+    }
     return 0;
 }
 

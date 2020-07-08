@@ -44,7 +44,9 @@ add_custom_command(
 )
 
 # set target props
-set_target_properties(kernel.bin PROPERTIES LINK_FLAGS "-T ${LINKER_SCRIPT} -nostdlib")              
+set_target_properties(kernel.bin PROPERTIES LINK_FLAGS "-T ${LINKER_SCRIPT} -nostdlib")           
+
+add_custom_command(TARGET kernel.bin COMMAND /bin/sh ${CMAKE_SOURCE_DIR}/modules/build.sh)
 
 # run the script to build an iso
 add_custom_command(TARGET kernel.bin POST_BUILD COMMAND /bin/sh ${CMAKE_CURRENT_SOURCE_DIR}/scripts/iso.sh)

@@ -16,11 +16,13 @@ int write(int file, char *ptr, int len)
 
 int isatty(int file)
 {
-	return 0;
+	return 1;
 }
 
 int fstat(int file, struct stat *st)
 {
+	syscall(SYSCALL_WRITE, 1, (int)"fuck its fstat", file, 15, 16);
+	st->st_mode = S_IFCHR;
 	return 0;
 }
 
@@ -47,6 +49,7 @@ int lseek(int file, int ptr, int dir)
 
 caddr_t sbrk(int incr)
 {
+	syscall(SYSCALL_WRITE, 1, (int)"fuck its sbrk", incr, 15, 16);
 	return -1;
 }
 

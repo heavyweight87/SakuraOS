@@ -65,7 +65,7 @@ void PhysicalAllocate(uint32_t startAddress, std::uint32_t numPages)
         }
         else
         {
-            printf("Physical allocate failed, address already used\r\n");
+          //  printf("Physical allocate failed, address already used\r\n");
         }
     }
 }
