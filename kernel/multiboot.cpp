@@ -136,8 +136,6 @@ void Multiboot::LoadModules()
         while(moduleNum < m_multibootInfo.modsCount)
         {   
             uint32_t size = module->modEnd - module->modStart;
-            //callModule start_program = (callModule) module->modStart;
-//            void *mem = (void*)MemoryManager::MemoryAllocate(4096*2, true);
             MemoryManager::IdentityMap(MemoryManager::GetKerkelPageDirectory(), module->modStart, size);
             Elf32_Ehdr *hdr = (Elf32_Ehdr *)module->modStart;
             if(elf_check_supported(hdr))
@@ -145,9 +143,8 @@ void Multiboot::LoadModules()
                 for(int sec = 0; sec < hdr->e_phnum; sec++)
                 {
                     Elf32_Phdr *programHeader = (Elf32_Phdr*)(module->modStart + hdr->e_phoff + (hdr->e_phentsize * sec));         
-					programHeader->p_vaddr = programHeader->p_vaddr - (programHeader->p_vaddr % 4096);   	
+					programHeader->p_vaddr = programHeader->p_vaddr - (programHeader->p_vaddr % PAGE_SIZE);   	
                     MemoryManager::MemoryMap(MemoryManager::GetKerkelPageDirectory(), programHeader->p_vaddr, programHeader->p_filesz, false);
-					uint8_t *t = (uint8_t*)programHeader->p_vaddr;
                     uint8_t *progData = (uint8_t*)(module->modStart + programHeader->p_offset);
                     memcpy((void*)programHeader->p_vaddr, progData, programHeader->p_filesz);
                 }
