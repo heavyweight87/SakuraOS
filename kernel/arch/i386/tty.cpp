@@ -5,8 +5,6 @@
 
 #include <tty.h>
 #include <io.h>
-#include "VirtualMemoryManager.h"
-
 #include "vga.h"
 
 static const size_t VGA_WIDTH = 80;

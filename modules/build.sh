@@ -1,8 +1,7 @@
-export PREFIX="$HOME/opt/cross"
-export TARGET=i686-elf
+DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null 2>&1 && pwd )"
+
+export PREFIX="$HOME/opt/cross/sakura"
+export TARGET=i686-sakura
 export PATH="$PREFIX/bin:$PATH"
-i686-elf-as program.s -o program.o
-objcopy program.o -O binary program.bin
-cp program.bin ../isodir/boot/grub
-
-
+cd ${DIR} && make
+cp ${DIR}/program.o ${DIR}/../build/bin/isodir/boot/

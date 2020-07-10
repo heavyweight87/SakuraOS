@@ -58,3 +58,4 @@ dkms.conf
 *.kernel
 bin
 build
+lib
