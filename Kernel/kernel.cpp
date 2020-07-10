@@ -54,7 +54,7 @@ extern "C" int kernel_main(uint32_t magic, Multiboot::MultibootInfo *mbinfo)
     gdt::init();
 	terminal_init(); //enable early so we have debugging
 	serial_init();
-    printf("Hello, kernel World!\r\n");
+    printf("Hello, kernel Wor!\r\n");
     if(magic != MULTIBOOT_BOOTLOADER_MAGIC)
     {
         printf("Booted with an unsupported bootloader %d\r\n", magic);
@@ -62,7 +62,7 @@ extern "C" int kernel_main(uint32_t magic, Multiboot::MultibootInfo *mbinfo)
     }
     Multiboot::Multiboot multiboot(*mbinfo);
     MemoryManager::Init(multiboot); 
-    interrupts::init();
+    Interrupts::Init();
     Scheduler::Init(); 
     multiboot.LoadModules(); 
     return 0;

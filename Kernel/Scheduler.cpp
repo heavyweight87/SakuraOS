@@ -17,37 +17,11 @@ static void SetTimerFrequency(uint16_t hz)
     outb(0x40, div & 0xFF);
     outb(0x40, (div >> 8) & 0xFF);
 }
-
-static void memtest()
-{
-    //uint32_t mem = TASK_STACK_SIZE*1000;
-    uint32_t mem = 8192;
-    uint32_t address = 0x40000000;
-    printf("Requesting %d bytes\r\n", mem); 
-    MemoryManager::PageDirectory * pd = (MemoryManager::PageDirectory*)runningTask->regs.cr3;
-    MemoryManager::MemoryMap(*pd, address, 8192*2, false);
-    uint8_t *buffer  = (uint8_t*)(address);
-    uint8_t *fucky  = (uint8_t*)(address + 4096);
- //   uint32_t phy = 1;//MemoryManager::GetPhysicalAddress(*pd, 0x40000000);
-    // uint8_t *buffer = (uint8_t*)MemoryManager::MemoryAllocate(*pd, mem, false);
-    if((uint32_t)buffer >= 0x40000000)
-        printf("Finally fucking works\r\n");
-    if(buffer)
-    {
-        for(unsigned int i = 0; i < mem; i++)
-        {
-            buffer[i] = i;
-            printf("i = %d\r\n", i);
-        }
-       // MemoryManager::MemoryFree(*pd, (uint32_t)buffer, mem);
-    }
-}
  
 static void otherMain() 
 {
     while(1)
     {
-        memtest();
     }
 }
  

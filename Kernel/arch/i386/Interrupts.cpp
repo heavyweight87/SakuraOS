@@ -366,7 +366,7 @@ extern "C" void init_table()
 }
 
 
-void interrupts::init()
+void Interrupts::Init()
 {    
    
     init_table();
