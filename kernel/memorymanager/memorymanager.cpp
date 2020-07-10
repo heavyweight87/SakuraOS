@@ -3,8 +3,9 @@
 #include "memorymanager.h"
 #include "physicalallocator.h"
 #include "virtualmemorymanager.h"
-#include <string.h>
 #include "scheduler.h"
+#include "atomic.h"
+#include "string.h"
 
 
 namespace MemoryManager {
@@ -63,7 +64,7 @@ uintptr_t MemoryAllocate(PageDirectory& pageDirectory, size_t size, bool user)
         numPages = PAGE_ALIGN(size) / PAGE_SIZE;
     }
 
-    //  atomic_begin();
+    Libk::AtomicEnable();
     //firstly allocate physical memory
     uintptr_t physicalAddress = PhysicalAllocate(numPages);
 
@@ -73,14 +74,12 @@ uintptr_t MemoryAllocate(PageDirectory& pageDirectory, size_t size, bool user)
         if (virtualAddress == 0)
         {
             PhysicalFree(physicalAddress, numPages);
-        //    atomic_end();
-
+            Libk::AtomicEnable();
             printf("Out of vmem!\r\n");
             return 0;
         }
 
-    // atomic_end();
-
+        Libk::AtomicEnable();
         memset((void *)virtualAddress, 0, numPages * PAGE_SIZE); //clear the memory
         return virtualAddress;
     }
@@ -100,7 +99,7 @@ void MemoryMap(PageDirectory& pageDirectory, uint32_t virtualAddress, size_t siz
 
 void MemoryFree(PageDirectory& pageDirectory, uint32_t startAddress, size_t size)
 {
-   // atomic_begin();
+    Libk::AtomicEnable();
     uint32_t numPages = 0;
     for (uint32_t i = 0; i < size/ PAGE_SIZE; i++)
     {
@@ -113,22 +112,23 @@ void MemoryFree(PageDirectory& pageDirectory, uint32_t startAddress, size_t size
             numPages++;
         }
     }
- //   atomic_end();
+    Libk::AtomicDisable();
 }
 
 PageDirectory *CreateUserPageDirectory() 
 {
-   // atomic_begin();
+   Libk::AtomicEnable();
 
     PageDirectory *pageDirectory = (PageDirectory *)MemoryAllocate(sizeof(PageDirectory), false);
     if (pageDirectory == NULL)
     {
         printf("Could not allocate page directory...\r\n");
+        Libk::AtomicDisable();
         return NULL;
     }
     MapKernelPageTable(*pageDirectory);
 
-   // atomic_end();
+   Libk::AtomicDisable();
 
     return pageDirectory;
 }
@@ -137,10 +137,10 @@ void IdentityMap(PageDirectory& pageDirectory, uintptr_t address, size_t size)
 {
     size_t page_count = PAGE_ALIGN(size) / PAGE_SIZE;
 
-    //atomic_begin();
+    Libk::AtomicEnable();
     PhysicalAllocate(address, page_count);
     VirtualMap(pageDirectory, address, address, page_count, false);
-   // atomic_end();
+    Libk::AtomicDisable();
 }
 
 PageDirectory& GetKerkelPageDirectory()

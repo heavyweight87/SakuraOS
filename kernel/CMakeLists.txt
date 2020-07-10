@@ -9,6 +9,8 @@ set(ARCH_FOLDER ${CMAKE_CURRENT_SOURCE_DIR}/arch/${CMAKE_SYSTEM_PROCESSOR})
 
 include_directories(arch/i386)
 include_directories(include)
+include_directories(libk)
+include_directories(libk/libc)
 
 # set the linker script
 set(LINKER_SCRIPT ${ARCH_FOLDER}/linker.ld)
