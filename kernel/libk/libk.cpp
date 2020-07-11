@@ -1,7 +1,6 @@
 
 #include "libk.h"
 #include "tty.h"
-#include <cstdarg>
 #include "serial.h"
 
 namespace Libk {

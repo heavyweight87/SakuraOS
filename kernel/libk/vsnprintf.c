@@ -856,3 +856,22 @@ int vsnprintf(char* buffer, size_t count, const char* format, va_list va)
 {
     return _vsnprintf(_out_buffer, buffer, count, format, va);
 }
+
+int sprintf(char* buffer, const char* format, ...)
+{
+  va_list va;
+  va_start(va, format);
+  const int ret = _vsnprintf(_out_buffer, buffer, (size_t)-1, format, va);
+  va_end(va);
+  return ret;
+}
+
+
+int snprintf(char* buffer, size_t count, const char* format, ...)
+{
+  va_list va;
+  va_start(va, format);
+  const int ret = _vsnprintf(_out_buffer, buffer, count, format, va);
+  va_end(va);
+  return ret;
+}
