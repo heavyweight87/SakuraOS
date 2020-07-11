@@ -1,18 +1,18 @@
-#ifndef _STDIO_H
-#define _STDIO_H 1
+#pragma once
 
-#define EOF (-1)
+namespace Libk {
 
 #ifdef __cplusplus
 extern "C" {
 #endif
 
-int printf(const char* __restrict, ...);
 int putchar(int);
 int puts(const char*);
+
+void printk(const char* __restrict format, ...);
 
 #ifdef __cplusplus
 }
 #endif
 
-#endif
+}

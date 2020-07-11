@@ -1,8 +1,7 @@
-#include <stdio.h>
+#include "kstdio.h"
 #include <stdint.h>
 #include <interrupts.h>
 #include <io.h>
-#include <string.h>
 #include "scheduler.h"
 #include "syscalls.h"
 
@@ -370,6 +369,6 @@ void Interrupts::Init()
 {    
    
     init_table();
-    printf("Initializing interrupts\r");
+    Libk::printk("Initializing interrupts\r");
 
 }

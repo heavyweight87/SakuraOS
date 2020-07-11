@@ -1,9 +1,9 @@
 
 #include "memorymanager.h"
 #include "physicalallocator.h"
-#include "stdio.h"
+#include "kstdio.h"
 #include "multiboot.h"
-#include <string.h>
+#include "kstring.h"
 
 namespace MemoryManager {
 
@@ -19,10 +19,10 @@ MemoryManagerData memManData;
 void PhysicalAllocatorInit(Multiboot::Multiboot& multiboot)
 {
     memManData.UsedMemory = 0;
-    memset(&memManData.PhysicalAllocation, 0xFF, ALLOCATION_BYTES);
+    Libk::memset(&memManData.PhysicalAllocation, 0xFF, ALLOCATION_BYTES);
     memManData.TotalMemory = multiboot.LoadMemoryMap();
 
-    printf("Total physical memory: %dmb\r\n", memManData.TotalMemory / 1024 /1024 );
+    Libk::printk("Total physical memory: %dmb\r\n", memManData.TotalMemory / 1024 /1024 );
 }
 
 static bool PhysicalIsFree(uint32_t startAddress, uint32_t numPages)
@@ -49,7 +49,7 @@ uint32_t PhysicalAllocate(std::uint32_t numPages)
             return physicalAddress;
         }
     }
-    printf("Out of physical memory! Trying to allocated %d pages but we hae only %d left\r\n", numPages, (memManData.TotalMemory - memManData.UsedMemory) / PAGE_SIZE);
+    Libk::printk("Out of physical memory! Trying to allocated %d pages but we hae only %d left\r\n", numPages, (memManData.TotalMemory - memManData.UsedMemory) / PAGE_SIZE);
     return 0;
 }
 

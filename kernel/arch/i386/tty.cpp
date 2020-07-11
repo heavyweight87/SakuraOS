@@ -1,7 +1,7 @@
 #include <stdbool.h>
 #include <stddef.h>
 #include <stdint.h>
-#include <string.h>
+#include "kstring.h"
 
 #include <tty.h>
 #include <io.h>
@@ -111,12 +111,11 @@ void terminal_write(const char* data, size_t size)
 {
 	for (size_t i = 0; i < size; i++)
 		terminal_putchar(data[i]);
-	serial_print(data, size);
 }
 
 void terminal_writestring(const char* data) 
 {
-	int len = strlen(data);
+	int len = Libk::strlen(data);
 	terminal_write(data, len);
 	update_cursor(len, terminal_row);
 }

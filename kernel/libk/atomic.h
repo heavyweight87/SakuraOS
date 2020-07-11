@@ -2,7 +2,7 @@
 
 namespace Libk {
 
-void AtomicEnable() { asm("sti"); }
-void AtomicDisable() { asm("cli"); }
+void atomicEnable() { asm("sti"); }
+void atomicDisable() { asm("cli"); }
 
 }
