@@ -1,8 +1,10 @@
 #pragma once
 
+#include "interrupts.h"
+
 namespace Libk {
 
-void AtomicEnable() { asm("sti"); }
-void AtomicDisable() { asm("cli"); }
+void atomicEnable() { Interrupts::disableInterrupts(); }
+void atomicDisable() { Interrupts::enableInterrupts(); }
 
 }

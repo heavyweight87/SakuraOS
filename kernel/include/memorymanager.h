@@ -2,7 +2,7 @@
 
 #include <stdbool.h>
 #include <stdint.h>
-#include <stddef.h>
+#include <cstddef>
 #include "multiboot.h"
 #include "paging.h"
 
@@ -26,7 +26,7 @@ void Init(Multiboot::Multiboot& multiboot);
  * @param user true if its user memory
  * @return uintptr_t a pointer to the allocated memory
  */
-uintptr_t MemoryAllocate(size_t size, bool user);
+uintptr_t MemoryAllocate(std::size_t size, bool user);
 
 /**
  * @brief Allocates page alligned memory
@@ -36,7 +36,7 @@ uintptr_t MemoryAllocate(size_t size, bool user);
  * @param user true if its user memory
  * @return uintptr_t a pointer to the allocated memory
  */
-uintptr_t MemoryAllocate(PageDirectory& pageDirectory, size_t size, bool user);
+uintptr_t MemoryAllocate(PageDirectory& pageDirectory, std::size_t size, bool user);
 
 /**
  * @brief Frees allocated memory
@@ -45,7 +45,7 @@ uintptr_t MemoryAllocate(PageDirectory& pageDirectory, size_t size, bool user);
  * @param startAddress the start address of the memory 
  * @param size how much memory to free
  */
-void MemoryFree(PageDirectory& pageDirectory, uint32_t startAddress, size_t size);
+void MemoryFree(PageDirectory& pageDirectory, uint32_t startAddress, std::size_t size);
 
 /**
  * @brief Maps memory so the physical and virtual addresses are the same
@@ -54,9 +54,9 @@ void MemoryFree(PageDirectory& pageDirectory, uint32_t startAddress, size_t size
  * @param address the start address to use
  * @param size how much memory to map
  */
-void IdentityMap(PageDirectory& pageDirectory, uintptr_t address, size_t size);
+void IdentityMap(PageDirectory& pageDirectory, uintptr_t address, std::size_t size);
 
-void MemoryMap(PageDirectory& pageDirectory, uint32_t virtualAddress, size_t size, bool isUser);
+void MemoryMap(PageDirectory& pageDirectory, uint32_t virtualAddress, std::size_t size, bool isUser);
 
 PageDirectory *CreateUserPageDirectory();
 

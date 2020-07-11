@@ -2,11 +2,9 @@
 #include "multiboot.h"
 #include "memorymanager.h"
 #include "physicalallocator.h"
-#include <stdio.h>
-#include <string.h>
+#include "libk.h"
 #include "virtualmemorymanager.h"
 #include "scheduler.h"
-#include <string.h>
 
 namespace Multiboot {
 
@@ -79,19 +77,19 @@ enum Elf_Type {
 bool elf_check_file(Elf32_Ehdr *hdr) {
 	if(!hdr) return false;
 	if(hdr->e_ident[EI_MAG0] != ELFMAG0) {
-		printf("ELF Header EI_MAG0 incorrect.\n");
+		Libk::printk("ELF Header EI_MAG0 incorrect.\n");
 		return false;
 	}
 	if(hdr->e_ident[EI_MAG1] != ELFMAG1) {
-		printf("ELF Header EI_MAG1 incorrect.\n");
+		Libk::printk("ELF Header EI_MAG1 incorrect.\n");
 		return false;
 	}
 	if(hdr->e_ident[EI_MAG2] != ELFMAG2) {
-		printf("ELF Header EI_MAG2 incorrect.\n");
+		Libk::printk("ELF Header EI_MAG2 incorrect.\n");
 		return false;
 	}
 	if(hdr->e_ident[EI_MAG3] != ELFMAG3) {
-		printf("ELF Header EI_MAG3 incorrect.\n");
+		Libk::printk("ELF Header EI_MAG3 incorrect.\n");
 		return false;
 	}
 	return true;
@@ -99,27 +97,27 @@ bool elf_check_file(Elf32_Ehdr *hdr) {
 
 bool elf_check_supported(Elf32_Ehdr *hdr) {
 	if(!elf_check_file(hdr)) {
-		printf("Invalid ELF File.\n");
+		Libk::printk("Invalid ELF File.\n");
 		return false;
 	}
 	if(hdr->e_ident[EI_CLASS] != ELFCLASS32) {
-		printf("Unsupported ELF File Class.\n");
+		Libk::printk("Unsupported ELF File Class.\n");
 		return false;
 	}
 	if(hdr->e_ident[EI_DATA] != ELFDATA2LSB) {
-		printf("Unsupported ELF File byte order.\n");
+		Libk::printk("Unsupported ELF File byte order.\n");
 		return false;
 	}
 	if(hdr->e_machine != EM_386) {
-		printf("Unsupported ELF File target.\n");
+		Libk::printk("Unsupported ELF File target.\n");
 		return false;
 	}
 	if(hdr->e_ident[EI_VERSION] != EV_CURRENT) {
-		printf("Unsupported ELF File version.\n");
+		Libk::printk("Unsupported ELF File version.\n");
 		return false;
 	}
 	if(hdr->e_type != ET_REL && hdr->e_type != ET_EXEC) {
-		printf("Unsupported ELF File type.\n");
+		Libk::printk("Unsupported ELF File type.\n");
 		return false;
 	}
 	return true;
@@ -131,7 +129,7 @@ void Multiboot::LoadModules()
     std::uint32_t moduleNum = 0;
     if(m_multibootInfo.modsCount > 0)
     {
-        printf("Loading %d modules\r\n", m_multibootInfo.modsCount);
+        Libk::printk("Loading %d modules\r\n", m_multibootInfo.modsCount);
         ModuleInfo *module = (ModuleInfo*)m_multibootInfo.modsAddress;
         while(moduleNum < m_multibootInfo.modsCount)
         {   
@@ -146,7 +144,7 @@ void Multiboot::LoadModules()
 					programHeader->p_vaddr = programHeader->p_vaddr - (programHeader->p_vaddr % PAGE_SIZE);   	
                     MemoryManager::MemoryMap(MemoryManager::GetKerkelPageDirectory(), programHeader->p_vaddr, programHeader->p_filesz, false);
                     uint8_t *progData = (uint8_t*)(module->modStart + programHeader->p_offset);
-                    memcpy((void*)programHeader->p_vaddr, progData, programHeader->p_filesz);
+                    Libk::memcpy((void*)programHeader->p_vaddr, progData, programHeader->p_filesz);
                 }
 
             }        

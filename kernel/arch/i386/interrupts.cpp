@@ -1,11 +1,12 @@
-#include <stdio.h>
+#include "libk.h"
 #include <stdint.h>
-#include <interrupts.h>
+#include "interrupts.h"
 #include <io.h>
-#include <string.h>
 #include "scheduler.h"
 #include "syscalls.h"
+#include "arch.h"
 
+namespace Interrupts {
 
 typedef struct  __attribute__((packed)) 
 {
@@ -34,45 +35,6 @@ typedef struct __attribute__((packed))
 
 idt_entry_t idt[256];
 
-static uint8_t kbdus[128] = {
-    0,  27, '1', '2', '3', '4', '5', '6', '7', '8', /* 9 */
-    '9', '0', '-', '=', '\b',   /* Backspace */
-    '\t',           /* Tab */
-    'q', 'w', 'e', 'r', /* 19 */
-    't', 'y', 'u', 'i', 'o', 'p', '[', ']', '\n',       /* Enter key */
-    0,          /* 29   - Control */
-    'a', 's', 'd', 'f', 'g', 'h', 'j', 'k', 'l', ';',   /* 39 */
-    '\'', '`',   0,     /* Left shift */
-    '\\', 'z', 'x', 'c', 'v', 'b', 'n',         /* 49 */
-    'm', ',', '.', '/',   0,                    /* Right shift */
-    '*',
-    0,  /* Alt */
-    ' ',    /* Space bar */
-    0,  /* Caps lock */
-    0,  /* 59 - F1 key ... > */
-    0,   0,   0,   0,   0,   0,   0,   0,
-    0,  /* < ... F10 */
-    0,  /* 69 - Num lock*/
-    0,  /* Scroll Lock */
-    0,  /* Home key */
-    0,  /* Up Arrow */
-    0,  /* Page Up */
-    '-',
-    0,  /* Left Arrow */
-    0,
-    0,  /* Right Arrow */
-    '+',
-    0,  /* 79 - End key*/
-    0,  /* Down Arrow */
-    0,  /* Page Down */
-    0,  /* Insert Key */
-    0,  /* Delete Key */
-    0,   0,   0,
-    0,  /* F11 Key */
-    0,  /* F12 Key */
-    0,  /* All other keys are undefined */
-};
-
 extern "C"
 {
 
@@ -82,12 +44,11 @@ void irq0_handler() {
     Scheduler::Schedule();
 }
 
-void irq1_handler(void) {
-	// TODO: Use pointers to add later a getch() function in stdio
+void irq1_handler(void) 
+{
+	  uint8_t keycode;
 
-	uint8_t keycode;
-
-	keycode = inb(0x60);
+	  keycode = inb(0x60);
     if(!(keycode & 0x80))
     {
        // printf("%c", kbdus[keycode]);
@@ -96,7 +57,8 @@ void irq1_handler(void) {
 	outb(0x20, 0x20);
 }
 
-void irq2_handler(void) {
+void irq2_handler(void) 
+{
   outb(0x20, 0x20); //EOI
 }
 
@@ -160,22 +122,16 @@ void irq15_handler(void) {
   outb(0x20, 0x20); //EOI
 }
 
-struct regs {
-	unsigned int gs, fs, es, ds;
-	unsigned int edi, esi, ebp, esp, ebx, edx, ecx, eax;
-	unsigned int int_no, err_code;
-	unsigned int eip, cs, eflags, useresp, ss;
-};
-
-void irq128_handler(struct regs *r) 
+void irq128_handler(Registers *regs) 
 {
-  r->eax = Syscalls::Handle((Syscalls::Syscall)r->eax, r->ebx, r->ecx, r->edx, r->esi, r->edi);
+  regs->eax = Syscalls::Handle((Syscalls::Syscall)regs->eax, regs->ebx, regs->ecx, regs->edx, regs->esi, regs->edi);
 }
 
 }
 
-struct IDT_entry{
-	unsigned short int offset_lowerbits;
+struct IDT_entry
+{
+    unsigned short int offset_lowerbits;
 	unsigned short int selector;
 	unsigned char zero;
 	unsigned char type_attr;
@@ -206,7 +162,7 @@ extern "C" void init_table()
     extern int irq15();
     extern int irq128();
 
-	  unsigned long irq0_address;
+    unsigned long irq0_address;
     unsigned long irq1_address;
     unsigned long irq2_address;
     unsigned long irq3_address;
@@ -223,11 +179,11 @@ extern "C" void init_table()
     unsigned long irq14_address;
     unsigned long irq15_address;
     unsigned long irq128_address;
-	  unsigned long idt_address;
-	  unsigned long idt_ptr[2];
+    unsigned long idt_address;
+    unsigned long idt_ptr[2];
 
     /* remapping the PIC */
-	  outb(0x20, 0x11);
+	outb(0x20, 0x11);
     outb(0xA0, 0x11);
     outb(0x21, 0x20);
     outb(0xA1, 40);
@@ -362,14 +318,13 @@ extern "C" void init_table()
     idt_ptr[0] = (sizeof (struct IDT_entry) * 256) + ((idt_address & 0xffff) << 16);
     idt_ptr[1] = idt_address >> 16 ;
     load_idt((unsigned long)idt_ptr);
-    asm volatile("sti" : : );
+    enableInterrupts();
 }
 
 
-void Interrupts::Init()
+void Init()
 {    
-   
     init_table();
-    printf("Initializing interrupts\r");
+}
 
 }

@@ -1,17 +1,11 @@
-#ifndef __KERNEL_SERIAL_H_
-#define __KERNEL_SERIAL_H_
+#pragma once
 
-#ifdef __cplusplus
-extern "C" {
-#endif
+namespace Serial {
 
-void serial_init(void);
-void serial_printchar(char a);
-int serial_printf(const char* __restrict format, ...);
-void serial_print(const char* data, size_t length);
+void Init(void);
+int Write(const char* data, size_t length);
+int Write(const char* __restrict format, ...);
+void Write(char a);
 
-#ifdef __cplusplus
 }
-#endif
 
-#endif //__KERNEL_SERIAL_H_

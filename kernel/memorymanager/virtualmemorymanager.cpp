@@ -2,7 +2,7 @@
 #include "virtualmemorymanager.h"
 #include "memorymanager.h"
 #include "physicalallocator.h"
-#include <stdio.h>
+#include "libk.h"
 #include <stddef.h>
 
 namespace MemoryManager {
@@ -124,7 +124,7 @@ uint32_t VirtualAllocate(PageDirectory& pageDirectory, uint32_t physicalAddress,
         virtualAddress += PAGE_SIZE;
     }
 
-    printf("Out of virtual memory!");
+    Libk::printk("Out of virtual memory!");
     return 0;
 }
 }
