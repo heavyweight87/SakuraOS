@@ -1,7 +1,7 @@
 #include <stdbool.h>
 #include <stddef.h>
 #include <stdint.h>
-#include "kstring.h"
+#include "libk.h"
 
 #include <tty.h>
 #include <io.h>

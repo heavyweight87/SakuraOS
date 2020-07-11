@@ -1,11 +1,10 @@
-#include "kstdio.h"
+#include "libk.h"
 #include <stddef.h>
 #include "memorymanager.h"
 #include "physicalallocator.h"
 #include "virtualmemorymanager.h"
 #include "scheduler.h"
 #include "atomic.h"
-#include "kstring.h"
 
 
 namespace MemoryManager {

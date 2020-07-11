@@ -1,5 +1,5 @@
 #include "syscalls.h"
-#include "kstdio.h"
+#include "libk.h"
 
 namespace Syscalls {
 

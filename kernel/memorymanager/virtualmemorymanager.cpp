@@ -2,7 +2,7 @@
 #include "virtualmemorymanager.h"
 #include "memorymanager.h"
 #include "physicalallocator.h"
-#include "kstdio.h"
+#include "libk.h"
 #include <stddef.h>
 
 namespace MemoryManager {

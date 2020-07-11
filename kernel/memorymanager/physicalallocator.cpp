@@ -1,9 +1,8 @@
 
 #include "memorymanager.h"
 #include "physicalallocator.h"
-#include "kstdio.h"
+#include "libk.h"
 #include "multiboot.h"
-#include "kstring.h"
 
 namespace MemoryManager {
 

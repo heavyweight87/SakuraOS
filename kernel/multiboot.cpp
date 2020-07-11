@@ -2,8 +2,7 @@
 #include "multiboot.h"
 #include "memorymanager.h"
 #include "physicalallocator.h"
-#include "kstdio.h"
-#include "kstring.h"
+#include "libk.h"
 #include "virtualmemorymanager.h"
 #include "scheduler.h"
 
