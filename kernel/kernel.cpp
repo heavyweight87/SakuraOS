@@ -4,8 +4,8 @@
 #include <io.h> 
 #include "multiboot.h"
 #include <string.h>
-#include <interrupts.h>
-#include <gdt.h>
+#include <idt.h>
+#include "gdt.h"
 #include "scheduler.h"
 #include "memorymanager.h"
 
@@ -23,8 +23,8 @@ extern "C" int kernel_main(uint32_t magic, Multiboot::MultibootInfo *mbinfo)
 
     Multiboot::Multiboot multiboot(*mbinfo);
     MemoryManager::Init(multiboot); 
-    Interrupts::Init();
-    Scheduler::Init(); 
+    IDT::init();
+    Scheduler::init(); 
     multiboot.LoadModules(); 
     return 0;
 }

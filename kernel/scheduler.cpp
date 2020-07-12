@@ -2,7 +2,9 @@
 #include <stdio.h>
 #include <io.h>
 #include "syscalls.h"
-#include "virtualmemorymanager.h"
+#include "interrupthandler.h"
+#include "libk.h"
+#include "arch.h"
 
 namespace Scheduler {
  
@@ -10,9 +12,16 @@ static Task *runningTask;
 static Task mainTask;
 static Task otherTask;
 
-static void SetTimerFrequency(uint16_t hz)
+static void timerCallback()
 {
-    uint32_t div = 1193182 / hz;
+    schedule();
+    Libk::printk("o");
+}
+
+static void ConfigurePit()
+{
+    uint32_t div = 1193182 / 1000;
+    InterruptHandler::registerInterrupt(Interrupts::Timer, timerCallback);
     outb(0x43, 0x36);
     outb(0x40, div & 0xFF);
     outb(0x40, (div >> 8) & 0xFF);
@@ -25,7 +34,7 @@ static void otherMain()
     }
 }
  
-void Init() 
+void init() 
 {
     // Get EFLAGS and CR3
     asm volatile("movl %%cr3, %%eax; movl %%eax, %0;":"=m"(mainTask.regs.cr3)::"%eax");
@@ -35,9 +44,7 @@ void Init()
     mainTask.next = &otherTask;
     otherTask.next = &mainTask;
  
-    SetTimerFrequency(1000);
-  //  int ret = __syscall(SYSCALL_OPEN, 1,2,3,4,5);
-    //printf("Does it work? ret = %d\r\n", ret);
+    ConfigurePit();
   //  while(1)
     {
         //kernel backgronud task
@@ -47,7 +54,7 @@ void Init()
     }
 }
  
-void CreateTask(Task& task, void (*main)(), uint32_t flags, bool isUser) 
+void createTask(Task& task, void (*main)(), uint32_t flags, bool isUser) 
 {
     task.regs.eax = 0;
     task.regs.ebx = 0;
@@ -76,7 +83,7 @@ void yield()
     switchTask(&last->regs, &runningTask->regs);
 }
 
-void Schedule()
+void schedule()
 {
     return;
     Task *last = runningTask;
@@ -84,7 +91,7 @@ void Schedule()
     switchTask(&last->regs, &runningTask->regs);
 }
 
-Task& GetRunningTask()
+Task& getRunningTask()
 {
     return *runningTask;
 }
