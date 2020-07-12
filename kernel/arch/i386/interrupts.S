@@ -2,8 +2,8 @@
 .align 4
 
 .macro ISR_NOERR index
-    .global _isr\index
-    _isr\index:
+    .global irq\index
+    irq\index:
         cli
         push $0
         push $\index
@@ -11,14 +11,14 @@
 .endm
 
 .macro ISR_ERR index
-    .global _isr\index
-    _isr\index:
+    .global irq\index
+    irq\index:
         cli
         push $\index
         jmp isr_common
 .endm
 
-/* Standard X86 interrupt service routines */
+# Exceptions
 ISR_NOERR 0
 ISR_NOERR 1
 ISR_NOERR 2
@@ -51,10 +51,12 @@ ISR_NOERR 28
 ISR_NOERR 29
 ISR_NOERR 30
 ISR_NOERR 31
+# Interrupts
+ISR_NOERR 32
 ISR_NOERR 128
 
-.extern fault_handler
-.type fault_handler, @function
+.extern interruptHandler
+.type interruptHandler, @function
 
 isr_common:
     /* Push all registers */
@@ -74,7 +76,7 @@ isr_common:
 
     /* Call fault handler */
     push %esp
-    call fault_handler
+    call interruptHandler
     add $4, %esp
 
     /* Restore segment registers */
@@ -89,3 +91,12 @@ isr_common:
     add $8, %esp
     /* pop CS, EIP, EFLAGS, SS and ESP */
     iret
+
+
+.global idt_load
+.type idt_load, @function
+
+idt_load:
+    mov 4(%esp), %eax
+    lidt (%eax)
+    ret
