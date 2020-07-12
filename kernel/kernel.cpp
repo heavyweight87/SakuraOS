@@ -23,8 +23,8 @@ extern "C" int kernel_main(uint32_t magic, Multiboot::MultibootInfo *mbinfo)
 
     Multiboot::Multiboot multiboot(*mbinfo);
     MemoryManager::Init(multiboot); 
-    IDT::Init();
-    Scheduler::Init(); 
+    IDT::init();
+    Scheduler::init(); 
     multiboot.LoadModules(); 
     return 0;
 }

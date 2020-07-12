@@ -51,7 +51,7 @@ void Init(Multiboot::Multiboot& multiboot)
 
 uintptr_t MemoryAllocate(size_t size, bool user)
 {
-    PageDirectory *pageDirectory = (PageDirectory*)Scheduler::GetRunningTask().regs.cr3;
+    PageDirectory *pageDirectory = (PageDirectory*)Scheduler::getRunningTask().regs.cr3;
     return MemoryAllocate(*pageDirectory, size, user);
 }
 

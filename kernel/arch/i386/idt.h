@@ -2,6 +2,6 @@
 
 namespace IDT {
 
-void Init();
+void init();
 
 }

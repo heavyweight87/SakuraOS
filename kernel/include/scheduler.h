@@ -22,10 +22,10 @@ struct Task
     Task *next;
 };
  
-void Init();
-void CreateTask(Task& task, void(*)(), uint32_t flags, bool isUSer);
-Task& GetRunningTask();
+void init();
+void createTask(Task& task, void(*)(), uint32_t flags, bool isUSer);
+Task& getRunningTask();
  
-void Schedule(void);
+void schedule(void);
 extern "C" void switchTask(Registers *old, Registers *n); // The function which actually switches
 }
