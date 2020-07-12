@@ -1,10 +1,10 @@
 #pragma once
 
-#include "interrupts.h"
+#include "arch.h"
 
 namespace Libk {
 
-void atomicEnable() { Interrupts::disableInterrupts(); }
-void atomicDisable() { Interrupts::enableInterrupts(); }
+void atomicEnable() { disableInterrupts(); }
+void atomicDisable() { enableInterrupts(); }
 
 }

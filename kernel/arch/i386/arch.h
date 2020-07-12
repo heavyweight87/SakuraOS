@@ -9,3 +9,6 @@ struct Registers
 	std::uint32_t int_no, err_code;
 	std::uint32_t eip, cs, eflags, useresp, ss;
 };
+
+inline void enableInterrupts() { asm volatile("sti" : : ); }
+inline void disableInterrupts() { asm volatile("cli" : : ); }

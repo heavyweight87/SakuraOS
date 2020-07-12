@@ -1,12 +1,11 @@
 #include "libk.h"
 #include <stdint.h>
-#include "interrupts.h"
 #include <io.h>
 #include "scheduler.h"
 #include "syscalls.h"
 #include "arch.h"
 
-namespace Interrupts {
+namespace IDT {
 
 typedef struct  __attribute__((packed)) 
 {
@@ -127,6 +126,17 @@ void irq128_handler(Registers *regs)
   regs->eax = Syscalls::Handle((Syscalls::Syscall)regs->eax, regs->ebx, regs->ecx, regs->edx, regs->esi, regs->edi);
 }
 
+
+void fault_handler(Registers *regs)
+{
+    outb(0xA0, 0x20);
+    outb(0x20, 0x20); //EOI
+    if(regs->int_no == 128)
+    {
+        regs->eax = Syscalls::Handle((Syscalls::Syscall)regs->eax, regs->ebx, regs->ecx, regs->edx, regs->esi, regs->edi);
+    }
+}
+
 }
 
 struct IDT_entry
@@ -144,6 +154,7 @@ struct IDT_entry IDT[256];
 extern "C" void init_table()
 {
     extern int load_idt(unsigned long);
+    extern int _isr0();
     extern int irq0();
     extern int irq1();
     extern int irq2();
@@ -160,7 +171,7 @@ extern "C" void init_table()
     extern int irq13();
     extern int irq14();
     extern int irq15();
-    extern int irq128();
+    extern int _isr128();
 
     unsigned long irq0_address;
     unsigned long irq1_address;
@@ -182,17 +193,12 @@ extern "C" void init_table()
     unsigned long idt_address;
     unsigned long idt_ptr[2];
 
-    /* remapping the PIC */
-	outb(0x20, 0x11);
-    outb(0xA0, 0x11);
-    outb(0x21, 0x20);
-    outb(0xA1, 40);
-    outb(0x21, 0x04);
-    outb(0xA1, 0x02);
-    outb(0x21, 0x01);
-    outb(0xA1, 0x01);
-    outb(0x21, 0x0);
-    outb(0xA1, 0x0);
+    unsigned long isr0_address = (unsigned long)_isr0; 
+    IDT[0].offset_lowerbits = isr0_address & 0xffff;
+    IDT[0].selector = 0x08; /* KERNEL_CODE_SEGMENT_OFFSET */
+    IDT[0].zero = 0;
+    IDT[0].type_attr = 0x8e; /* INTERRUPT_GATE */
+    IDT[0].offset_higherbits = (isr0_address & 0xffff0000) >> 16;
 
     irq0_address = (unsigned long)irq0; 
     IDT[32].offset_lowerbits = irq0_address & 0xffff;
@@ -306,7 +312,7 @@ extern "C" void init_table()
     IDT[47].type_attr = 0x8e; /* INTERRUPT_GATE */
     IDT[47].offset_higherbits = (irq15_address & 0xffff0000) >> 16;
 
-    irq128_address = (unsigned long)irq128; 
+    irq128_address = (unsigned long)_isr128; 
     IDT[128].offset_lowerbits = irq128_address & 0xffff;
     IDT[128].selector = 0x08; /* KERNEL_CODE_SEGMENT_OFFSET */
     IDT[128].zero = 0;
@@ -324,6 +330,17 @@ extern "C" void init_table()
 
 void Init()
 {    
+        /* remapping the PIC */
+	outb(0x20, 0x11);
+    outb(0xA0, 0x11);
+    outb(0x21, 0x20);
+    outb(0xA1, 40);
+    outb(0x21, 0x04);
+    outb(0xA1, 0x02);
+    outb(0x21, 0x01);
+    outb(0xA1, 0x01);
+    outb(0x21, 0x0);
+    outb(0xA1, 0x0);
     init_table();
 }
 
