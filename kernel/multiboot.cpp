@@ -134,23 +134,27 @@ void Multiboot::LoadModules()
         while(moduleNum < m_multibootInfo.modsCount)
         {   
             uint32_t size = module->modEnd - module->modStart;
-            MemoryManager::IdentityMap(MemoryManager::GetKerkelPageDirectory(), module->modStart, size);
             Elf32_Ehdr *hdr = (Elf32_Ehdr *)module->modStart;
+            static Scheduler::Task task;
+            Scheduler::createTask(task, 0, false);
+            MemoryManager::IdentityMap(*(MemoryManager::PageDirectory*) task.regs.cr3, module->modStart, size);
             if(elf_check_supported(hdr))
             {
                 for(int sec = 0; sec < hdr->e_phnum; sec++)
                 {
                     Elf32_Phdr *programHeader = (Elf32_Phdr*)(module->modStart + hdr->e_phoff + (hdr->e_phentsize * sec));         
 					programHeader->p_vaddr = programHeader->p_vaddr - (programHeader->p_vaddr % PAGE_SIZE);   	
-                    MemoryManager::MemoryMap(MemoryManager::GetKerkelPageDirectory(), programHeader->p_vaddr, programHeader->p_filesz, false);
+                    MemoryManager::MemoryMap(*(MemoryManager::PageDirectory*) task.regs.cr3, programHeader->p_vaddr, programHeader->p_filesz, false);
                     uint8_t *progData = (uint8_t*)(module->modStart + programHeader->p_offset);
                     Libk::memcpy((void*)programHeader->p_vaddr, progData, programHeader->p_filesz);
                 }
 
             }        
+            //start_program();
             callModule start_program = (callModule)hdr->e_entry;
-            start_program();
+            Scheduler::taskStart(task, start_program);
             module++;
+            moduleNum++;
         }
     }
 }

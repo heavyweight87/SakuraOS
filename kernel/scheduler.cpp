@@ -15,7 +15,6 @@ static Task otherTask;
 static void timerCallback()
 {
     schedule();
-    Libk::printk("o");
 }
 
 static void ConfigurePit()
@@ -41,8 +40,8 @@ void init()
     asm volatile("pushfl; movl (%%esp), %%eax; movl %%eax, %0; popfl;":"=m"(mainTask.regs.eflags)::"%eax");
     runningTask = &mainTask;
    // CreateTask(otherTask, otherMain, mainTask.regs.eflags, false);
-    mainTask.next = &otherTask;
-    otherTask.next = &mainTask;
+   // mainTask.next = &otherTask;
+    //otherTask.next = &mainTask;
  
     ConfigurePit();
   //  while(1)
@@ -54,7 +53,7 @@ void init()
     }
 }
  
-void createTask(Task& task, void (*main)(), uint32_t flags, bool isUser) 
+void createTask(Task& task, uint32_t flags, bool isUser) 
 {
     task.regs.eax = 0;
     task.regs.ebx = 0;
@@ -63,7 +62,6 @@ void createTask(Task& task, void (*main)(), uint32_t flags, bool isUser)
     task.regs.esi = 0;
     task.regs.edi = 0;
     task.regs.eflags = flags;
-    task.regs.eip = (uint32_t) main;
     if(isUser)
     {
         task.regs.cr3 = (uint32_t)MemoryManager::CreateUserPageDirectory();
@@ -75,6 +73,13 @@ void createTask(Task& task, void (*main)(), uint32_t flags, bool isUser)
     task.regs.esp = (uint32_t)MemoryManager::MemoryAllocate(TASK_STACK_SIZE, false) + TASK_STACK_SIZE;
     task.next = 0;
 }
+
+void taskStart(Task& task,  void (*main)())
+{
+    task.regs.eip = (uint32_t) main;
+    mainTask.next = &task;
+    task.next = &mainTask;
+}
  
 void yield() 
 {
@@ -85,10 +90,12 @@ void yield()
 
 void schedule()
 {
-    return;
     Task *last = runningTask;
-    runningTask = runningTask->next;
-    switchTask(&last->regs, &runningTask->regs);
+    if(runningTask->next)
+    {
+        runningTask = runningTask->next;
+        switchTask(&last->regs, &runningTask->regs);
+    }
 }
 
 Task& getRunningTask()

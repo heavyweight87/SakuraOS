@@ -51,7 +51,7 @@ extern "C" int irq128();
 
 extern "C" void interruptHandler(Registers *regs)
 {
-    if(regs->int_no >= 8)
+    if(regs->int_no >= 40)
     {
 		outb(PIC2_COMMAND,PIC_EOI);
     }
