@@ -1,10 +1,10 @@
-#include "elf.h"
 #include "scheduler.h"
 #include "libk.h"
+#include "elf.h"
 
 namespace Elf {
 
-static bool verifyElfHeader(ElfHeader *header)
+static bool verifyElfHeader(ElfHeader *header) 
 {
 	if(!header) return false;
 	if(header->m_ident[EI_MAG0] != ELFMAG0) 
@@ -58,11 +58,9 @@ static bool verifyElfHeader(ElfHeader *header)
 bool Load(std::uint8_t* elfData, std::uint32_t length)
 {
     ElfHeader *header = (ElfHeader*)elfData;
-    static Scheduler::Task task;
-    Scheduler::createTask(task, 0, false);
-    MemoryManager::IdentityMap(*(MemoryManager::PageDirectory*) task.regs.cr3, reinterpret_cast<std::uintptr_t>(elfData), length);
     if(verifyElfHeader(header))
     {
+        Scheduler::Task& task = Scheduler::createTask(0, false);
         for(int sec = 0; sec < header->m_phnum; sec++)
         {
             ElfProgramHeader *programHeader = (ElfProgramHeader*)(elfData + header->m_phoff + (header->m_phentsize * sec));         
@@ -73,6 +71,7 @@ bool Load(std::uint8_t* elfData, std::uint32_t length)
         }
         Scheduler::TaskEntry entry = reinterpret_cast<Scheduler::TaskEntry>(header->m_entry);
         Scheduler::taskStart(task, entry);
+        return true;
     }    
     return false;    
 }

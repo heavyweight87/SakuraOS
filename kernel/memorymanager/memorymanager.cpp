@@ -96,6 +96,12 @@ void MemoryMap(PageDirectory& pageDirectory, uint32_t virtualAddress, size_t siz
     VirtualMap(pageDirectory, virtualAddress, physicalAddress, numPages, isUser);
 }
 
+void MemoryFree(int32_t startAddress, size_t size)
+{
+    PageDirectory *pageDirectory = (PageDirectory*)Scheduler::getRunningTask().regs.cr3;
+    MemoryFree(*pageDirectory, startAddress, size);
+}
+
 void MemoryFree(PageDirectory& pageDirectory, uint32_t startAddress, size_t size)
 {
     Libk::atomicEnable();

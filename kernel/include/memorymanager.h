@@ -46,6 +46,7 @@ uintptr_t MemoryAllocate(PageDirectory& pageDirectory, std::size_t size, bool us
  * @param size how much memory to free
  */
 void MemoryFree(PageDirectory& pageDirectory, uint32_t startAddress, std::size_t size);
+void MemoryFree(int32_t startAddress, size_t size);
 
 /**
  * @brief Maps memory so the physical and virtual addresses are the same

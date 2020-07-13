@@ -5,12 +5,13 @@
 #include "interrupthandler.h"
 #include "libk.h"
 #include "arch.h"
+#include "kmalloc.h"
 
 namespace Scheduler {
  
 static Task *runningTask;
 static Task mainTask;
-static Task otherTask;
+bool schedulerEnabled = true;
 
 static void timerCallback()
 {
@@ -26,28 +27,18 @@ static void ConfigurePit()
     outb(0x40, (div >> 8) & 0xFF);
 }
  
-static void otherMain() 
-{
-    while(1)
-    {
-    }
-}
- 
 void init() 
 {
     // Get EFLAGS and CR3
     asm volatile("movl %%cr3, %%eax; movl %%eax, %0;":"=m"(mainTask.regs.cr3)::"%eax");
     asm volatile("pushfl; movl (%%esp), %%eax; movl %%eax, %0; popfl;":"=m"(mainTask.regs.eflags)::"%eax");
-    runningTask = &mainTask;
-   // CreateTask(otherTask, otherMain, mainTask.regs.eflags, false);
-   // mainTask.next = &otherTask;
-    //otherTask.next = &mainTask;
- 
+    runningTask = &mainTask; 
     ConfigurePit();      
 }
  
-void createTask(Task& task, uint32_t flags, bool isUser) 
+Task& createTask(uint32_t flags, bool isUser) 
 {
+    Task& task = *(Task*)malloc(sizeof(Task));
     task.regs.eax = 0;
     task.regs.ebx = 0;
     task.regs.ecx = 0;
@@ -65,6 +56,7 @@ void createTask(Task& task, uint32_t flags, bool isUser)
     }
     task.regs.esp = (uint32_t)MemoryManager::MemoryAllocate(TASK_STACK_SIZE, false) + TASK_STACK_SIZE;
     task.next = 0;
+    return task;
 }
 
 void taskStart(Task& task,  TaskEntry entry)
@@ -83,12 +75,25 @@ void yield()
 
 void schedule()
 {
-    Task *last = runningTask;
-    if(runningTask->next)
+    if(schedulerEnabled)
     {
-        runningTask = runningTask->next;
-        switchTask(&last->regs, &runningTask->regs);
+        Task *last = runningTask;
+        if(runningTask->next)
+        {
+            runningTask = runningTask->next;
+            switchTask(&last->regs, &runningTask->regs);
+        }
     }
+}
+
+void enable()
+{
+    schedulerEnabled = true;
+}
+
+void disable()
+{
+    schedulerEnabled = false;
 }
 
 Task& getRunningTask()

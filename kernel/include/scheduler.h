@@ -23,9 +23,11 @@ struct Task
 };
  
 void init();
-void createTask(Task& task, uint32_t flags, bool isUser);
+Task& createTask( uint32_t flags, bool isUser);
 void taskStart(Task& task,  TaskEntry entry);
 Task& getRunningTask();
+void disable();
+void enable();
  
 void schedule(void);
 extern "C" void switchTask(Registers *old, Registers *n); // The function which actually switches

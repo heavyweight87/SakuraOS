@@ -19,6 +19,7 @@ void Multiboot::LoadModules()
         while(moduleNum < m_multibootInfo.modsCount)
         {   
             uint32_t size = module->modEnd - module->modStart;
+            MemoryManager::IdentityMap(MemoryManager::GetKerkelPageDirectory(), module->modStart, size);
             Elf::Load(reinterpret_cast<uint8_t*>(module->modStart), size);
             module++;
             moduleNum++;
