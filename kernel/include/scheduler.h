@@ -23,7 +23,7 @@ struct Task
 };
  
 void init();
-void createTask(Task& task, uint32_t flags, bool isUSer);
+void createTask(Task& task, uint32_t flags, bool isUser);
 void taskStart(Task& task,  TaskEntry entry);
 Task& getRunningTask();
  

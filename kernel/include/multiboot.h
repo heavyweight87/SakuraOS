@@ -99,7 +99,7 @@ struct MemoryMap
 
 class Multiboot {
 public:
-  Multiboot(MultibootInfo& info);
+  Multiboot(MultibootInfo& info)  : m_multibootInfo(info) {};
   void LoadModules();
   std::uint32_t LoadMemoryMap();
 private:

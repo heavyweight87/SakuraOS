@@ -43,14 +43,7 @@ void init()
    // mainTask.next = &otherTask;
     //otherTask.next = &mainTask;
  
-    ConfigurePit();
-  //  while(1)
-    {
-        //kernel backgronud task
-      //  printf("Switching to otherTask... \n");
-  //    memtest();
-      
-    }
+    ConfigurePit();      
 }
  
 void createTask(Task& task, uint32_t flags, bool isUser) 
@@ -74,9 +67,9 @@ void createTask(Task& task, uint32_t flags, bool isUser)
     task.next = 0;
 }
 
-void taskStart(Task& task,  void (*main)())
+void taskStart(Task& task,  TaskEntry entry)
 {
-    task.regs.eip = (uint32_t) main;
+    task.regs.eip = (uint32_t) entry;
     mainTask.next = &task;
     task.next = &mainTask;
 }

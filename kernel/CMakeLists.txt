@@ -7,7 +7,7 @@ enable_language(ASM)
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bin/isodir/boot)
 set(ARCH_FOLDER ${CMAKE_CURRENT_SOURCE_DIR}/arch/${CMAKE_SYSTEM_PROCESSOR})
 
-include_directories(arch/i386)
+include_directories(arch/i386/include)
 include_directories(include)
 include_directories(libk)
 
