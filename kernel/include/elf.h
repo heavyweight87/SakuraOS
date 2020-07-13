@@ -24,8 +24,6 @@ enum ElfIdent
 	EI_PAD		= 9  // Padding
 };
 
-bool Load(std::uint8_t* elfData, std::uint32_t length);
-
 
 enum ElfType 
 {
@@ -69,5 +67,7 @@ struct ElfProgramHeader
 	std::uint16_t		m_flags;
 	std::uint16_t		m_align;
 };
+
+bool Load(std::uint8_t* elfData, std::uint32_t length);
 
 }
