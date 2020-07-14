@@ -8,7 +8,7 @@ set(CMAKE_CXX_FLAGS_DEBUG "-g -O0")
 set(CMAKE_C_FLAGS "-ffreestanding -O0 -Wall -Wextra")
 set(CMAKE_C_FLAGS_DEBUG "-g -O0")
 
-add_subdirectory(kernel)
+add_subdirectory(Kernel)
 
 add_custom_target(iso ALL DEPENDS ${CMAKE_CURRENT_BINARY_DIR}/bin/isodir/boot/kernel.bin)
 

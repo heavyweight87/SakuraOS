@@ -1,4 +1,13 @@
 OS development project
 
-Based off and continuing from:
-https://wiki.osdev.org/Meaty_Skeleton
+So far we have
+- Paging
+- newlib for user space 
+- loadable modules
+- kernel lib called libk
+- Interrupts
+- Some basic system calls
+- Basic multithreading
+
+This project uses the webkit c++ coding style
+https://webkit.org/code-style-guidelines/
