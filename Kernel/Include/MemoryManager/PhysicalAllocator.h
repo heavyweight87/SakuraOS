@@ -28,9 +28,7 @@ struct MemoryManagerData
  * @param multiboot multiboot structure containing the memmory map
  * and other goodiesx   
  */
-void PhysicalAllocatorInit(Multiboot::Multiboot& multiboot);
-
-int physical_is_used(uint32_t addr, uint32_t count);
+void physicalAllocatorInit(Multiboot::Multiboot& multiboot);
 
 /**
  * @brief Allocates physical memory at aspecified adddress
@@ -38,7 +36,7 @@ int physical_is_used(uint32_t addr, uint32_t count);
  * @param startAddress the address to start allocation from
  * @param numPages the number of pages to allocate
  */
-void PhysicalAllocate(uint32_t startAddress, std::uint32_t numPages);
+void physicalAllocate(uint32_t startAddress, std::uint32_t numPages);
 
 /**
  * @brief Allocates a number of pages at the next free location
@@ -46,7 +44,7 @@ void PhysicalAllocate(uint32_t startAddress, std::uint32_t numPages);
  * @param numPages the number of pages to allocate
  * @return uint32_t the physical address at which the pages were allocated
  */
-uint32_t PhysicalAllocate(std::uint32_t numPages);
+uint32_t physicalAllocate(std::uint32_t numPages);
 
 /**
  * @brief Frees physical pages at the specified address
@@ -54,6 +52,6 @@ uint32_t PhysicalAllocate(std::uint32_t numPages);
  * @param startAddress the address to start freeing at 
  * @param numPages the number of pages to free 
  */
-void PhysicalFree(uint32_t startAddress, uint32_t numPages);
+void physicalFree(uint32_t startAddress, uint32_t numPages);
 
 }

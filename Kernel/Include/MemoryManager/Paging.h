@@ -59,8 +59,8 @@ struct __attribute__((packed)) PageDirectory
     PageDirectoryEntry entries[PAGE_DIRECTORY_ENTRY_COUNT];
 };
 
-extern "C" void EnablePaging(void);
-extern "C" void ChangePageDirectory(uintptr_t directory);
-extern "C" void FlushCurrentPageDirectory(void);
+extern "C" void enablePaging(void);
+extern "C" void changePageDirectory(uintptr_t directory);
+extern "C" void flushCurrentPageDirectory(void);
 
 }

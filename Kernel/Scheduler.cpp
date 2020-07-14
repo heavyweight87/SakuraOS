@@ -36,32 +36,33 @@ void init()
     asm volatile("pushfl; movl (%%esp), %%eax; movl %%eax, %0; popfl;":"=m"(mainTask.regs.eflags)::"%eax");
     runningTask = &mainTask; 
     ConfigurePit();      
-    Task *t = (Task*)kmalloc(sizeof(Task));
-    uint32_t x = 5;
+//    Task *t = (Task*)kmalloc(sizeof(Task));
+   /* uint32_t x = 5;
     taskList.add(x);
-    taskList.remove(0);
+    taskList.add(x);
+    taskList.remove(1);*/
 }
  
-Task& createTask(uint32_t flags, bool isUser) 
+Task* createTask(uint32_t flags, bool isUser) 
 {
-    Task& task = *(Task*)kmalloc(sizeof(Task));
-    task.regs.eax = 0;
-    task.regs.ebx = 0;
-    task.regs.ecx = 0;
-    task.regs.edx = 0;
-    task.regs.esi = 0;
-    task.regs.edi = 0;
-    task.regs.eflags = flags;
+    Task *task = (Task*)kmalloc(sizeof(Task));
+    task->regs.eax = 0;
+    task->regs.ebx = 0;
+    task->regs.ecx = 0;
+    task->regs.edx = 0;
+    task->regs.esi = 0;
+    task->regs.edi = 0;
+    task->regs.eflags = flags;
     if(isUser)
     {
-        task.regs.cr3 = (uint32_t)MemoryManager::CreateUserPageDirectory();
+        task->regs.cr3 = (uint32_t)MemoryManager::createUserPageDirectory();
     }
     else
     {
-        task.regs.cr3 = (uint32_t) &MemoryManager::GetKerkelPageDirectory();
+        task->regs.cr3 = (uint32_t) &MemoryManager::getKerkelPageDirectory();
     }
-    task.regs.esp = (uint32_t)MemoryManager::MemoryAllocate(TASK_STACK_SIZE, false) + TASK_STACK_SIZE;
-    task.next = 0;
+    task->regs.esp = (uint32_t)MemoryManager::memoryAllocate(TASK_STACK_SIZE, false) + TASK_STACK_SIZE;
+    task->next = 0;
     return task;
 }
 

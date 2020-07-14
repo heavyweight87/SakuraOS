@@ -42,8 +42,8 @@ void VirtualMap(PageDirectory& pageDirectory, uint32_t virtualAddress, uint32_t 
 
         if (pageDirectoryEntry.present == false)
         {
-            uint32_t pageTablePhysicalAddress = PhysicalAllocate(1);
-            IdentityMap(pageDirectory, pageTablePhysicalAddress, false);
+            uint32_t pageTablePhysicalAddress = physicalAllocate(1);
+            identityMap(pageDirectory, pageTablePhysicalAddress, false);
             PageTable *pageTable = (PageTable*)pageTablePhysicalAddress;
             pageDirectoryEntry.present = 1;
             pageDirectoryEntry.write = 1;
@@ -60,8 +60,7 @@ void VirtualMap(PageDirectory& pageDirectory, uint32_t virtualAddress, uint32_t 
         virtualAddress += PAGE_SIZE;
         physicalAddress += PAGE_SIZE;
     }
-
-    FlushCurrentPageDirectory();
+    flushCurrentPageDirectory();
 }
 
 bool IsPagePresent(PageDirectory& pageDirectory, uint32_t virtualAddress)
@@ -86,7 +85,7 @@ void VirtualFree(PageDirectory& pageDirectory, uint32_t virtualAddress, uint32_t
     {
         GetPageTableEntry(pageDirectory, address).pageTableEntry = 0;
     }
-    FlushCurrentPageDirectory();
+    flushCurrentPageDirectory();
 }
 
 uint32_t VirtualAllocate(PageDirectory& pageDirectory, uint32_t physicalAddress, uint32_t numPages, bool user)

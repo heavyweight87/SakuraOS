@@ -16,7 +16,7 @@ extern "C" uint32_t _kernel_end;
 PageDirectory kernelPageDirectory __attribute__ ((aligned(PAGE_SIZE)));
 PageTable kernelPageTable[NUM_KERNEL_PAGETABLES] __attribute__ ((aligned(PAGE_SIZE)));
 
-static void MapKernelPageTable(PageDirectory& pageDirectory)
+static void mapKernelPageTable(PageDirectory& pageDirectory)
 {
     for (int index = 0; index < NUM_KERNEL_PAGETABLES; index++)
     {
@@ -28,34 +28,35 @@ static void MapKernelPageTable(PageDirectory& pageDirectory)
     }
 }
 
-static void MapKernelMemory()
+static void mapKernelMemory()
 {
     uintptr_t kernelStart = (uintptr_t)&__start;
     size_t kernelSize = (size_t)&_kernel_end - (size_t)&__start;
     kernelStart -= (uintptr_t)&__start % PAGE_SIZE;
     kernelSize += (uintptr_t)&__start % PAGE_SIZE;
     kernelSize += PAGE_SIZE - (kernelSize % PAGE_SIZE);
-    MapKernelPageTable(kernelPageDirectory); //map the kernel page directory
-    IdentityMap(kernelPageDirectory, kernelStart, kernelSize);
+    mapKernelPageTable(kernelPageDirectory); //map the kernel page directory
+    identityMap(kernelPageDirectory, kernelStart, kernelSize);
 }
 
-void Init(Multiboot::Multiboot& multiboot)
+void init(Multiboot::Multiboot& multiboot)
 {
-    PhysicalAllocatorInit(multiboot);
-    MapKernelMemory();
+    physicalAllocatorInit(multiboot);
+    mapKernelMemory();
     //its much easier to indentity map first 1mb for hardware bound addresses
-    IdentityMap(kernelPageDirectory, 0, (size_t)&__start);
-    ChangePageDirectory(GetPhysicalAddress(kernelPageDirectory, (uintptr_t)&kernelPageDirectory));
-    EnablePaging();
+    identityMap(kernelPageDirectory, 0, (size_t)&__start);
+    multiboot.reserveModuleMemory();
+    changePageDirectory(GetPhysicalAddress(kernelPageDirectory, (uintptr_t)&kernelPageDirectory));
+    enablePaging();
 }
 
-uintptr_t MemoryAllocate(size_t size, bool user)
+uintptr_t memoryAllocate(size_t size, bool user)
 {
     PageDirectory *pageDirectory = (PageDirectory*)Scheduler::getRunningTask().regs.cr3;
-    return MemoryAllocate(*pageDirectory, size, user);
+    return memoryAllocate(*pageDirectory, size, user);
 }
 
-uintptr_t MemoryAllocate(PageDirectory& pageDirectory, size_t size, bool user)
+uintptr_t memoryAllocate(PageDirectory& pageDirectory, size_t size, bool user)
 {
     std::uint32_t numPages = size / PAGE_SIZE;
     if(size % PAGE_SIZE)
@@ -65,14 +66,14 @@ uintptr_t MemoryAllocate(PageDirectory& pageDirectory, size_t size, bool user)
 
     Libk::atomicEnable();
     //firstly allocate physical memory
-    uintptr_t physicalAddress = PhysicalAllocate(numPages);
+    uintptr_t physicalAddress = physicalAllocate(numPages);
 
     if (physicalAddress > 0)
     {
         uintptr_t virtualAddress = VirtualAllocate(pageDirectory ,physicalAddress, numPages, user);
         if (virtualAddress == 0)
         {
-            PhysicalFree(physicalAddress, numPages);
+            physicalFree(physicalAddress, numPages);
             Libk::atomicEnable();
             Libk::printk("Out of vmem!\r\n");
             return 0;
@@ -85,24 +86,24 @@ uintptr_t MemoryAllocate(PageDirectory& pageDirectory, size_t size, bool user)
     return 0; 
 }
 
-void MemoryMap(PageDirectory& pageDirectory, uint32_t virtualAddress, size_t size, bool isUser)
+void memoryMap(PageDirectory& pageDirectory, uint32_t virtualAddress, size_t size, bool isUser)
 {
     std::uint32_t numPages = size / PAGE_SIZE;
     if(size % PAGE_SIZE)
     {
         numPages = PAGE_ALIGN(size) / PAGE_SIZE;
     }
-    std::uint32_t physicalAddress = PhysicalAllocate(numPages);
+    std::uint32_t physicalAddress = physicalAllocate(numPages);
     VirtualMap(pageDirectory, virtualAddress, physicalAddress, numPages, isUser);
 }
 
-void MemoryFree(int32_t startAddress, size_t size)
+void memoryFree(int32_t startAddress, size_t size)
 {
     PageDirectory *pageDirectory = (PageDirectory*)Scheduler::getRunningTask().regs.cr3;
-    MemoryFree(*pageDirectory, startAddress, size);
+    memoryFree(*pageDirectory, startAddress, size);
 }
 
-void MemoryFree(PageDirectory& pageDirectory, uint32_t startAddress, size_t size)
+void memoryFree(PageDirectory& pageDirectory, uint32_t startAddress, size_t size)
 {
     Libk::atomicEnable();
     uint32_t numPages = 0;
@@ -112,7 +113,7 @@ void MemoryFree(PageDirectory& pageDirectory, uint32_t startAddress, size_t size
 
         if (IsPagePresent(pageDirectory, virtual_address))
         {
-            PhysicalFree(GetPhysicalAddress(pageDirectory, virtual_address), 1);
+            physicalFree(GetPhysicalAddress(pageDirectory, virtual_address), 1);
             VirtualFree(pageDirectory, virtual_address, 1);
             numPages++;
         }
@@ -120,35 +121,35 @@ void MemoryFree(PageDirectory& pageDirectory, uint32_t startAddress, size_t size
     Libk::atomicDisable();
 }
 
-PageDirectory *CreateUserPageDirectory() 
+PageDirectory *createUserPageDirectory() 
 {
    Libk::atomicEnable();
 
-    PageDirectory *pageDirectory = (PageDirectory *)MemoryAllocate(sizeof(PageDirectory), false);
+    PageDirectory *pageDirectory = (PageDirectory *)memoryAllocate(sizeof(PageDirectory), false);
     if (pageDirectory == NULL)
     {
         Libk::printk("Could not allocate page directory...\r\n");
         Libk::atomicDisable();
         return NULL;
     }
-    MapKernelPageTable(*pageDirectory);
+    mapKernelPageTable(*pageDirectory);
 
    Libk::atomicDisable();
 
     return pageDirectory;
 }
 
-void IdentityMap(PageDirectory& pageDirectory, uintptr_t address, size_t size)
+void identityMap(PageDirectory& pageDirectory, uintptr_t address, size_t size)
 {
     size_t page_count = PAGE_ALIGN(size) / PAGE_SIZE;
 
     Libk::atomicEnable();
-    PhysicalAllocate(address, page_count);
+    physicalAllocate(address, page_count);
     VirtualMap(pageDirectory, address, address, page_count, false);
     Libk::atomicDisable();
 }
 
-PageDirectory& GetKerkelPageDirectory()
+PageDirectory& getKerkelPageDirectory()
 {
     return kernelPageDirectory;
 }

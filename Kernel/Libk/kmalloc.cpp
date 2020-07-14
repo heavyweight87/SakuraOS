@@ -546,13 +546,13 @@ int liballoc_lock()
 
 int liballoc_free(void *ptr, int numPages)
 {
-    MemoryManager::MemoryFree(MemoryManager::GetKerkelPageDirectory(), (uint32_t)ptr, numPages * PAGE_SIZE);
+    MemoryManager::memoryFree(MemoryManager::getKerkelPageDirectory(), (uint32_t)ptr, numPages * PAGE_SIZE);
     return 0;
 }
 
 void *liballoc_alloc(int numPages)
 {
-    return (void*)MemoryManager::MemoryAllocate(MemoryManager::GetKerkelPageDirectory(), numPages * PAGE_SIZE,  false);
+    return (void*)MemoryManager::memoryAllocate(MemoryManager::getKerkelPageDirectory(), numPages * PAGE_SIZE,  false);
 }
 
 

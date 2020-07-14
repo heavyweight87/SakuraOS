@@ -68,6 +68,6 @@ struct ElfProgramHeader
 	std::uint16_t		m_align;
 };
 
-bool Load(std::uint8_t* elfData, std::uint32_t length);
+bool load(std::uint8_t* elfData, std::uint32_t length);
 
 }

@@ -1,7 +1,7 @@
 #ifndef EM_RINGBUF_CPP_H
 #define EM_RINGBUF_CPP_H
 
-#include "scheduler.h"
+#include "Scheduler.h"
 
 template <typename Type, size_t MaxElements>
 class RingBufCPP

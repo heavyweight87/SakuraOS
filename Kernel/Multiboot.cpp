@@ -7,7 +7,7 @@
 
 namespace Multiboot {
 
-void Multiboot::LoadModules()
+void Multiboot::loadModules()
 {
     std::uint32_t moduleNum = 0;
     if(m_multibootInfo.modsCount > 0)
@@ -17,29 +17,29 @@ void Multiboot::LoadModules()
         while(moduleNum < m_multibootInfo.modsCount)
         {   
             uint32_t size = module->modEnd - module->modStart;
-            MemoryManager::IdentityMap(MemoryManager::GetKerkelPageDirectory(), module->modStart, size);
-            Elf::Load(reinterpret_cast<uint8_t*>(module->modStart), size);
+            MemoryManager::identityMap(MemoryManager::getKerkelPageDirectory(), module->modStart, size);
+            Elf::load(reinterpret_cast<uint8_t*>(module->modStart), size);
             module++;
             moduleNum++;
         }
     }
 }
 
-void Multiboot::ReserveModuleMemory()
+void Multiboot::reserveModuleMemory()
 {
     std::uint32_t moduleNum = 0;
     ModuleInfo *module = (ModuleInfo*)m_multibootInfo.modsAddress;
     while(moduleNum < m_multibootInfo.modsCount)
     {   
         uint32_t size = module->modEnd - module->modStart;
-        MemoryManager::PhysicalFree(module->modStart, size / PAGE_SIZE);
-        MemoryManager::IdentityMap(MemoryManager::GetKerkelPageDirectory(), module->modStart, size);
+        MemoryManager::physicalFree(module->modStart, size / PAGE_SIZE);
+        MemoryManager::identityMap(MemoryManager::getKerkelPageDirectory(), module->modStart, size);
         module++;
         moduleNum++;
     }
 }
 
-std::uint32_t Multiboot::LoadMemoryMap()
+std::uint32_t Multiboot::loadMemoryMap()
 {
     std::uint32_t totalFreeMemory = 0;
     MemoryMap *map = (MemoryMap*)m_multibootInfo.mmapAddress;
@@ -63,13 +63,12 @@ std::uint32_t Multiboot::LoadMemoryMap()
                 length -= alignUp;
             }
             length -= size % PAGE_SIZE; //make sure the last page is aligned down
-            MemoryManager::PhysicalFree(startAddress, length / PAGE_SIZE);
+            MemoryManager::physicalFree(startAddress, length / PAGE_SIZE);
             totalFreeMemory += length;
         }
         
         map = (MemoryMap*)((uint64_t)map + map->size + sizeof(map->size));
     }
-    ReserveModuleMemory();
     return totalFreeMemory;
 }
 

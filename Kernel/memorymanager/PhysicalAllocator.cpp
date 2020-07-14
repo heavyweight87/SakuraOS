@@ -15,16 +15,16 @@ MemoryManagerData memManData;
 #define PHYSICAL_ALLOCATOR_SET(pageAddress) (PHYSICAL_ALLOCATOR_GET_BYTE(pageAddress) |= (1 << ((uint32_t)(pageAddress) / PAGE_SIZE % 8)))
 #define PHYSICAL_ALLOCATOR_CLEAR(pageAddress) (PHYSICAL_ALLOCATOR_GET_BYTE(pageAddress) &= ~(1 << ((uint32_t)(pageAddress) / PAGE_SIZE % 8)))
 
-void PhysicalAllocatorInit(Multiboot::Multiboot& multiboot)
+void physicalAllocatorInit(Multiboot::Multiboot& multiboot)
 {
     memManData.UsedMemory = 0;
     Libk::memset(&memManData.PhysicalAllocation, 0xFF, ALLOCATION_BYTES);
-    memManData.TotalMemory = multiboot.LoadMemoryMap();
+    memManData.TotalMemory = multiboot.loadMemoryMap();
 
     Libk::printk("Total physical memory: %dmb\r\n", memManData.TotalMemory / 1024 /1024 );
 }
 
-static bool PhysicalIsFree(uint32_t startAddress, uint32_t numPages)
+static bool isPhysicalFree(uint32_t startAddress, uint32_t numPages)
 {
     for (uint32_t pageIndex = 0; pageIndex < numPages; pageIndex++)
     {
@@ -37,14 +37,14 @@ static bool PhysicalIsFree(uint32_t startAddress, uint32_t numPages)
     return true;
 }
 
-uint32_t PhysicalAllocate(std::uint32_t numPages)
+uint32_t physicalAllocate(std::uint32_t numPages)
 {
     for (uint32_t pageIndex = 0; pageIndex < (memManData.TotalMemory / PAGE_SIZE); pageIndex++)
     {
         uint32_t physicalAddress = pageIndex * PAGE_SIZE;
-        if (PhysicalIsFree(physicalAddress, numPages))
+        if (isPhysicalFree(physicalAddress, numPages))
         {
-            PhysicalAllocate(physicalAddress, numPages);
+            physicalAllocate(physicalAddress, numPages);
             return physicalAddress;
         }
     }
@@ -52,7 +52,7 @@ uint32_t PhysicalAllocate(std::uint32_t numPages)
     return 0;
 }
 
-void PhysicalAllocate(uint32_t startAddress, std::uint32_t numPages)
+void physicalAllocate(uint32_t startAddress, std::uint32_t numPages)
 {
     for (uint32_t pageIndex = 0; pageIndex < numPages; pageIndex++)
     {
@@ -64,12 +64,12 @@ void PhysicalAllocate(uint32_t startAddress, std::uint32_t numPages)
         }
         else
         {
-          //  printf("Physical allocate failed, address already used\r\n");
+            Libk::printk("Physical allocate failed, address already used\r\n");
         }
     }
 }
 
-void PhysicalFree(uint32_t startAddress, uint32_t numPages)
+void physicalFree(uint32_t startAddress, uint32_t numPages)
 {
     for (uint32_t pageIndex = 0; pageIndex < numPages; pageIndex++)
     {
