@@ -27,6 +27,7 @@ int fstat(int file, struct stat *st)
 
 int read(int file, char *ptr, int len)
 {
+    syscall(SYSCALL_READ, file, (int)ptr, len, 15, 16);
 	return 0;
 }
 
@@ -48,11 +49,13 @@ int lseek(int file, int ptr, int dir)
 
 caddr_t sbrk(int incr)
 {
-	return -1;
+    syscall(SYSCALL_SRBK, incr, 0, 0, 0, 6);
+	return 0;
 }
 
 void _exit()
 {
+    syscall(SYSCALL_EXIT, 0, 0, 0, 0, 6);
 }
 
 int getpid()
@@ -62,5 +65,6 @@ int getpid()
 
 int kill(int pid, int sig)
 {
+    syscall(SYSCALL_KILL, pid, sig, 0, 0, 6);
 	return 0;
 }

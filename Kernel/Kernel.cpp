@@ -8,12 +8,29 @@
 #include "Scheduler.h"
 #include "MemoryManager.h"
 
+extern void (*start_ctors)(void) __attribute__((weak));
+extern void (*end_ctors)(void) __attribute__((weak));
+
+static void initGlobalConstructors()
+{
+    // Constructor list is defined in the linker script.
+    // The .ctors section is just an array of function pointers.
+    // iterate through, calling each in turn.
+    uintptr_t *iterator = reinterpret_cast<uintptr_t*>(&start_ctors);
+    while (iterator < reinterpret_cast<uintptr_t*>(&end_ctors))
+    {
+        void (*fp)(void) = reinterpret_cast<void (*)(void)>(*iterator);
+        fp();
+        iterator++;
+    }
+}
+
 extern "C" int kernel_main(uint32_t magic, Multiboot::MultibootInfo *mbinfo) 
 {
     gdt::init();
 	terminal_init(); //enable early so we have debugging
 	Serial::Init();
-    Libk::printk("Sakura 1.0.0 %x\r\n", 55);
+    Libk::printk("Sakura 1.0.0\r\n");
     if(magic != MULTIBOOT_BOOTLOADER_MAGIC)
     {
         Libk::printk("Booted with an unsupported bootloader %d\r\n", magic);
@@ -23,8 +40,12 @@ extern "C" int kernel_main(uint32_t magic, Multiboot::MultibootInfo *mbinfo)
     Multiboot::Multiboot multiboot(*mbinfo);
     MemoryManager::init(multiboot); 
     IDT::init();
-    Scheduler::init(); 
-    multiboot.loadModules();  
-    while(1);
+    initGlobalConstructors(); //call global constructors once there is paging and malloc etc
+    Scheduler::init();
+  //  multiboot.loadModules();  
+    while(1)
+    {
+        Libk::printk("main\r\n");
+    }
     return 0;
 }

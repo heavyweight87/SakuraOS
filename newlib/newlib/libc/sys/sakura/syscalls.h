@@ -5,6 +5,10 @@ typedef enum
     SYSCALL_OPEN,
     SYSCALL_CLOSE,
     SYSCALL_WRITE,
+    SYSCALL_READ,
+    SYSCALL_SRBK,
+    SYSCALL_KILL,
+    SYSCALL_EXIT
 }Syscall;
 
 static inline int syscall(Syscall syscall, int p1, int p2, int p3, int p4, int p5)

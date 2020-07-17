@@ -1,9 +1,10 @@
 #include "CPP.h"
 #include "kmalloc.h"
+#include <stddef.h>
  
-	#ifdef __cplusplus
-	extern "C" {
-	#endif
+#ifdef __cplusplus
+extern "C" {
+#endif
  
 atexit_func_entry_t __atexit_funcs[ATEXIT_MAX_FUNCS];
 uarch_t __atexit_func_count = 0;
@@ -98,8 +99,6 @@ void __cxa_finalize(void *f)
 		};
 	};
 };
-
-#include <stddef.h>
  
 void *operator new(size_t size)
 {
@@ -125,7 +124,14 @@ void operator delete[](void *p)
 {
     kfree(p);
 }
+
+void __cxa_pure_virtual() { /* Do nothing or print an error message. */ }
+
+__extension__ typedef int __guard __attribute__((mode(__DI__)));
+int __cxa_guard_acquire(__guard *g) { return !*(char *)(g); }
+void __cxa_guard_release(__guard *g) { *(char *)g = 1; }
+void __cxa_guard_abort(__guard *) {}
  
-	#ifdef __cplusplus
-	};
-	#endif
+#ifdef __cplusplus
+};
+#endif

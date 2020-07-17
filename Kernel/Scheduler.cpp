@@ -6,14 +6,16 @@
 #include "Arch.h"
 #include "kmalloc.h"
 #include "List.h"
+#include <list>
 #include "MemoryManager.h"
+#include <vector>
 
 namespace Scheduler {
  
 static Task *runningTask;
 static Task mainTask;
 bool schedulerEnabled = true;
-LinkedList<int> taskList;
+LinkedList<Task*> taskList;
 
 static void timerCallback()
 {
@@ -28,6 +30,12 @@ static void ConfigurePit()
     outb(0x40, div & 0xFF);
     outb(0x40, (div >> 8) & 0xFF);
 }
+
+static void fucky()
+{
+    while(1)
+    Libk::printk("poopoo\r\n");
+}
  
 void init() 
 {
@@ -35,15 +43,12 @@ void init()
     asm volatile("movl %%cr3, %%eax; movl %%eax, %0;":"=m"(mainTask.regs.cr3)::"%eax");
     asm volatile("pushfl; movl (%%esp), %%eax; movl %%eax, %0; popfl;":"=m"(mainTask.regs.eflags)::"%eax");
     runningTask = &mainTask; 
-    ConfigurePit();      
-//    Task *t = (Task*)kmalloc(sizeof(Task));
-   /* uint32_t x = 5;
-    taskList.add(x);
-    taskList.add(x);
-    taskList.remove(1);*/
+    ConfigurePit();
+    Task& task = createTask(0, false);
+    taskStart(task, fucky);
 }
  
-Task* createTask(uint32_t flags, bool isUser) 
+Task& createTask(uint32_t flags, bool isUser) 
 {
     Task *task = (Task*)kmalloc(sizeof(Task));
     task->regs.eax = 0;
@@ -62,8 +67,9 @@ Task* createTask(uint32_t flags, bool isUser)
         task->regs.cr3 = (uint32_t) &MemoryManager::getKerkelPageDirectory();
     }
     task->regs.esp = (uint32_t)MemoryManager::memoryAllocate(TASK_STACK_SIZE, false) + TASK_STACK_SIZE;
-    task->next = 0;
-    return task;
+    task->next = 0; 
+   // taskList.add(task);
+    return *task;
 }
 
 void taskStart(Task& task,  TaskEntry entry)

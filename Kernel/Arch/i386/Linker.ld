@@ -20,11 +20,19 @@ SECTIONS
 		*(.text)
 	}
 
-	/* Read-only data. */
-	.rodata BLOCK(4K) : ALIGN(4K)
-	{
-		*(.rodata)
-	}
+	.rodata ALIGN(0x1000) :
+    {
+        start_ctors = .;
+        *(SORT(.ctors*))  /* Note the "SORT" */
+        end_ctors = .;
+
+        start_dtors = .;
+        *(SORT(.dtors*))
+        end_dtors = .;
+
+        *(.rodata*)
+        *(.gnu.linkonce.r*)
+    }
 
 	/* Read-write data (initialized) */
 	.data BLOCK(4K) : ALIGN(4K)

@@ -16,6 +16,12 @@ struct Registers
 
 enum Interrupts
 {
+    DivideZeroExeption = 0,
+    OverflowException = 1,
+    InvalidOpcodeException = 6,
+    DoubleFault = 8,
+    GeneralProtectionFault = 13,
+    PageFault = 14,
     Timer = 32,
     Keyboard = 34,
     Com2,

@@ -45,22 +45,17 @@ extern "C" int irq13();
 extern "C" int irq14();
 extern "C" int irq15();
 extern "C" int irq15();
+extern "C" int irq17();
 extern "C" int irq32();
 extern "C" int irq128();
 
 extern "C" void interruptHandler(Registers *regs)
 {
-    if(regs->int_no >= 40)
-    {
-		outb(PIC2_COMMAND,PIC_EOI);
-    }
-    else
-    {
-	    outb(PIC1_COMMAND,PIC_EOI);
-    }
     if(regs->int_no < 32)
     {
         //exception handler
+        Libk::printk("Exception occured! %d\r\n", regs->int_no);
+        while(1);
     }
     else if(regs->int_no < 48)
     {
@@ -69,6 +64,14 @@ extern "C" void interruptHandler(Registers *regs)
     else if(regs->int_no == 128)
     {
         regs->eax = Syscalls::Handle((Syscalls::Syscall)regs->eax, regs->ebx, regs->ecx, regs->edx, regs->esi, regs->edi);
+    }
+    if(regs->int_no >= 40)
+    {
+		outb(PIC2_COMMAND,PIC_EOI);
+    }
+    else
+    {
+	    outb(PIC1_COMMAND,PIC_EOI);
     }
 }
 
@@ -84,6 +87,20 @@ static void configureGate(std::uintptr_t offset, int gateNum)
 
 static void configureIdt()
 {
+    configureGate((uintptr_t)irq0, 0);
+    configureGate((uintptr_t)irq1, 1);
+    configureGate((uintptr_t)irq3, 2);
+    configureGate((uintptr_t)irq4, 4);
+    configureGate((uintptr_t)irq5, 5);
+    configureGate((uintptr_t)irq6, 6);
+    configureGate((uintptr_t)irq7, 7);
+    configureGate((uintptr_t)irq8, 8);
+    configureGate((uintptr_t)irq10, 10);
+    configureGate((uintptr_t)irq11, 11);
+    configureGate((uintptr_t)irq12, 12);
+    configureGate((uintptr_t)irq13, 13);
+    configureGate((uintptr_t)irq14, 14);
+    configureGate((uintptr_t)irq17, 17);
     configureGate((uintptr_t)irq32, 32);
     configureGate((uintptr_t)irq128, 128);
 }

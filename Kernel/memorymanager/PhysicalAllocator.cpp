@@ -64,7 +64,7 @@ void physicalAllocate(uint32_t startAddress, std::uint32_t numPages)
         }
         else
         {
-            Libk::printk("Physical allocate failed, address already used\r\n");
+          //  Libk::printk("Physical allocate failed, address already used\r\n");
         }
     }
 }
