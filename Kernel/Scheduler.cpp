@@ -34,7 +34,9 @@ static void ConfigurePit()
 static void fucky()
 {
     while(1)
-    Libk::printk("poopoo\r\n");
+    {
+       // Libk::printk("poopoo\r\n");
+    }
 }
  
 void init() 
@@ -94,6 +96,7 @@ void schedule()
         if(runningTask->next)
         {
             runningTask = runningTask->next;
+           // Libk::printk("Switch\r\n");
             switchTask(&last->regs, &runningTask->regs);
         }
     }

@@ -23,8 +23,8 @@ enum Interrupts
     GeneralProtectionFault = 13,
     PageFault = 14,
     Timer = 32,
-    Keyboard = 34,
-    Com2,
+    Keyboard = 33,
+    Com2 = 35,
     Com1,
     NumInterrupts = 48
 };

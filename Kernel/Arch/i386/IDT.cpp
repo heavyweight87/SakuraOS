@@ -47,10 +47,19 @@ extern "C" int irq15();
 extern "C" int irq15();
 extern "C" int irq17();
 extern "C" int irq32();
+extern "C" int irq33();
 extern "C" int irq128();
 
 extern "C" void interruptHandler(Registers *regs)
 {
+    if(regs->int_no >= 40)
+    {
+		outb(PIC2_COMMAND,PIC_EOI);
+    }
+    else
+    {
+	    outb(PIC1_COMMAND,PIC_EOI);
+    }
     if(regs->int_no < 32)
     {
         //exception handler
@@ -60,18 +69,15 @@ extern "C" void interruptHandler(Registers *regs)
     else if(regs->int_no < 48)
     {
         InterruptHandler::interruptHandler(regs->int_no);
+        if(regs->int_no == 33)
+        {
+            uint8_t scancode = inb(0x60);
+            Libk::printk("key %d\r\n", scancode);
+        }
     }
     else if(regs->int_no == 128)
     {
         regs->eax = Syscalls::Handle((Syscalls::Syscall)regs->eax, regs->ebx, regs->ecx, regs->edx, regs->esi, regs->edi);
-    }
-    if(regs->int_no >= 40)
-    {
-		outb(PIC2_COMMAND,PIC_EOI);
-    }
-    else
-    {
-	    outb(PIC1_COMMAND,PIC_EOI);
     }
 }
 
@@ -102,6 +108,7 @@ static void configureIdt()
     configureGate((uintptr_t)irq14, 14);
     configureGate((uintptr_t)irq17, 17);
     configureGate((uintptr_t)irq32, 32);
+    configureGate((uintptr_t)irq33, 33);
     configureGate((uintptr_t)irq128, 128);
 }
 

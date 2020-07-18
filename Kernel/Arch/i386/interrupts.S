@@ -53,6 +53,7 @@ ISR_NOERR 30
 ISR_NOERR 31
 # Interrupts
 ISR_NOERR 32
+ISR_NOERR 33
 ISR_NOERR 128
 
 .extern interruptHandler
