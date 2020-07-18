@@ -14,12 +14,21 @@ struct Registers
 {
     uint32_t eax, ebx, ecx, edx, esi, edi, esp, ebp, eip, eflags, cr3;
 };
+
+enum class TaskState 
+{
+    None,
+    Running,
+    Sleep
+};
  
 struct Task 
 {
     Registers regs;
     Task *next;
     char name[50];
+    uint64_t wakeupTime;
+    TaskState state;
 };
  
 void init();

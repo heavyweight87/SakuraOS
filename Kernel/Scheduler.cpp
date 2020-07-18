@@ -17,9 +17,18 @@ static Task mainTask;
 static Task *taskTail;
 bool schedulerEnabled = true;
 LinkedList<Task*> taskList;
+uint64_t timeMs;
 
 static void timerCallback()
 {
+    timeMs++;
+    schedule();
+}
+
+static void sleep(Task& task, uint64_t sleepMs)
+{
+    task.state = TaskState::Sleep;
+    task.wakeupTime = timeMs + sleepMs;
     schedule();
 }
 
@@ -36,23 +45,28 @@ static void fucky()
 {
     while(1)
     {
-        Libk::printk("fucky0\r\n");
+        Libk::printk("task1\r\n");
+        sleep(*runningTask, 3000);
     }
 }
 
 static void fucky1()
 {
+    sleep(*runningTask, 1000);
     while(1)
     {
-        Libk::printk("fucky1\r\n");
+        Libk::printk("task2\r\n");
+        sleep(*runningTask, 3000);
     }
 }
 
 static void fucky2()
 {
+    sleep(*runningTask, 2000);
     while(1)
     {
-        Libk::printk("fucky2\r\n");
+        Libk::printk("task3\r\n");
+        sleep(*runningTask, 3000);
     }
 }
  
@@ -63,6 +77,7 @@ void init()
     asm volatile("pushfl; movl (%%esp), %%eax; movl %%eax, %0; popfl;":"=m"(mainTask.regs.eflags)::"%eax");
     runningTask = &mainTask; 
     sprintf(mainTask.name, "main");
+    mainTask.state = TaskState::Running;
     taskTail = &mainTask;
     Task& task = createTask(false);
     sprintf(task.name, "fucky0");
@@ -109,13 +124,25 @@ void taskStart(Task& task,  TaskEntry entry)
     taskTail->next = &task;
    taskTail = &task;
    task.next = &mainTask;
+   task.state = TaskState::Running;
 }
- 
-void yield() 
+
+static Task* goToNextTask()
 {
-    Task *last = runningTask;
-    runningTask = runningTask->next;
-    switchTask(&last->regs, &runningTask->regs);
+    Task *nextTask = runningTask->next;
+    while(1)
+    {
+        if(nextTask == NULL)
+        {
+            return NULL;
+        }
+        if(nextTask->state == TaskState::Running || (nextTask->state == TaskState::Sleep && timeMs > nextTask->wakeupTime))
+        {
+            nextTask->state = TaskState::Running;
+            return nextTask;
+        }
+        nextTask = nextTask->next;
+    }
 }
 
 void schedule()
@@ -123,10 +150,10 @@ void schedule()
     if(schedulerEnabled)
     {
         Task *last = runningTask;
-        if(runningTask->next)
+        Task *next = goToNextTask();
+        if(next != nullptr)
         {
-            runningTask = runningTask->next;
-            Libk::printk("switching to task %s\r\n", runningTask->name);
+            runningTask = next;
             switchTask(&last->regs, &runningTask->regs);
         }
     }
