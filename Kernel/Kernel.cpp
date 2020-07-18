@@ -42,10 +42,7 @@ extern "C" int kernel_main(uint32_t magic, Multiboot::MultibootInfo *mbinfo)
     IDT::init();
     initGlobalConstructors(); //call global constructors once there is paging and malloc etc
     Scheduler::init();
-  //  multiboot.loadModules();  
-    while(1)
-    {
-        Libk::printk("main\r\n");
-    }
+//    multiboot.loadModules();  
+    while(1);
     return 0;
 }

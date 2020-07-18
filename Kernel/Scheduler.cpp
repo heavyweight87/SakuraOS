@@ -14,6 +14,7 @@ namespace Scheduler {
  
 static Task *runningTask;
 static Task mainTask;
+static Task *taskTail;
 bool schedulerEnabled = true;
 LinkedList<Task*> taskList;
 
@@ -35,7 +36,23 @@ static void fucky()
 {
     while(1)
     {
-       // Libk::printk("poopoo\r\n");
+        Libk::printk("fucky0\r\n");
+    }
+}
+
+static void fucky1()
+{
+    while(1)
+    {
+        Libk::printk("fucky1\r\n");
+    }
+}
+
+static void fucky2()
+{
+    while(1)
+    {
+        Libk::printk("fucky2\r\n");
     }
 }
  
@@ -45,12 +62,25 @@ void init()
     asm volatile("movl %%cr3, %%eax; movl %%eax, %0;":"=m"(mainTask.regs.cr3)::"%eax");
     asm volatile("pushfl; movl (%%esp), %%eax; movl %%eax, %0; popfl;":"=m"(mainTask.regs.eflags)::"%eax");
     runningTask = &mainTask; 
-    ConfigurePit();
-    Task& task = createTask(0, false);
+    sprintf(mainTask.name, "main");
+    taskTail = &mainTask;
+    Task& task = createTask(false);
+    sprintf(task.name, "fucky0");
     taskStart(task, fucky);
+
+    Task& task1 = createTask(false);
+    sprintf(task1.name, "fucky1");
+    taskStart(task1, fucky1);
+
+
+    Task& task2 = createTask(false);
+    sprintf(task2.name, "fucky2");
+    taskStart(task2, fucky2);
+
+    ConfigurePit();
 }
  
-Task& createTask(uint32_t flags, bool isUser) 
+Task& createTask(bool isUser) 
 {
     Task *task = (Task*)kmalloc(sizeof(Task));
     task->regs.eax = 0;
@@ -59,7 +89,7 @@ Task& createTask(uint32_t flags, bool isUser)
     task->regs.edx = 0;
     task->regs.esi = 0;
     task->regs.edi = 0;
-    task->regs.eflags = flags;
+    task->regs.eflags = mainTask.regs.eflags;
     if(isUser)
     {
         task->regs.cr3 = (uint32_t)MemoryManager::createUserPageDirectory();
@@ -70,15 +100,15 @@ Task& createTask(uint32_t flags, bool isUser)
     }
     task->regs.esp = (uint32_t)MemoryManager::memoryAllocate(TASK_STACK_SIZE, false) + TASK_STACK_SIZE;
     task->next = 0; 
-   // taskList.add(task);
     return *task;
 }
 
 void taskStart(Task& task,  TaskEntry entry)
 {
     task.regs.eip = (uint32_t) entry;
-    mainTask.next = &task;
-    task.next = &mainTask;
+    taskTail->next = &task;
+   taskTail = &task;
+   task.next = &mainTask;
 }
  
 void yield() 
@@ -96,7 +126,7 @@ void schedule()
         if(runningTask->next)
         {
             runningTask = runningTask->next;
-           // Libk::printk("Switch\r\n");
+            Libk::printk("switching to task %s\r\n", runningTask->name);
             switchTask(&last->regs, &runningTask->regs);
         }
     }

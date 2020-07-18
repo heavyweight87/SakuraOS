@@ -63,7 +63,7 @@ bool load(std::uint8_t* elfData, std::uint32_t length)
     ElfHeader *header = (ElfHeader*)elfData;
     if(verifyElfHeader(header))
     {
-        Scheduler::Task& task = Scheduler::createTask(0, false);
+        Scheduler::Task& task = Scheduler::createTask(false);
         for(int sec = 0; sec < header->m_phnum; sec++)
         {
             ElfProgramHeader *programHeader = (ElfProgramHeader*)(elfData + header->m_phoff + (header->m_phentsize * sec));         
