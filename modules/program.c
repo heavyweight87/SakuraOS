@@ -3,7 +3,7 @@
 
 int main()
 {
-	printf("Hello module!");
-	while(1); 
-	return 0;
+    printf("Hello module!");
+    while(1);
+    return 0;
 }
