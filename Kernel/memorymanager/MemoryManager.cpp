@@ -74,12 +74,11 @@ uintptr_t memoryAllocate(PageDirectory& pageDirectory, size_t size, bool user)
         if (virtualAddress == 0)
         {
             physicalFree(physicalAddress, numPages);
-            Libk::atomicEnable();
+            Libk::atomicDisable();
             Libk::printk("Out of vmem!\r\n");
             return 0;
         }
-
-        Libk::atomicEnable();
+        Libk::atomicDisable();
         Libk::memset((void *)virtualAddress, 0, numPages * PAGE_SIZE); //clear the memory
         return virtualAddress;
     }

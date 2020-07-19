@@ -5,18 +5,16 @@
 #include "Libk.h"
 #include "Arch.h"
 #include "kmalloc.h"
-#include "List.h"
-#include <list>
 #include "MemoryManager.h"
-#include <vector>
 
 namespace Scheduler {
+
+#define PIT_FREQUENCY_HZ 1000
  
 static Task *runningTask;
 static Task mainTask;
 static Task *taskTail;
 bool schedulerEnabled = true;
-LinkedList<Task*> taskList;
 uint64_t timeMs;
 
 static void timerCallback()
@@ -34,14 +32,14 @@ static void sleep(Task& task, uint64_t sleepMs)
 
 static void ConfigurePit()
 {
-    uint32_t div = 1193182 / 1000;
+    uint32_t div = 1193182 / PIT_FREQUENCY_HZ;
     InterruptHandler::registerInterrupt(Interrupts::Timer, timerCallback);
     outb(0x43, 0x36);
     outb(0x40, div & 0xFF);
     outb(0x40, (div >> 8) & 0xFF);
 }
 
-static void fucky()
+static void task2()
 {
     while(1)
     {
@@ -50,7 +48,7 @@ static void fucky()
     }
 }
 
-static void fucky1()
+static void task1()
 {
     sleep(*runningTask, 1000);
     while(1)
@@ -60,7 +58,7 @@ static void fucky1()
     }
 }
 
-static void fucky2()
+static void task3()
 {
     sleep(*runningTask, 2000);
     while(1)
@@ -69,7 +67,6 @@ static void fucky2()
         sleep(*runningTask, 3000);
     }
 }
- 
 void init() 
 {
     // Get EFLAGS and CR3
@@ -80,17 +77,17 @@ void init()
     mainTask.state = TaskState::Running;
     taskTail = &mainTask;
     Task& task = createTask(false);
-    sprintf(task.name, "fucky0");
-    taskStart(task, fucky);
+    sprintf(task.name, "task1");
+    taskStart(task, task1);
 
     Task& task1 = createTask(false);
-    sprintf(task1.name, "fucky1");
-    taskStart(task1, fucky1);
+    sprintf(task1.name, "task2");
+    taskStart(task1, task2);
 
 
     Task& task2 = createTask(false);
-    sprintf(task2.name, "fucky2");
-    taskStart(task2, fucky2);
+    sprintf(task2.name, "task3");
+    taskStart(task2, task3);
 
     ConfigurePit();
 }
@@ -121,10 +118,11 @@ Task& createTask(bool isUser)
 void taskStart(Task& task,  TaskEntry entry)
 {
     task.regs.eip = (uint32_t) entry;
+    // this task is now the tail
     taskTail->next = &task;
-   taskTail = &task;
-   task.next = &mainTask;
-   task.state = TaskState::Running;
+    taskTail = &task;
+    task.next = &mainTask; //loop back to the first task
+    task.state = TaskState::Running;
 }
 
 static Task* goToNextTask()

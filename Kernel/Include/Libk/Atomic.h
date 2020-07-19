@@ -4,7 +4,7 @@
 
 namespace Libk {
 
-void atomicEnable() { /*disableInterrupts();*/ }
-void atomicDisable() { /*enableInterrupts();*/ }
+void atomicEnable() { disableInterrupts(); }
+void atomicDisable() { enableInterrupts(); }
 
 }

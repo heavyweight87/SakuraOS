@@ -5,5 +5,5 @@ int main()
 {
     printf("Hello module!");
     while(1);
-	return 0;
+    return 0;
 }
