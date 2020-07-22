@@ -33,7 +33,7 @@ static void sleep(Task& task, uint64_t sleepMs)
 static void ConfigurePit()
 {
     uint32_t div = 1193182 / PIT_FREQUENCY_HZ;
-    InterruptHandler::registerInterrupt(Interrupts::Timer, timerCallback);
+    InterruptHandler::registerInterrupt(InterruptSource::Timer, timerCallback);
     outb(0x43, 0x36);
     outb(0x40, div & 0xFF);
     outb(0x40, (div >> 8) & 0xFF);
@@ -76,19 +76,21 @@ void init()
     sprintf(mainTask.name, "main");
     mainTask.state = TaskState::Running;
     taskTail = &mainTask;
-    Task& task = createTask(false);
-    sprintf(task.name, "task1");
-    taskStart(task, task1);
+    Task& t = createTask(false);
+    sprintf(t.name, "task1");
 
-    Task& task1 = createTask(false);
-    sprintf(task1.name, "task2");
-    taskStart(task1, task2);
+    Task& t1 = createTask(false);
+    sprintf(t1.name, "task2");
 
 
-    Task& task2 = createTask(false);
-    sprintf(task2.name, "task3");
-    taskStart(task2, task3);
 
+    Task& t2 = createTask(false);
+    sprintf(t2.name, "task3");
+#ifdef TASKTEST
+    taskStart(t, task1);
+    taskStart(t1, task2);
+    taskStart(t2, task3);
+#endif
     ConfigurePit();
 }
  

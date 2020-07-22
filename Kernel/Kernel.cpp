@@ -7,6 +7,9 @@
 #include "GDT.h"
 #include "Scheduler.h"
 #include "MemoryManager.h"
+#include "Keyboard.h"
+
+Devices::Keyboard keyboard;
 
 extern void (*start_ctors)(void) __attribute__((weak));
 extern void (*end_ctors)(void) __attribute__((weak));

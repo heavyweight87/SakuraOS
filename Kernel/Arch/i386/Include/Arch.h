@@ -14,7 +14,7 @@ struct Registers
 	std::uint32_t eip, cs, eflags, useresp, ss;
 };
 
-enum Interrupts
+enum InterruptSource
 {
     DivideZeroExeption = 0,
     OverflowException = 1,

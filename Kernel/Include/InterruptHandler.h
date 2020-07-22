@@ -1,10 +1,12 @@
 #pragma once
 
+#include "Arch.h"
+
 namespace InterruptHandler {
 
 typedef void (*InterruptCallback)();
 
-void registerInterrupt(int intNum, InterruptCallback callback);
-void interruptHandler(int intNum);
+void registerInterrupt(InterruptSource intNum, InterruptCallback callback);
+void interruptHandler(InterruptSource intNum);
 
 }

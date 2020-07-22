@@ -11,6 +11,7 @@ include_directories(Arch/i386/Include)
 include_directories(Include)
 include_directories(Include/Libk)
 include_directories(Include/MemoryManager)
+include_directories(Include/Devices)
 
 # set the linker script
 set(LINKER_SCRIPT ${ARCH_FOLDER}/Linker.ld)

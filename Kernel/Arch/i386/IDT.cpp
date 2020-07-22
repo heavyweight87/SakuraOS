@@ -68,12 +68,7 @@ extern "C" void interruptHandler(Registers *regs)
     }
     else if(regs->int_no < 48)
     {
-        InterruptHandler::interruptHandler(regs->int_no);
-        if(regs->int_no == 33)
-        {
-            uint8_t scancode = inb(0x60);
-            Libk::printk("key %d\r\n", scancode);
-        }
+        InterruptHandler::interruptHandler(static_cast<InterruptSource>(regs->int_no));
     }
     else if(regs->int_no == 128)
     {

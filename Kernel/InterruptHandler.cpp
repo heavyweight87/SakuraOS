@@ -4,19 +4,19 @@
 
 namespace InterruptHandler {
 
-InterruptCallback callbackTable[Interrupts::NumInterrupts];
+InterruptCallback callbackTable[InterruptSource::NumInterrupts];
 
-void interruptHandler(int intNum)
+void interruptHandler(InterruptSource intNum)
 {
-    if(intNum < Interrupts::NumInterrupts && callbackTable[intNum] != nullptr)
+    if(intNum < InterruptSource::NumInterrupts && callbackTable[intNum] != nullptr)
     {
         callbackTable[intNum]();
     }
 }
 
-void registerInterrupt(int intNum, InterruptCallback callback)
+void registerInterrupt(InterruptSource intNum, InterruptCallback callback)
 {
-    if(intNum < Interrupts::NumInterrupts)
+    if(intNum < InterruptSource::NumInterrupts)
     {
         callbackTable[intNum] = callback;
         return;
