@@ -7,33 +7,36 @@
 #include "kmalloc.h"
 #include "MemoryManager.h"
 
-namespace Scheduler {
+namespace Kernel {
 
 #define PIT_FREQUENCY_HZ 1000
  
-static Task *runningTask;
-static Task mainTask;
-static Task *taskTail;
+static Scheduler::Task mainTask;
 bool schedulerEnabled = true;
 uint64_t timeMs;
+
+Scheduler::Task *Scheduler::m_taskTail;
+Scheduler::Task *Scheduler::m_runningTask;
+
+extern "C" void switchTask(Registers *old, Registers *n); // The function which actually switches
 
 static void timerCallback()
 {
     timeMs++;
-    schedule();
+    Scheduler::schedule();
 }
 
-static void sleep(Task& task, uint64_t sleepMs)
+void Scheduler::sleep(uint64_t sleepMs)
 {
-    task.state = TaskState::Sleep;
-    task.wakeupTime = timeMs + sleepMs;
+    m_runningTask->state = TaskState::Sleep;
+    m_runningTask->wakeupTime = timeMs + sleepMs;
     schedule();
 }
 
 static void ConfigurePit()
 {
     uint32_t div = 1193182 / PIT_FREQUENCY_HZ;
-    InterruptHandler::registerInterrupt(InterruptSource::Timer, timerCallback);
+    //InterruptHandler::registerInterrupt(InterruptSource::Timer, timerCallback);
     outb(0x43, 0x36);
     outb(0x40, div & 0xFF);
     outb(0x40, (div >> 8) & 0xFF);
@@ -44,38 +47,38 @@ static void task2()
     while(1)
     {
         Libk::printk("task1\r\n");
-        sleep(*runningTask, 3000);
+        Scheduler::sleep(3000);
     }
 }
 
 static void task1()
 {
-    sleep(*runningTask, 1000);
+    Scheduler::sleep(1000);
     while(1)
     {
         Libk::printk("task2\r\n");
-        sleep(*runningTask, 3000);
+        Scheduler::sleep(3000);
     }
 }
 
 static void task3()
 {
-    sleep(*runningTask, 2000);
+    Scheduler::sleep(2000);
     while(1)
     {
         Libk::printk("task3\r\n");
-        sleep(*runningTask, 3000);
+        Scheduler::sleep(3000);
     }
 }
-void init() 
+void Scheduler::start() 
 {
     // Get EFLAGS and CR3
     asm volatile("movl %%cr3, %%eax; movl %%eax, %0;":"=m"(mainTask.regs.cr3)::"%eax");
     asm volatile("pushfl; movl (%%esp), %%eax; movl %%eax, %0; popfl;":"=m"(mainTask.regs.eflags)::"%eax");
-    runningTask = &mainTask; 
+    m_runningTask = &mainTask; 
     sprintf(mainTask.name, "main");
     mainTask.state = TaskState::Running;
-    taskTail = &mainTask;
+    m_taskTail = &mainTask;
     Task& t = createTask(false);
     sprintf(t.name, "task1");
 
@@ -94,9 +97,9 @@ void init()
     ConfigurePit();
 }
  
-Task& createTask(bool isUser) 
+Scheduler::Task& Scheduler::createTask(bool isUser) 
 {
-    Task *task = (Task*)kmalloc(sizeof(Task));
+    Scheduler::Task *task = (Task*)kmalloc(sizeof(Task));
     task->regs.eax = 0;
     task->regs.ebx = 0;
     task->regs.ecx = 0;
@@ -117,19 +120,19 @@ Task& createTask(bool isUser)
     return *task;
 }
 
-void taskStart(Task& task,  TaskEntry entry)
+void Scheduler::taskStart(Scheduler::Task& task,  TaskEntry entry)
 {
     task.regs.eip = (uint32_t) entry;
     // this task is now the tail
-    taskTail->next = &task;
-    taskTail = &task;
+    m_taskTail->next = &task;
+    m_taskTail = &task;
     task.next = &mainTask; //loop back to the first task
     task.state = TaskState::Running;
 }
 
-static Task* goToNextTask()
+Scheduler::Task* Scheduler::goToNextTask()
 {
-    Task *nextTask = runningTask->next;
+    Task *nextTask = m_runningTask->next;
     while(1)
     {
         if(nextTask == NULL)
@@ -145,33 +148,33 @@ static Task* goToNextTask()
     }
 }
 
-void schedule()
+void Scheduler::schedule()
 {
     if(schedulerEnabled)
     {
-        Task *last = runningTask;
+        Task *last = m_runningTask;
         Task *next = goToNextTask();
         if(next != nullptr)
         {
-            runningTask = next;
-            switchTask(&last->regs, &runningTask->regs);
+            m_runningTask = next;
+            switchTask(&last->regs, &m_runningTask->regs);
         }
     }
 }
 
-void enable()
+void Scheduler::enable()
 {
     schedulerEnabled = true;
 }
 
-void disable()
+void Scheduler::disable()
 {
     schedulerEnabled = false;
 }
 
-Task& getRunningTask()
+Scheduler::Task& Scheduler::getRunningTask()
 {
-    return *runningTask;
+    return *m_runningTask;
 }
 
 }

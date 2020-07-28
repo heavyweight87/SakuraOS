@@ -2,8 +2,9 @@
 #include "Libk.h"
 #include "Elf.h"
 #include "MemoryManager.h"
+#include "kmalloc.h"
 
-namespace Elf {
+namespace Kernel {
 
 static bool verifyElfHeader(ElfHeader *header) 
 {
@@ -55,8 +56,6 @@ static bool verifyElfHeader(ElfHeader *header)
 	}
 	return true;
 }
-
-#include "kmalloc.h"
 
 bool load(std::uint8_t* elfData, std::uint32_t length)
 {

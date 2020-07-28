@@ -3,7 +3,7 @@
 #include <cstdint>
 // The following was copied from https://www.gnu.org/software/grub/manual/multiboot/html_node/multiboot.h.html
 
-namespace Multiboot {
+namespace Kernel {
 
 
 /* The magic number for the Multiboot header. */

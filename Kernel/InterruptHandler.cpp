@@ -2,23 +2,24 @@
 #include "Arch.h"
 #include "Libk.h"
 
-namespace InterruptHandler {
+namespace Kernel {
 
-InterruptCallback callbackTable[InterruptSource::NumInterrupts];
+InterruptHandler *InterruptHandler::m_callbackTable[InterruptSource::NumInterrupts];
 
-void interruptHandler(InterruptSource intNum)
+
+void InterruptHandler::interruptHandler(InterruptSource intNum)
 {
-    if(intNum < InterruptSource::NumInterrupts && callbackTable[intNum] != nullptr)
+    if(intNum < InterruptSource::NumInterrupts && m_callbackTable[intNum] != nullptr)
     {
-        callbackTable[intNum]();
+        InterruptHandler::m_callbackTable[intNum]->IrqCallback(intNum);
     }
 }
 
-void registerInterrupt(InterruptSource intNum, InterruptCallback callback)
+void InterruptHandler::registerInterrupt(InterruptSource intNum)
 {
     if(intNum < InterruptSource::NumInterrupts)
     {
-        callbackTable[intNum] = callback;
+        m_callbackTable[intNum] = this;
         return;
     }
     Libk::printk("Invalid interrupt number %d. Cannot register interrupt callback\r\n");

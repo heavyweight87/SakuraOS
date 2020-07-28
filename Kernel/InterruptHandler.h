@@ -2,11 +2,15 @@
 
 #include "Arch.h"
 
-namespace InterruptHandler {
+namespace Kernel {
 
-typedef void (*InterruptCallback)();
-
-void registerInterrupt(InterruptSource intNum, InterruptCallback callback);
-void interruptHandler(InterruptSource intNum);
+class InterruptHandler {
+    public:
+        virtual void IrqCallback(int intNum) = 0;
+        void registerInterrupt(InterruptSource intNum);
+        static void interruptHandler(InterruptSource intNum);
+    private:
+        static InterruptHandler *m_callbackTable[InterruptSource::NumInterrupts];
+};
 
 }

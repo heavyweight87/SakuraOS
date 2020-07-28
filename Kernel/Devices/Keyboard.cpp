@@ -47,7 +47,7 @@ char keymap[] = {
     0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, '7', '8', '9', '-', '4', '5', '6', '+', '1', '2', '3', '0', '.', 0, 0, '\\', 0, 0, 0,
 };
 
-static void keyboard_isr()
+void Keyboard::IrqCallback(int intNum)
 {
     std::uint8_t keycode = inb(PS2_DATA_REG);
     if(!(keycode & 0x80))
@@ -55,6 +55,7 @@ static void keyboard_isr()
         uint8_t code = keycode&0x7F;
         char c = keymap[code];
         Libk::printk("%c", c);
+        m_ringbuffer.push(c);
     }
 }
 
@@ -65,7 +66,7 @@ std::size_t Keyboard::read(std::uint8_t *buffer, std::size_t length)
 
 Keyboard::Keyboard()
 {
-    InterruptHandler::registerInterrupt(InterruptSource::Keyboard, keyboard_isr);
+    registerInterrupt(InterruptSource::Keyboard);
 }
 
 

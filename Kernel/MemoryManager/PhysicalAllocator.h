@@ -28,7 +28,7 @@ struct MemoryManagerData
  * @param multiboot multiboot structure containing the memmory map
  * and other goodiesx   
  */
-void physicalAllocatorInit(Multiboot::Multiboot& multiboot);
+void physicalAllocatorInit(Kernel::Multiboot& multiboot);
 
 /**
  * @brief Allocates physical memory at aspecified adddress

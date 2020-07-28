@@ -2,7 +2,7 @@
 
 #include <cstdint>
 
-namespace Elf {
+namespace Kernel {
 
 # define ELF_NIDENT_LENTH	16
 # define ELFMAG0	        0x7F // e_ident[EI_MAG0]

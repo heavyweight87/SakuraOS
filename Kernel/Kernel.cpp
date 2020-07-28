@@ -28,8 +28,10 @@ static void initGlobalConstructors()
     }
 }
 
-extern "C" int kernel_main(uint32_t magic, Multiboot::MultibootInfo *mbinfo) 
+extern "C" int kernel_main(uint32_t magic, Kernel::MultibootInfo *mbinfo) 
 {
+    Kernel::IDT idt;
+    Kernel::Scheduler scheduler;
     gdt::init();
 	terminal_init(); //enable early so we have debugging
 	Serial::Init();
@@ -40,11 +42,11 @@ extern "C" int kernel_main(uint32_t magic, Multiboot::MultibootInfo *mbinfo)
         return 0;
     }
 
-    Multiboot::Multiboot multiboot(*mbinfo);
+    Kernel::Multiboot multiboot(*mbinfo);
+    idt.init();
     MemoryManager::init(multiboot); 
-    IDT::init();
     initGlobalConstructors(); //call global constructors once there is paging and malloc etc
-    Scheduler::init();
+    scheduler.start();
 //    multiboot.loadModules();  //dont load modules yet... still need some work on syscalls
     while(1);
     return 0;

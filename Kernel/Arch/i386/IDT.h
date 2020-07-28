@@ -1,7 +1,10 @@
 #pragma once
 
-namespace IDT {
+namespace Kernel {
 
-void init();
+class IDT {
+    public:
+        void init();
+};
 
 }

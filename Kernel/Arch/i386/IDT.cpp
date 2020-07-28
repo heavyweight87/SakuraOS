@@ -3,8 +3,9 @@
 #include "InterruptHandler.h"
 #include "Syscalls.h"
 #include "Arch.h"
+#include "IDT.h"
 
-namespace IDT {
+namespace Kernel {
 
 #define NUM_IDT_ENTRIES 256
 
@@ -25,7 +26,7 @@ struct IDT_entry
 	std::uint16_t offsethigher;
 };
 
-struct IDT_entry IDT[NUM_IDT_ENTRIES];
+struct IDT_entry IDTTable[NUM_IDT_ENTRIES];
 
 extern "C" int idt_load(unsigned long);
 extern "C" int irq0();
@@ -68,7 +69,7 @@ extern "C" void interruptHandler(Registers *regs)
     }
     else if(regs->int_no < 48)
     {
-        InterruptHandler::interruptHandler(static_cast<InterruptSource>(regs->int_no));
+        InterruptHandler::InterruptHandler::interruptHandler(static_cast<InterruptSource>(regs->int_no));
     }
     else if(regs->int_no == 128)
     {
@@ -78,11 +79,11 @@ extern "C" void interruptHandler(Registers *regs)
 
 static void configureGate(std::uintptr_t offset, int gateNum)
 {
-    IDT[gateNum].offsetLower = offset & 0xffff;
-    IDT[gateNum].selector = 0x08; 
-    IDT[gateNum].zero = 0;
-    IDT[gateNum].typeAttribute = 0x8E;
-    IDT[gateNum].offsethigher = (offset & 0xffff0000) >> 16;
+    IDTTable[gateNum].offsetLower = offset & 0xffff;
+    IDTTable[gateNum].selector = 0x08; 
+    IDTTable[gateNum].zero = 0;
+    IDTTable[gateNum].typeAttribute = 0x8E;
+    IDTTable[gateNum].offsethigher = (offset & 0xffff0000) >> 16;
 }
 
 
@@ -108,7 +109,7 @@ static void configureIdt()
 }
 
 
-void init()
+void IDT::init()
 {    
     std::uint32_t idt_address;
     std::uint32_t idt_ptr[2];
@@ -126,7 +127,7 @@ void init()
     configureIdt();
 
         /* fill the IDT descriptor */
-    idt_address = (unsigned long)IDT ;
+    idt_address = (unsigned long)IDTTable;
     idt_ptr[0] = (sizeof (struct IDT_entry) * NUM_IDT_ENTRIES) + ((idt_address & 0xffff) << 16);
     idt_ptr[1] = idt_address >> 16 ;
     idt_load((unsigned long)idt_ptr);
