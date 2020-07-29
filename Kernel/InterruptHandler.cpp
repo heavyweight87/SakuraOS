@@ -11,7 +11,7 @@ void InterruptHandler::interruptHandler(InterruptSource intNum)
 {
     if(intNum < InterruptSource::NumInterrupts && m_callbackTable[intNum] != nullptr)
     {
-        InterruptHandler::m_callbackTable[intNum]->IrqCallback(intNum);
+        InterruptHandler::m_callbackTable[intNum]->irqCallback(intNum);
     }
 }
 

@@ -6,7 +6,7 @@ namespace Kernel {
 
 class InterruptHandler {
     public:
-        virtual void IrqCallback(int intNum) = 0;
+        virtual void irqCallback(int intNum) = 0;
         void registerInterrupt(InterruptSource intNum);
         static void interruptHandler(InterruptSource intNum);
     private:

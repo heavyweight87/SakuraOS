@@ -2,6 +2,7 @@
 
 #include <stdint.h>
 #include <stdint.h>
+#include "InterruptHandler.h"
 
 namespace Kernel {
 
@@ -20,13 +21,13 @@ enum class TaskState
     Sleep
 };
 
-class Scheduler {
+class Scheduler : InterruptHandler {
     public:
         struct Task 
         {
             Registers regs;
             Task *next;
-            char name[50];
+            char name[PROCESS_NAME_SIZE];
             uint64_t wakeupTime;
             TaskState state;
         };
@@ -43,6 +44,8 @@ class Scheduler {
         static Task *m_runningTask;
         static Task *m_taskTail;
         static Task* goToNextTask();
+        static uint64_t m_timeMs;
+        void irqCallback(int intNum) override;
 };
 
 }

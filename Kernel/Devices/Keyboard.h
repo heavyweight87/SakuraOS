@@ -15,7 +15,7 @@ class Keyboard : public Device, Kernel::InterruptHandler {
         std::size_t read(std::uint8_t *buffer, std::size_t length) override;
     private:
         Libk::RingBuffer<char, KEYBOARD_RINGBUF_SIZE> m_ringbuffer;
-        void IrqCallback(int intNum) override;
+        void irqCallback(int intNum) override;
 };
 
 

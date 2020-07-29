@@ -13,30 +13,30 @@ namespace Kernel {
  
 static Scheduler::Task mainTask;
 bool schedulerEnabled = true;
-uint64_t timeMs;
 
+uint64_t Scheduler::m_timeMs = 0;
 Scheduler::Task *Scheduler::m_taskTail;
 Scheduler::Task *Scheduler::m_runningTask;
 
 extern "C" void switchTask(Registers *old, Registers *n); // The function which actually switches
 
-static void timerCallback()
+void Scheduler::irqCallback(int intNum) 
 {
-    timeMs++;
+    (void)intNum;
+    m_timeMs++;
     Scheduler::schedule();
 }
 
 void Scheduler::sleep(uint64_t sleepMs)
 {
     m_runningTask->state = TaskState::Sleep;
-    m_runningTask->wakeupTime = timeMs + sleepMs;
+    m_runningTask->wakeupTime = m_timeMs + sleepMs;
     schedule();
 }
 
 static void ConfigurePit()
 {
     uint32_t div = 1193182 / PIT_FREQUENCY_HZ;
-    //InterruptHandler::registerInterrupt(InterruptSource::Timer, timerCallback);
     outb(0x43, 0x36);
     outb(0x40, div & 0xFF);
     outb(0x40, (div >> 8) & 0xFF);
@@ -139,7 +139,7 @@ Scheduler::Task* Scheduler::goToNextTask()
         {
             return NULL;
         }
-        if(nextTask->state == TaskState::Running || (nextTask->state == TaskState::Sleep && timeMs > nextTask->wakeupTime))
+        if(nextTask->state == TaskState::Running || (nextTask->state == TaskState::Sleep && m_timeMs > nextTask->wakeupTime))
         {
             nextTask->state = TaskState::Running;
             return nextTask;

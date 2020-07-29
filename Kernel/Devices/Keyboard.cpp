@@ -47,8 +47,9 @@ char keymap[] = {
     0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, '7', '8', '9', '-', '4', '5', '6', '+', '1', '2', '3', '0', '.', 0, 0, '\\', 0, 0, 0,
 };
 
-void Keyboard::IrqCallback(int intNum)
+void Keyboard::irqCallback(int intNum)
 {
+    (void)intNum;
     std::uint8_t keycode = inb(PS2_DATA_REG);
     if(!(keycode & 0x80))
     {
