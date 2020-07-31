@@ -62,17 +62,17 @@ bool load(std::uint8_t* elfData, std::uint32_t length)
     ElfHeader *header = (ElfHeader*)elfData;
     if(verifyElfHeader(header))
     {
-        Scheduler::Task& task = Scheduler::createTask(false);
+        Scheduler::Task *task = Scheduler::createTask(false, NULL);
         for(int sec = 0; sec < header->m_phnum; sec++)
         {
             ElfProgramHeader *programHeader = (ElfProgramHeader*)(elfData + header->m_phoff + (header->m_phentsize * sec));         
             programHeader->m_vaddr = programHeader->m_vaddr - (programHeader->m_vaddr % PAGE_SIZE);   	
-            MemoryManager::memoryMap(*(MemoryManager::PageDirectory*) task.regs.cr3, programHeader->m_vaddr, programHeader->m_filesz, false);
+            MemoryManager::memoryMap(*(MemoryManager::PageDirectory*) task->regs.cr3, programHeader->m_vaddr, programHeader->m_filesz, false);
             uint8_t *progData = (uint8_t*)(elfData + programHeader->m_offset);
             Libk::memcpy((void*)programHeader->m_vaddr, progData, programHeader->m_filesz);
         }
         Scheduler::TaskEntry entry = reinterpret_cast<Scheduler::TaskEntry>(header->m_entry);
-        Scheduler::taskStart(task, entry);
+        Scheduler::taskStart(*task, entry);
         return true;
     }    
     return false;    

@@ -1,6 +1,5 @@
 #include "Scheduler.h"
 #include <stdio.h>
-#include "Syscalls.h"
 #include "InterruptHandler.h"
 #include "Libk.h"
 #include "Arch.h"
@@ -18,7 +17,7 @@ uint64_t Scheduler::m_timeMs = 0;
 Scheduler::Task *Scheduler::m_taskTail;
 Scheduler::Task *Scheduler::m_runningTask;
 
-extern "C" void switchTask(Registers *old, Registers *n); // The function which actually switches
+extern "C" void switchTask(TaskRegisters *old, TaskRegisters *n); // The function which actually switches
 
 void Scheduler::irqCallback(int intNum) 
 {
@@ -42,62 +41,20 @@ static void ConfigurePit()
     outb(0x40, (div >> 8) & 0xFF);
 }
 
-static void task2()
-{
-    while(1)
-    {
-        Libk::printk("task1\r\n");
-        Scheduler::sleep(3000);
-    }
-}
-
-static void task1()
-{
-    Scheduler::sleep(1000);
-    while(1)
-    {
-        Libk::printk("task2\r\n");
-        Scheduler::sleep(3000);
-    }
-}
-
-static void task3()
-{
-    Scheduler::sleep(2000);
-    while(1)
-    {
-        Libk::printk("task3\r\n");
-        Scheduler::sleep(3000);
-    }
-}
 void Scheduler::start() 
 {
     // Get EFLAGS and CR3
     asm volatile("movl %%cr3, %%eax; movl %%eax, %0;":"=m"(mainTask.regs.cr3)::"%eax");
     asm volatile("pushfl; movl (%%esp), %%eax; movl %%eax, %0; popfl;":"=m"(mainTask.regs.eflags)::"%eax");
+    InterruptHandler::registerInterrupt(InterruptSource::Timer);
     m_runningTask = &mainTask; 
     sprintf(mainTask.name, "main");
     mainTask.state = TaskState::Running;
     m_taskTail = &mainTask;
-    Task& t = createTask(false);
-    sprintf(t.name, "task1");
-
-    Task& t1 = createTask(false);
-    sprintf(t1.name, "task2");
-
-
-
-    Task& t2 = createTask(false);
-    sprintf(t2.name, "task3");
-#ifdef TASKTEST
-    taskStart(t, task1);
-    taskStart(t1, task2);
-    taskStart(t2, task3);
-#endif
     ConfigurePit();
 }
  
-Scheduler::Task& Scheduler::createTask(bool isUser) 
+Scheduler::Task *Scheduler::createTask(bool isUser, void *arg) 
 {
     Scheduler::Task *task = (Task*)kmalloc(sizeof(Task));
     task->regs.eax = 0;
@@ -117,10 +74,10 @@ Scheduler::Task& Scheduler::createTask(bool isUser)
     }
     task->regs.esp = (uint32_t)MemoryManager::memoryAllocate(TASK_STACK_SIZE, false) + TASK_STACK_SIZE;
     task->next = 0; 
-    return *task;
+    return task;
 }
 
-void Scheduler::taskStart(Scheduler::Task& task,  TaskEntry entry)
+void Scheduler::taskStart(Scheduler::Task& task, TaskEntry entry)
 {
     task.regs.eip = (uint32_t) entry;
     // this task is now the tail

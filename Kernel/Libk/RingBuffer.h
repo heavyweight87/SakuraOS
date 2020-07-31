@@ -10,7 +10,7 @@ class RingBuffer {
     public:
         RingBuffer() {}
         bool isFull() const { return m_numElements >= maxElements; } 
-        bool isEmpty() const { return numElements == 0; } 
+        bool isEmpty() const { return m_numElements == 0; } 
 
         bool push(const Type& element, bool force = false)
         {

@@ -1,0 +1,152 @@
+#include "Libk.h"
+#include "TTY.h"
+#include "Arch.h"
+#include "vga.h"
+
+#define VGA_BUFFER_ADDRESS 0xB8000
+#define VGA_ADDRESS_REGISTER 0x3D4
+#define VGA_DATA_REGISTER 0x3d5
+
+#define VGA_REG_CURSOR_START    0x0A
+#define VGA_REG_CURSOR_END      0x0B
+#define VGA_REG_CURSOR_LOC_HIGH 0x0E
+#define VGA_REG_CURSOR_LOC_LOW  0x0F
+
+
+
+static const size_t VGA_WIDTH = 80;
+static const size_t VGA_HEIGHT = 25;
+static uint16_t* const VGA_MEMORY = (uint16_t*) VGA_BUFFER_ADDRESS;
+
+
+namespace Devices {
+
+Devices::Keyboard TTY::m_keyboard;
+
+void TTY::tty_process()
+{
+   // uintptr_t r = (uintptr_t) arg;
+  //  int row = *(int*)arg;
+    char c;
+    while(1)
+    {
+        m_keyboard.read((uint8_t*)&c, 1);
+      //  writeChar(c);
+    }
+}
+
+bool TTY::open()
+{
+    m_row = 0;
+	m_column = 0;
+	m_color = vga_entry_color(VGA_COLOR_LIGHT_GREY, VGA_COLOR_BLACK);
+	m_buffer = VGA_MEMORY;	
+	clear();
+	updateCursor(0,0);
+	disableCursor();
+   // m_task = Kernel::Scheduler::createTask(false, &m_row);
+    //Kernel::Scheduler::taskStart(*m_task, tty_process);
+    m_keyboard.open();
+    return true;
+}
+
+void TTY::vgaWrite(int address, int value)
+{
+    outb(VGA_ADDRESS_REGISTER, address);
+    outb(VGA_DATA_REGISTER, value);
+}
+
+int TTY::vgaRead(int address)
+{
+    outb(VGA_ADDRESS_REGISTER, address);
+    return inb(VGA_DATA_REGISTER);
+}
+
+void TTY::updateCursor(int x, int y)
+{
+	int pos = (y * VGA_WIDTH) + x;
+    vgaWrite(VGA_REG_CURSOR_LOC_LOW, (uint8_t) (pos & 0xFF));
+	vgaWrite(VGA_REG_CURSOR_LOC_HIGH,  (uint8_t) ((pos >> 8) & 0xFF));
+}
+
+void TTY::enableCursor(uint8_t cursor_start, uint8_t cursor_end)
+{
+    //writting 0 to the bit 5 enables the cursor
+	vgaWrite(VGA_REG_CURSOR_START, (vgaRead(VGA_REG_CURSOR_START) & 0xC0) | cursor_start);
+    vgaWrite(VGA_REG_CURSOR_START, (vgaRead(VGA_REG_CURSOR_END) & 0xE0) | cursor_end);
+}
+
+void TTY::disableCursor()
+{
+	vgaWrite(VGA_REG_CURSOR_START, 0x20); //writting 1 to bit 5 disables the cursor
+}
+
+void TTY::clear()
+{
+	for (size_t y = 0; y < VGA_HEIGHT; y++) 
+	{
+		for (size_t x = 0; x < VGA_WIDTH; x++) 
+		{
+			const size_t index = y * VGA_WIDTH + x;
+			m_buffer[index] = vga_entry(' ', m_color);
+		}
+	}
+}
+
+std::size_t TTY::read(std::uint8_t *buffer, std::size_t length) 
+{
+    (void)length;
+    (void)buffer;
+    return -1;
+}
+
+std::size_t TTY::write(std::uint8_t *buffer, std::size_t length)
+{
+	int len = Libk::strlen((const char*)buffer);
+    for (size_t i = 0; i < length; i++)
+    {
+		writeChar(buffer[i]);
+    }
+	updateCursor(len, m_row);
+    return length;
+}
+
+void TTY::writeChar(char c, uint8_t color, int x, int y) 
+{
+	size_t index = y * VGA_WIDTH + x;
+	if(index > (VGA_WIDTH * VGA_HEIGHT)) //go to new line
+	{
+		index = 0;
+		clear();
+		m_row = 0;
+		m_column = 0;
+	}
+	m_buffer[index] = vga_entry(c, color);
+}
+
+void TTY::writeChar(char c) 
+{
+	unsigned char uc = c;
+	switch(c)
+	{
+		case '\r':
+		case '\n':
+			m_row++;
+			m_column = 0;
+			break;
+		default: 	
+			writeChar(uc, m_color, m_column, m_row); 
+			if (++m_column == VGA_WIDTH) 
+			{
+				m_column = 0;
+				if (++m_row == VGA_HEIGHT)
+                {
+					m_row = 0;
+                }
+			}
+			break;
+	}
+	updateCursor(m_column, m_row);
+}
+
+}

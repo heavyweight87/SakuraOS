@@ -55,19 +55,40 @@ void Keyboard::irqCallback(int intNum)
     {
         uint8_t code = keycode&0x7F;
         char c = keymap[code];
-        Libk::printk("%c", c);
         m_ringbuffer.push(c);
     }
 }
 
 std::size_t Keyboard::read(std::uint8_t *buffer, std::size_t length)
 {
+    int read = 0;
+    while(read < length)
+    {
+        if(m_ringbuffer.numElements() > 0)
+        {
+            char c;
+            m_ringbuffer.pop(&c);
+            buffer[read] = c;
+        }
+    }
     return 0;
+}
+
+std::size_t Keyboard::write(std::uint8_t *buffer, std::size_t length)
+{
+    (void)buffer;
+    (void)length;
+    return -1;
 }
 
 Keyboard::Keyboard()
 {
     registerInterrupt(InterruptSource::Keyboard);
+}
+
+bool Keyboard::open() 
+{
+
 }
 
 

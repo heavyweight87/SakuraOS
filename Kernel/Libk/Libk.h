@@ -2,6 +2,7 @@
 
 #include <cstddef>
 #include <cstdarg>
+#include "TTY.h"
 
 namespace Libk {
 
@@ -10,6 +11,7 @@ extern "C" {
 #endif
 
 //stdio
+void setTTY(Devices::TTY *tty);
 int putchar(int);
 int puts(const char*);
 void printk(const char* __restrict format, ...);

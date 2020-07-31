@@ -1,8 +1,8 @@
+#include "Arch.h"
 #include "Libk.h"
 #include <stdint.h>
 #include "InterruptHandler.h"
 #include "Syscalls.h"
-#include "Arch.h"
 #include "IDT.h"
 
 namespace Kernel {
