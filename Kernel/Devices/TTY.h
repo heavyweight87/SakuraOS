@@ -6,6 +6,9 @@
 
 namespace Devices {
 
+#define VGA_WIDTH 80
+#define VGA_HEIGHT 25
+
 
 class TTY : public Device {
     public:
@@ -19,6 +22,7 @@ class TTY : public Device {
         void vgaWrite(int address, int value);
         void updateCursor(int x, int y);
         int vgaRead(int address);
+        int getBufferIndex(int x, int y) { return (y * VGA_WIDTH) + x; }
 
         void writeChar(char c) ;
         void writeChar(char c, uint8_t color, int x, int y);

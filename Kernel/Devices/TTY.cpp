@@ -12,10 +12,6 @@
 #define VGA_REG_CURSOR_LOC_HIGH 0x0E
 #define VGA_REG_CURSOR_LOC_LOW  0x0F
 
-
-
-static const size_t VGA_WIDTH = 80;
-static const size_t VGA_HEIGHT = 25;
 static uint16_t* const VGA_MEMORY = (uint16_t*) VGA_BUFFER_ADDRESS;
 
 
@@ -62,7 +58,7 @@ int TTY::vgaRead(int address)
 
 void TTY::updateCursor(int x, int y)
 {
-	int pos = (y * VGA_WIDTH) + x;
+	int pos = getBufferIndex(x,y);
     vgaWrite(VGA_REG_CURSOR_LOC_LOW, (uint8_t) (pos & 0xFF));
 	vgaWrite(VGA_REG_CURSOR_LOC_HIGH,  (uint8_t) ((pos >> 8) & 0xFF));
 }
@@ -101,7 +97,6 @@ std::size_t TTY::read(void*buffer, std::size_t length)
 std::size_t TTY::write(void *buffer, std::size_t length)
 {
     uint8_t *writeBuffer = (uint8_t*)buffer;
-	int len = Libk::strlen((const char*)writeBuffer);
     for (size_t i = 0; i < length; i++)
     {
 		writeChar(writeBuffer[i]);
@@ -112,7 +107,7 @@ std::size_t TTY::write(void *buffer, std::size_t length)
 
 void TTY::writeChar(char c, uint8_t color, int x, int y) 
 {
-	size_t index = y * VGA_WIDTH + x;
+	size_t index = getBufferIndex(x,y);
 	if(index > (VGA_WIDTH * VGA_HEIGHT)) //go to new line
 	{
 		index = 0;
@@ -133,6 +128,13 @@ void TTY::writeChar(char c)
 			m_row++;
 			m_column = 0;
 			break;
+        case 0x08:
+            if(m_column > 0)
+            {
+                m_buffer[getBufferIndex(m_column-1, m_row)] = ' ';
+                m_column--;
+            }
+            break;
 		default: 	
 			writeChar(uc, m_color, m_column, m_row); 
 			if (++m_column == VGA_WIDTH) 
