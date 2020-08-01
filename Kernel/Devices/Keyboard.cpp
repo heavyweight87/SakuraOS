@@ -59,22 +59,24 @@ void Keyboard::irqCallback(int intNum)
     }
 }
 
-std::size_t Keyboard::read(std::uint8_t *buffer, std::size_t length)
+std::size_t Keyboard::read(void *buffer, std::size_t length)
 {
-    int read = 0;
+    std::size_t read = 0;
+    uint8_t *readBuffer = (uint8_t*)buffer;
     while(read < length)
     {
         if(m_ringbuffer.numElements() > 0)
         {
             char c;
             m_ringbuffer.pop(&c);
-            buffer[read] = c;
+            readBuffer[read] = c;
+            read++;
         }
     }
     return 0;
 }
 
-std::size_t Keyboard::write(std::uint8_t *buffer, std::size_t length)
+std::size_t Keyboard::write(void *buffer, std::size_t length)
 {
     (void)buffer;
     (void)length;

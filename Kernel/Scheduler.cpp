@@ -73,6 +73,10 @@ Scheduler::Task *Scheduler::createTask(bool isUser, void *arg)
         task->regs.cr3 = (uint32_t) &MemoryManager::getKerkelPageDirectory();
     }
     task->regs.esp = (uint32_t)MemoryManager::memoryAllocate(TASK_STACK_SIZE, false) + TASK_STACK_SIZE;
+    // push the argument address onto the stack
+    task->regs.esp -= sizeof(uintptr_t);
+    *((uintptr_t *)task->regs.esp) = (uintptr_t)arg;
+
     task->next = 0; 
     return task;
 }

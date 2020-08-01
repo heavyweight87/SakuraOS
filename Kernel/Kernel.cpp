@@ -12,10 +12,10 @@
 extern void (*start_ctors)(void) __attribute__((weak));
 extern void (*end_ctors)(void) __attribute__((weak));
 
-#define TASKTEST
+//#define TASKTEST
 
 #ifdef TASKTEST
-static void task1()
+static void task1(void *arg)
 {
     while(1)
     {
@@ -24,7 +24,7 @@ static void task1()
     }
 }
 
-static void task2()
+static void task2(void *arg)
 {
     Kernel::Scheduler::sleep(1000);
     while(1)
@@ -34,7 +34,7 @@ static void task2()
     }
 }
 
-static void task3()
+static void task3(void *arg)
 {
     Kernel::Scheduler::sleep(2000);
     while(1)
@@ -96,8 +96,8 @@ extern "C" int kernel_main(uint32_t magic, Kernel::MultibootInfo *mbinfo)
     
     tty.open();
     Libk::setTTY(&tty);
-    Libk::printk("Sakura 1.0.0\r\n");
-    taskTest();
+    Libk::printk("Sakura 1.0.0\r");
+  //  taskTest();
 //    multiboot.loadModules();  //dont load modules yet... still need some work on syscalls
     while(1);
     return 0;

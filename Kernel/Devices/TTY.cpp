@@ -21,17 +21,15 @@ static uint16_t* const VGA_MEMORY = (uint16_t*) VGA_BUFFER_ADDRESS;
 
 namespace Devices {
 
-Devices::Keyboard TTY::m_keyboard;
-
-void TTY::tty_process()
+void TTY::tty_process(void *arg)
 {
-   // uintptr_t r = (uintptr_t) arg;
-  //  int row = *(int*)arg;
+    TTY *tty = (TTY*)arg;
     char c;
     while(1)
     {
-        m_keyboard.read((uint8_t*)&c, 1);
-      //  writeChar(c);
+        tty->m_keyboard.read(&c, 1);
+        tty->writeChar(c);
+        tty->updateCursor(tty->m_column, tty->m_row);
     }
 }
 
@@ -42,10 +40,10 @@ bool TTY::open()
 	m_color = vga_entry_color(VGA_COLOR_LIGHT_GREY, VGA_COLOR_BLACK);
 	m_buffer = VGA_MEMORY;	
 	clear();
-	updateCursor(0,0);
-	disableCursor();
-   // m_task = Kernel::Scheduler::createTask(false, &m_row);
-    //Kernel::Scheduler::taskStart(*m_task, tty_process);
+	enableCursor(0, 0);
+    updateCursor(0,0);
+    m_task = Kernel::Scheduler::createTask(false, this);
+    Kernel::Scheduler::taskStart(*m_task, tty_process);
     m_keyboard.open();
     return true;
 }
@@ -93,21 +91,22 @@ void TTY::clear()
 	}
 }
 
-std::size_t TTY::read(std::uint8_t *buffer, std::size_t length) 
+std::size_t TTY::read(void*buffer, std::size_t length) 
 {
     (void)length;
     (void)buffer;
     return -1;
 }
 
-std::size_t TTY::write(std::uint8_t *buffer, std::size_t length)
+std::size_t TTY::write(void *buffer, std::size_t length)
 {
-	int len = Libk::strlen((const char*)buffer);
+    uint8_t *writeBuffer = (uint8_t*)buffer;
+	int len = Libk::strlen((const char*)writeBuffer);
     for (size_t i = 0; i < length; i++)
     {
-		writeChar(buffer[i]);
+		writeChar(writeBuffer[i]);
     }
-	updateCursor(len, m_row);
+	updateCursor(m_column, m_row);
     return length;
 }
 
@@ -146,7 +145,6 @@ void TTY::writeChar(char c)
 			}
 			break;
 	}
-	updateCursor(m_column, m_row);
 }
 
 }

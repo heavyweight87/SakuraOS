@@ -7,7 +7,7 @@
 namespace Kernel {
 
 #define PROCESS_NAME_SIZE 32
-#define TASK_STACK_SIZE 16384
+#define TASK_STACK_SIZE 0x1000
  
 struct TaskRegisters
 {
@@ -31,7 +31,7 @@ class Scheduler : InterruptHandler {
             uint64_t wakeupTime;
             TaskState state;
         };
-        typedef void (*TaskEntry)();
+        typedef void (*TaskEntry)(void *);
         void start();
         static Task *createTask(bool isUser, void *arg);
         static void taskStart(Task& task,  TaskEntry entry);

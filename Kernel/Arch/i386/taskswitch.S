@@ -1,3 +1,4 @@
+# Thanks to Kemyland, whoever you are! 
 .section .text
 .global switchTask
 switchTask:
@@ -14,7 +15,7 @@ switchTask:
     mov 36(%esp), %ebx #EAX
     mov 40(%esp), %ecx #IP
     mov 20(%esp), %edx #ESP
-    add $4, %edx #Remove the return value ;)
+    add $4, %edx #Remove the return value 
     mov 16(%esp), %esi #EBP
     mov 4(%esp), %edi #EFLAGS
     mov %ebx, (%eax)
@@ -43,9 +44,11 @@ switchTask:
     mov %eax, %cr3
     pop %eax
     push %eax
+    #i dont know why but we have to push something here, if not the argument we passed will be incorrect
+    push $0 
     mov 32(%eax), %eax #EIP
-    xchg (%esp), %eax #We do not have any more registers to use as tmp storage
-    mov (%eax), %eax #EAX
-    ret #This ends all!
+    xchg (%esp), %eax 
+    mov (%eax), %eax 
+    ret 
 
     
