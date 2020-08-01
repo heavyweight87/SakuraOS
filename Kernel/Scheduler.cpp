@@ -1,102 +1,62 @@
 #include "Scheduler.h"
 #include <stdio.h>
-#include "Syscalls.h"
 #include "InterruptHandler.h"
 #include "Libk.h"
 #include "Arch.h"
 #include "kmalloc.h"
 #include "MemoryManager.h"
 
-namespace Scheduler {
+namespace Kernel {
 
 #define PIT_FREQUENCY_HZ 1000
  
-static Task *runningTask;
-static Task mainTask;
-static Task *taskTail;
+static Scheduler::Task mainTask;
 bool schedulerEnabled = true;
-uint64_t timeMs;
 
-static void timerCallback()
+uint64_t Scheduler::m_timeMs = 0;
+Scheduler::Task *Scheduler::m_taskTail;
+Scheduler::Task *Scheduler::m_runningTask;
+
+extern "C" void switchTask(TaskRegisters *old, TaskRegisters *n); // The function which actually switches
+
+void Scheduler::irqCallback(int intNum) 
 {
-    timeMs++;
-    schedule();
+    (void)intNum;
+    m_timeMs++;
+    Scheduler::schedule();
 }
 
-static void sleep(Task& task, uint64_t sleepMs)
+void Scheduler::sleep(uint64_t sleepMs)
 {
-    task.state = TaskState::Sleep;
-    task.wakeupTime = timeMs + sleepMs;
+    m_runningTask->state = TaskState::Sleep;
+    m_runningTask->wakeupTime = m_timeMs + sleepMs;
     schedule();
 }
 
 static void ConfigurePit()
 {
     uint32_t div = 1193182 / PIT_FREQUENCY_HZ;
-    InterruptHandler::registerInterrupt(InterruptSource::Timer, timerCallback);
     outb(0x43, 0x36);
     outb(0x40, div & 0xFF);
     outb(0x40, (div >> 8) & 0xFF);
 }
 
-static void task2()
-{
-    while(1)
-    {
-        Libk::printk("task1\r\n");
-        sleep(*runningTask, 3000);
-    }
-}
-
-static void task1()
-{
-    sleep(*runningTask, 1000);
-    while(1)
-    {
-        Libk::printk("task2\r\n");
-        sleep(*runningTask, 3000);
-    }
-}
-
-static void task3()
-{
-    sleep(*runningTask, 2000);
-    while(1)
-    {
-        Libk::printk("task3\r\n");
-        sleep(*runningTask, 3000);
-    }
-}
-void init() 
+void Scheduler::start() 
 {
     // Get EFLAGS and CR3
     asm volatile("movl %%cr3, %%eax; movl %%eax, %0;":"=m"(mainTask.regs.cr3)::"%eax");
     asm volatile("pushfl; movl (%%esp), %%eax; movl %%eax, %0; popfl;":"=m"(mainTask.regs.eflags)::"%eax");
-    runningTask = &mainTask; 
+    InterruptHandler::registerInterrupt(InterruptSource::Timer);
+    m_runningTask = &mainTask; 
     sprintf(mainTask.name, "main");
     mainTask.state = TaskState::Running;
-    taskTail = &mainTask;
-    Task& t = createTask(false);
-    sprintf(t.name, "task1");
-
-    Task& t1 = createTask(false);
-    sprintf(t1.name, "task2");
-
-
-
-    Task& t2 = createTask(false);
-    sprintf(t2.name, "task3");
-#ifdef TASKTEST
-    taskStart(t, task1);
-    taskStart(t1, task2);
-    taskStart(t2, task3);
-#endif
+    m_taskTail = &mainTask;
     ConfigurePit();
 }
  
-Task& createTask(bool isUser) 
+Scheduler::Task *Scheduler::createTask(bool isUser, void *arg) 
 {
-    Task *task = (Task*)kmalloc(sizeof(Task));
+    Scheduler::Task *task = (Task*)kmalloc(sizeof(Task));
     task->regs.eax = 0;
     task->regs.ebx = 0;
     task->regs.ecx = 0;
@@ -113,30 +73,34 @@ Task& createTask(bool isUser)
         task->regs.cr3 = (uint32_t) &MemoryManager::getKerkelPageDirectory();
     }
     task->regs.esp = (uint32_t)MemoryManager::memoryAllocate(TASK_STACK_SIZE, false) + TASK_STACK_SIZE;
+    // push the argument address onto the stack
+    task->regs.esp -= sizeof(uintptr_t);
+    *((uintptr_t *)task->regs.esp) = (uintptr_t)arg;
+
     task->next = 0; 
-    return *task;
+    return task;
 }
 
-void taskStart(Task& task,  TaskEntry entry)
+void Scheduler::taskStart(Scheduler::Task& task, TaskEntry entry)
 {
     task.regs.eip = (uint32_t) entry;
     // this task is now the tail
-    taskTail->next = &task;
-    taskTail = &task;
+    m_taskTail->next = &task;
+    m_taskTail = &task;
     task.next = &mainTask; //loop back to the first task
     task.state = TaskState::Running;
 }
 
-static Task* goToNextTask()
+Scheduler::Task* Scheduler::goToNextTask()
 {
-    Task *nextTask = runningTask->next;
+    Task *nextTask = m_runningTask->next;
     while(1)
     {
         if(nextTask == NULL)
         {
             return NULL;
         }
-        if(nextTask->state == TaskState::Running || (nextTask->state == TaskState::Sleep && timeMs > nextTask->wakeupTime))
+        if(nextTask->state == TaskState::Running || (nextTask->state == TaskState::Sleep && m_timeMs > nextTask->wakeupTime))
         {
             nextTask->state = TaskState::Running;
             return nextTask;
@@ -145,33 +109,33 @@ static Task* goToNextTask()
     }
 }
 
-void schedule()
+void Scheduler::schedule()
 {
     if(schedulerEnabled)
     {
-        Task *last = runningTask;
+        Task *last = m_runningTask;
         Task *next = goToNextTask();
         if(next != nullptr)
         {
-            runningTask = next;
-            switchTask(&last->regs, &runningTask->regs);
+            m_runningTask = next;
+            switchTask(&last->regs, &m_runningTask->regs);
         }
     }
 }
 
-void enable()
+void Scheduler::enable()
 {
     schedulerEnabled = true;
 }
 
-void disable()
+void Scheduler::disable()
 {
     schedulerEnabled = false;
 }
 
-Task& getRunningTask()
+Scheduler::Task& Scheduler::getRunningTask()
 {
-    return *runningTask;
+    return *m_runningTask;
 }
 
 }

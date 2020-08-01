@@ -142,7 +142,7 @@ void gdt::init()
     create_descriptor(0, 0x000FFFFF, (GDT_DATA_PL0), gdTable[2]);
     create_descriptor(0, 0x000FFFFF, (GDT_CODE_PL3), gdTable[3]);
     create_descriptor(0, 0x000FFFFF, (GDT_DATA_PL3), gdTable[4]);
-    create_descriptor((uint32_t)&tss, sizeof(TSS), 99, gdTable[5]);
+    create_descriptor(reinterpret_cast<uintptr_t>(&tss), sizeof(TSS), 99, gdTable[5]);
 
     gp.base = gdTable;
     gp.limit =  (sizeof(gdt_entry_t) * 6) - 1;

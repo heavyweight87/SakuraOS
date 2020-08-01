@@ -15,7 +15,7 @@ MemoryManagerData memManData;
 #define PHYSICAL_ALLOCATOR_SET(pageAddress) (PHYSICAL_ALLOCATOR_GET_BYTE(pageAddress) |= (1 << ((uint32_t)(pageAddress) / PAGE_SIZE % 8)))
 #define PHYSICAL_ALLOCATOR_CLEAR(pageAddress) (PHYSICAL_ALLOCATOR_GET_BYTE(pageAddress) &= ~(1 << ((uint32_t)(pageAddress) / PAGE_SIZE % 8)))
 
-void physicalAllocatorInit(Multiboot::Multiboot& multiboot)
+void physicalAllocatorInit(Kernel::Multiboot& multiboot)
 {
     memManData.UsedMemory = 0;
     Libk::memset(&memManData.PhysicalAllocation, 0xFF, ALLOCATION_BYTES);

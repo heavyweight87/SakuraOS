@@ -39,7 +39,7 @@ static void mapKernelMemory()
     identityMap(kernelPageDirectory, kernelStart, kernelSize);
 }
 
-void init(Multiboot::Multiboot& multiboot)
+void init(Kernel::Multiboot& multiboot)
 {
     physicalAllocatorInit(multiboot);
     mapKernelMemory();
@@ -52,7 +52,7 @@ void init(Multiboot::Multiboot& multiboot)
 
 uintptr_t memoryAllocate(size_t size, bool user)
 {
-    PageDirectory *pageDirectory = (PageDirectory*)Scheduler::getRunningTask().regs.cr3;
+    PageDirectory *pageDirectory = (PageDirectory*)Kernel::Scheduler::getRunningTask().regs.cr3;
     return memoryAllocate(*pageDirectory, size, user);
 }
 
@@ -98,7 +98,7 @@ void memoryMap(PageDirectory& pageDirectory, uint32_t virtualAddress, size_t siz
 
 void memoryFree(int32_t startAddress, size_t size)
 {
-    PageDirectory *pageDirectory = (PageDirectory*)Scheduler::getRunningTask().regs.cr3;
+    PageDirectory *pageDirectory = (PageDirectory*)Kernel::Scheduler::getRunningTask().regs.cr3;
     memoryFree(*pageDirectory, startAddress, size);
 }
 

@@ -534,13 +534,13 @@ void* krealloc(void *p, size_t size)
 
 int liballoc_unlock()
 {
-    Scheduler::enable();
+    Kernel::Scheduler::enable();
     return 0;
 }
 
 int liballoc_lock()
 {
-    Scheduler::disable();
+    Kernel::Scheduler::disable();
     return 0;
 }
 

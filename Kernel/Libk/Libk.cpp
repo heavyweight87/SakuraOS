@@ -1,26 +1,20 @@
 
 #include "Libk.h"
-#include "tty.h"
 #include "Serial.h"
 
 namespace Libk {
 
 #define PRINTK_BUFFER_SIZE 100
+Devices::TTY *console = NULL;
 
 char printkBuffer[PRINTK_BUFFER_SIZE];
 
-int puts(const char* string) 
+void setTTY(Devices::TTY *tty)
 {
-	Libk::printk("%s\n", string);
-	return 0;
+    console = tty;
 }
 
-int putchar(int ic)
-{
-	char c = (char) ic;
-	terminal_putchar(c);
-	return ic;
-}
+
 
 void printk(const char* __restrict format, ...) 
 {
@@ -32,8 +26,10 @@ void printk(const char* __restrict format, ...)
 		len = PRINTK_BUFFER_SIZE;
 	}
 	va_end(va);
-    Serial::Write(printkBuffer, len);
-    terminal_write(printkBuffer, len);
+    if(console)
+    {
+        console->write((uint8_t*)printkBuffer, len);
+    }
 }
 
 void* memset(void* bufptr, int value, size_t size) 

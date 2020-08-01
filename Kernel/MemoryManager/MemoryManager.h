@@ -13,7 +13,7 @@ namespace MemoryManager {
  * 
  * @param multiboot structure with multiboot info
  */
-void init(Multiboot::Multiboot& multiboot);
+void init(Kernel::Multiboot& multiboot);
 
 /**
  * @brief Allocates page alligned memory

@@ -5,7 +5,7 @@
 #include "Scheduler.h"
 #include "Elf.h"
 
-namespace Multiboot {
+namespace Kernel {
 
 void Multiboot::loadModules()
 {
@@ -18,7 +18,7 @@ void Multiboot::loadModules()
         {   
             uint32_t size = module->modEnd - module->modStart;
             MemoryManager::identityMap(MemoryManager::getKerkelPageDirectory(), module->modStart, size);
-            Elf::load(reinterpret_cast<uint8_t*>(module->modStart), size);
+            Kernel::load(reinterpret_cast<uint8_t*>(module->modStart), size);
             module++;
             moduleNum++;
         }

@@ -7,11 +7,11 @@ enable_language(ASM)
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bin/isodir/boot)
 set(ARCH_FOLDER ${CMAKE_CURRENT_SOURCE_DIR}/Arch/${CMAKE_SYSTEM_PROCESSOR})
 
-include_directories(Arch/i386/Include)
-include_directories(Include)
-include_directories(Include/Libk)
-include_directories(Include/MemoryManager)
-include_directories(Include/Devices)
+include_directories(Arch/i386)
+include_directories(.)
+include_directories(Libk)
+include_directories(MemoryManager)
+include_directories(Devices)
 
 # set the linker script
 set(LINKER_SCRIPT ${ARCH_FOLDER}/Linker.ld)
