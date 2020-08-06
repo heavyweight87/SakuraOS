@@ -59,3 +59,5 @@ dkms.conf
 bin
 build
 lib
+
+*.img

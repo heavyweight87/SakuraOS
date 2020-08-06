@@ -131,8 +131,8 @@ void TTY::writeChar(char c)
         case 0x08:
             if(m_column > 0)
             {
-                m_buffer[getBufferIndex(m_column-1, m_row)] = ' ';
                 m_column--;
+                writeChar(' ', m_color, m_column, m_row); 
             }
             break;
 		default: 	

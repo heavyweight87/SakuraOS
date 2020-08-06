@@ -26,6 +26,9 @@ add_custom_command(TARGET iso POST_BUILD
     COMMENT "Building iso image")
 
 # for qemu
-add_custom_target(qemu COMMAND qemu-system-i386 -cdrom bin/kernel.iso -serial mon:stdio  -d cpu_reset -m 256M -no-reboot)
-add_custom_target(qemu-debug COMMAND qemu-system-i386 -cdrom bin/kernel.iso -serial file:serial.log -monitor stdio -m 256M -S -gdb tcp::1234)
+add_custom_target(qemu COMMAND qemu-system-i386 -cdrom bin/kernel.iso -serial mon:stdio  -d cpu_reset -m 256M -no-reboot 
+-drive file=${CMAKE_SOURCE_DIR}/image.img,format=raw,index=0,media=disk)
+
+add_custom_target(qemu-debug COMMAND qemu-system-i386 -cdrom bin/kernel.iso -serial file:serial.log -monitor stdio -m 256M -S -gdb tcp::1234
+-drive file=${CMAKE_SOURCE_DIR}/image.img,format=raw,index=0,media=disk)
 

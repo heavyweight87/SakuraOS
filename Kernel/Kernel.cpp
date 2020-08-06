@@ -8,6 +8,7 @@
 #include "Scheduler.h"
 #include "MemoryManager.h"
 #include "Keyboard.h"
+#include "Devices/PCIEnumerator.h"
 
 extern void (*start_ctors)(void) __attribute__((weak));
 extern void (*end_ctors)(void) __attribute__((weak));
@@ -61,6 +62,14 @@ static void taskTest()
 }
 #endif
 
+static void idleTask()
+{
+    while(1)
+    {
+        halt();
+    }
+}
+
 static void initGlobalConstructors()
 {
     // Constructor list is defined in the linker script.
@@ -97,8 +106,10 @@ extern "C" int kernel_main(uint32_t magic, Kernel::MultibootInfo *mbinfo)
     tty.open();
     Libk::setTTY(&tty);
     Libk::printk("Sakura 1.0.0\r");
+    Devices::PCIEnumerator pciEnumerator;
   //  taskTest();
 //    multiboot.loadModules();  //dont load modules yet... still need some work on syscalls
-    while(1);
+    pciEnumerator.enumerate();
+    idleTask();
     return 0;
 }
