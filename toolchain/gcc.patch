@@ -32,7 +32,7 @@ diff -Naur gcc-10.1.0/gcc/config/sakura.h gcc-10.1.0-sakura/gcc/config/sakura.h
 +/* Default arguments you want when running your
 +   i686-myos-gcc/x86_64-myos-gcc toolchain */
 +#undef LIB_SPEC
-+#define LIB_SPEC "-lc" /* link against C standard library */
++#define LIB_SPEC "-lc -lg -lm -lnosys"/* link against C standard library */
 + 
 +/* Files that are linked before user code.
 +   The %s tells GCC to look for these files in the library directory. */
@@ -47,9 +47,9 @@ diff -Naur gcc-10.1.0/gcc/config/sakura.h gcc-10.1.0-sakura/gcc/config/sakura.h
 +#undef TARGET_OS_CPP_BUILTINS
 +#define TARGET_OS_CPP_BUILTINS()      \
 +  do {                                \
-+    builtin_define ("__myos__");      \
++    builtin_define ("__sakura__");      \
 +    builtin_define ("__unix__");      \
-+    builtin_assert ("system=myos");   \
++    builtin_assert ("system=sakura");   \
 +    builtin_assert ("system=unix");   \
 +    builtin_assert ("system=posix");   \
 +  } while(0);

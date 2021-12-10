@@ -34,7 +34,7 @@ export PATH=${DIR}/build/auto-build/bin:$PATH
 
 cd ..
 ../configure --prefix=/usr --target=i686-sakura
-make all -j
+make all -j8
 
 cecho "GREEN" "Installing..."
 make DESTDIR=${SYSROOT} install 
@@ -44,5 +44,5 @@ cp -ar $SYSROOT/usr/i686-sakura/* $SYSROOT/usr/
 rm -rf $SYSROOT/usr/i686-sakura/
 cecho "GREEN" "Done"
 
-#rm -rf ${DIR}/build
+rm -rf ${DIR}/build
 
