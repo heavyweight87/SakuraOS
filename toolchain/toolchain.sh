@@ -1,4 +1,4 @@
-export PREFIX="$HOME/opt/cross/sakura"
+export PREFIX="/opt/sakura"
 export TARGET=i686-sakura
 export PATH="$PREFIX/bin:$PATH"
 
