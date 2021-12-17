@@ -105,11 +105,11 @@ extern "C" int kernel_main(uint32_t magic, Kernel::MultibootInfo *mbinfo)
     
     tty.open();
     Libk::setTTY(&tty);
-    Libk::printk("Sakura 1.0.0\r");
+    Libk::printk("Sakura 1.0.0\r\r");
     Devices::PCIEnumerator pciEnumerator;
   //  taskTest();
 //    multiboot.loadModules();  //dont load modules yet... still need some work on syscalls
-    pciEnumerator.enumerate();
+  //  pciEnumerator.enumerate();
     idleTask();
     return 0;
 }

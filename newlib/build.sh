@@ -14,25 +14,18 @@ export PREFIX="/opt/sakura"
 export TARGET=i686-sakura
 export PATH="$PREFIX/bin:$PATH"
 
-mkdir -p build && cd build
+mkdir -p build
 
-wget -N https://ftp.gnu.org/gnu/automake/automake-1.11.tar.gz
-wget -N https://ftp.gnu.org/gnu/autoconf/autoconf-2.65.tar.gz
-tar xf automake-1.11.tar.gz
-tar xf autoconf-2.65.tar.gz
-mkdir -p auto-build && cd auto-build
-
-# build automake
-../automake-1.11/configure --prefix="${DIR}/build/auto-build"
-make && make install
-
-# build autoconf
-../autoconf-2.65/configure --prefix="${DIR}/build/auto-build/"
-make && make install
-
-export PATH=${DIR}/build/auto-build/bin:$PATH
+export PATH=${DIR}/autobin/bin:$PATH
 
 cd ..
+cecho "GREEN" "Running autoconf in sys folder..."
+cd ${DIR}/newlib/libc/sys
+autoconf 
+cd ${DIR}/newlib/libc/sys/sakura
+autoreconf
+
+cd ${DIR}/build
 ../configure --prefix=/usr --target=i686-sakura
 make all -j8
 
@@ -45,4 +38,3 @@ rm -rf $SYSROOT/usr/i686-sakura/
 cecho "GREEN" "Done"
 
 rm -rf ${DIR}/build
-

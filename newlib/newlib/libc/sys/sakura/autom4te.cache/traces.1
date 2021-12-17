@@ -1,4 +1,7 @@
-m4trace:aclocal.m4:992: -1- m4_include([../../../acinclude.m4])
+m4trace:aclocal.m4:715: -1- AC_SUBST([am__quote])
+m4trace:aclocal.m4:715: -1- AC_SUBST_TRACE([am__quote])
+m4trace:aclocal.m4:715: -1- m4_pattern_allow([^am__quote$])
+m4trace:aclocal.m4:1125: -1- m4_include([../../../acinclude.m4])
 m4trace:configure.in:2: -1- AC_INIT([newlib], [NEWLIB_VERSION])
 m4trace:configure.in:2: -1- m4_pattern_forbid([^_?A[CHUM]_])
 m4trace:configure.in:2: -1- m4_pattern_forbid([_AC_])
@@ -64,6 +67,9 @@ m4trace:configure.in:2: -1- m4_pattern_allow([^sharedstatedir$])
 m4trace:configure.in:2: -1- AC_SUBST([localstatedir], ['${prefix}/var'])
 m4trace:configure.in:2: -1- AC_SUBST_TRACE([localstatedir])
 m4trace:configure.in:2: -1- m4_pattern_allow([^localstatedir$])
+m4trace:configure.in:2: -1- AC_SUBST([runstatedir], ['${localstatedir}/run'])
+m4trace:configure.in:2: -1- AC_SUBST_TRACE([runstatedir])
+m4trace:configure.in:2: -1- m4_pattern_allow([^runstatedir$])
 m4trace:configure.in:2: -1- AC_SUBST([includedir], ['${prefix}/include'])
 m4trace:configure.in:2: -1- AC_SUBST_TRACE([includedir])
 m4trace:configure.in:2: -1- m4_pattern_allow([^includedir$])
@@ -190,7 +196,7 @@ m4trace:configure.in:5: -1- AC_SUBST_TRACE([host_os])
 m4trace:configure.in:5: -1- m4_pattern_allow([^host_os$])
 m4trace:configure.in:5: -1- AM_INIT_AUTOMAKE([cygnus no-define 1.9.5])
 m4trace:configure.in:5: -1- m4_pattern_allow([^AM_[A-Z]+FLAGS$])
-m4trace:configure.in:5: -1- AM_AUTOMAKE_VERSION([1.11])
+m4trace:configure.in:5: -1- AM_AUTOMAKE_VERSION([1.16.1])
 m4trace:configure.in:5: -1- AC_REQUIRE_AUX_FILE([install-sh])
 m4trace:configure.in:5: -1- AC_SUBST([INSTALL_PROGRAM])
 m4trace:configure.in:5: -1- AC_SUBST_TRACE([INSTALL_PROGRAM])
@@ -243,7 +249,7 @@ m4trace:configure.in:5: -1- AC_REQUIRE_AUX_FILE([install-sh])
 m4trace:configure.in:5: -1- AC_SUBST([MKDIR_P])
 m4trace:configure.in:5: -1- AC_SUBST_TRACE([MKDIR_P])
 m4trace:configure.in:5: -1- m4_pattern_allow([^MKDIR_P$])
-m4trace:configure.in:5: -1- AC_SUBST([mkdir_p], ["$MKDIR_P"])
+m4trace:configure.in:5: -1- AC_SUBST([mkdir_p], ['$(MKDIR_P)'])
 m4trace:configure.in:5: -1- AC_SUBST_TRACE([mkdir_p])
 m4trace:configure.in:5: -1- m4_pattern_allow([^mkdir_p$])
 m4trace:configure.in:5: -1- AC_SUBST([AWK])
@@ -255,7 +261,7 @@ m4trace:configure.in:5: -1- m4_pattern_allow([^SET_MAKE$])
 m4trace:configure.in:5: -1- AC_SUBST([am__leading_dot])
 m4trace:configure.in:5: -1- AC_SUBST_TRACE([am__leading_dot])
 m4trace:configure.in:5: -1- m4_pattern_allow([^am__leading_dot$])
-m4trace:configure.in:5: -1- AC_SUBST([AMTAR])
+m4trace:configure.in:5: -1- AC_SUBST([AMTAR], ['$${TAR-tar}'])
 m4trace:configure.in:5: -1- AC_SUBST_TRACE([AMTAR])
 m4trace:configure.in:5: -1- m4_pattern_allow([^AMTAR$])
 m4trace:configure.in:5: -1- AC_SUBST([am__tar])
@@ -264,6 +270,22 @@ m4trace:configure.in:5: -1- m4_pattern_allow([^am__tar$])
 m4trace:configure.in:5: -1- AC_SUBST([am__untar])
 m4trace:configure.in:5: -1- AC_SUBST_TRACE([am__untar])
 m4trace:configure.in:5: -1- m4_pattern_allow([^am__untar$])
+m4trace:configure.in:5: -1- AM_SILENT_RULES
+m4trace:configure.in:5: -1- AC_SUBST([AM_V])
+m4trace:configure.in:5: -1- AC_SUBST_TRACE([AM_V])
+m4trace:configure.in:5: -1- m4_pattern_allow([^AM_V$])
+m4trace:configure.in:5: -1- _AM_SUBST_NOTMAKE([AM_V])
+m4trace:configure.in:5: -1- AC_SUBST([AM_DEFAULT_V])
+m4trace:configure.in:5: -1- AC_SUBST_TRACE([AM_DEFAULT_V])
+m4trace:configure.in:5: -1- m4_pattern_allow([^AM_DEFAULT_V$])
+m4trace:configure.in:5: -1- _AM_SUBST_NOTMAKE([AM_DEFAULT_V])
+m4trace:configure.in:5: -1- AC_SUBST([AM_DEFAULT_VERBOSITY])
+m4trace:configure.in:5: -1- AC_SUBST_TRACE([AM_DEFAULT_VERBOSITY])
+m4trace:configure.in:5: -1- m4_pattern_allow([^AM_DEFAULT_VERBOSITY$])
+m4trace:configure.in:5: -1- AC_SUBST([AM_BACKSLASH])
+m4trace:configure.in:5: -1- AC_SUBST_TRACE([AM_BACKSLASH])
+m4trace:configure.in:5: -1- m4_pattern_allow([^AM_BACKSLASH$])
+m4trace:configure.in:5: -1- _AM_SUBST_NOTMAKE([AM_BACKSLASH])
 m4trace:configure.in:5: -1- AC_SUBST([CC])
 m4trace:configure.in:5: -1- AC_SUBST_TRACE([CC])
 m4trace:configure.in:5: -1- m4_pattern_allow([^CC$])
@@ -273,9 +295,6 @@ m4trace:configure.in:5: -1- m4_pattern_allow([^DEPDIR$])
 m4trace:configure.in:5: -1- AC_SUBST([am__include])
 m4trace:configure.in:5: -1- AC_SUBST_TRACE([am__include])
 m4trace:configure.in:5: -1- m4_pattern_allow([^am__include$])
-m4trace:configure.in:5: -1- AC_SUBST([am__quote])
-m4trace:configure.in:5: -1- AC_SUBST_TRACE([am__quote])
-m4trace:configure.in:5: -1- m4_pattern_allow([^am__quote$])
 m4trace:configure.in:5: -1- AM_CONDITIONAL([AMDEP], [test "x$enable_dependency_tracking" != xno])
 m4trace:configure.in:5: -1- AC_SUBST([AMDEP_TRUE])
 m4trace:configure.in:5: -1- AC_SUBST_TRACE([AMDEP_TRUE])
@@ -289,6 +308,10 @@ m4trace:configure.in:5: -1- AC_SUBST([AMDEPBACKSLASH])
 m4trace:configure.in:5: -1- AC_SUBST_TRACE([AMDEPBACKSLASH])
 m4trace:configure.in:5: -1- m4_pattern_allow([^AMDEPBACKSLASH$])
 m4trace:configure.in:5: -1- _AM_SUBST_NOTMAKE([AMDEPBACKSLASH])
+m4trace:configure.in:5: -1- AC_SUBST([am__nodep])
+m4trace:configure.in:5: -1- AC_SUBST_TRACE([am__nodep])
+m4trace:configure.in:5: -1- m4_pattern_allow([^am__nodep$])
+m4trace:configure.in:5: -1- _AM_SUBST_NOTMAKE([am__nodep])
 m4trace:configure.in:5: -1- AC_SUBST([CCDEPMODE], [depmode=$am_cv_CC_dependencies_compiler_type])
 m4trace:configure.in:5: -1- AC_SUBST_TRACE([CCDEPMODE])
 m4trace:configure.in:5: -1- m4_pattern_allow([^CCDEPMODE$])
@@ -307,31 +330,31 @@ m4trace:configure.in:5: -1- AC_SUBST([CC])
 m4trace:configure.in:5: -1- AC_SUBST_TRACE([CC])
 m4trace:configure.in:5: -1- m4_pattern_allow([^CC$])
 m4trace:configure.in:5: -2- _m4_warn([obsolete], [The macro `ac_cv_prog_gcc' is obsolete.
-You should run autoupdate.], [../../../lib/autoconf/c.m4:436: ac_cv_prog_gcc is expanded from...
+You should run autoupdate.], [../../lib/autoconf/c.m4:436: ac_cv_prog_gcc is expanded from...
 configure.in:5: LIB_AC_PROG_CC_GNU is expanded from...
 configure.in:5: LIB_AC_PROG_CC is expanded from...
 ../../../acinclude.m4:14: NEWLIB_CONFIGURE is expanded from...
 configure.in:5: the top level])
 m4trace:configure.in:5: -1- _m4_warn([obsolete], [The macro `ac_cv_prog_gcc' is obsolete.
-You should run autoupdate.], [../../../lib/autoconf/c.m4:436: ac_cv_prog_gcc is expanded from...
-../../../lib/m4sugar/m4sh.m4:639: AS_IF is expanded from...
-../../../lib/autoconf/general.m4:2031: AC_CACHE_VAL is expanded from...
-../../../lib/autoconf/general.m4:2052: AC_CACHE_CHECK is expanded from...
+You should run autoupdate.], [../../lib/autoconf/c.m4:436: ac_cv_prog_gcc is expanded from...
+../../lib/m4sugar/m4sh.m4:639: AS_IF is expanded from...
+../../lib/autoconf/general.m4:2042: AC_CACHE_VAL is expanded from...
+../../lib/autoconf/general.m4:2063: AC_CACHE_CHECK is expanded from...
 configure.in:5: LIB_AC_PROG_CC_GNU is expanded from...
 configure.in:5: LIB_AC_PROG_CC is expanded from...
 ../../../acinclude.m4:14: NEWLIB_CONFIGURE is expanded from...
 configure.in:5: the top level])
 m4trace:configure.in:5: -1- _m4_warn([obsolete], [The macro `ac_cv_prog_gcc' is obsolete.
-You should run autoupdate.], [../../../lib/autoconf/c.m4:436: ac_cv_prog_gcc is expanded from...
-../../../lib/m4sugar/m4sh.m4:639: AS_IF is expanded from...
-../../../lib/autoconf/general.m4:2031: AC_CACHE_VAL is expanded from...
-../../../lib/autoconf/general.m4:2052: AC_CACHE_CHECK is expanded from...
+You should run autoupdate.], [../../lib/autoconf/c.m4:436: ac_cv_prog_gcc is expanded from...
+../../lib/m4sugar/m4sh.m4:639: AS_IF is expanded from...
+../../lib/autoconf/general.m4:2042: AC_CACHE_VAL is expanded from...
+../../lib/autoconf/general.m4:2063: AC_CACHE_CHECK is expanded from...
 configure.in:5: LIB_AC_PROG_CC_GNU is expanded from...
 configure.in:5: LIB_AC_PROG_CC is expanded from...
 ../../../acinclude.m4:14: NEWLIB_CONFIGURE is expanded from...
 configure.in:5: the top level])
 m4trace:configure.in:5: -1- _m4_warn([obsolete], [The macro `ac_cv_prog_gcc' is obsolete.
-You should run autoupdate.], [../../../lib/autoconf/c.m4:436: ac_cv_prog_gcc is expanded from...
+You should run autoupdate.], [../../lib/autoconf/c.m4:436: ac_cv_prog_gcc is expanded from...
 configure.in:5: LIB_AC_PROG_CC is expanded from...
 ../../../acinclude.m4:14: NEWLIB_CONFIGURE is expanded from...
 configure.in:5: the top level])
