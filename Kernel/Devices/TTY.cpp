@@ -140,13 +140,29 @@ void TTY::writeChar(char c)
 			if (++m_column == VGA_WIDTH) 
 			{
 				m_column = 0;
-				if (++m_row == VGA_HEIGHT)
-                {
-					m_row = 0;
-                }
 			}
 			break;
 	}
+    if(m_row >= VGA_HEIGHT)
+    {
+        scroll();
+    }
 }
+
+void TTY::scroll()
+{
+    for(int y = 1; y <= VGA_HEIGHT; y++)
+    {
+        auto dest = (y-1);
+        if(y == (VGA_HEIGHT))
+        {
+            Libk::memset(&m_buffer[dest*VGA_WIDTH], 0, VGA_WIDTH);
+        } else {
+            Libk::memcpy(&m_buffer[dest * VGA_WIDTH], &m_buffer[y * VGA_WIDTH], VGA_WIDTH);
+        }
+    }
+    m_row--;
+}
+
 
 }

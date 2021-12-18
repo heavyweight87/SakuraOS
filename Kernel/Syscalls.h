@@ -9,6 +9,10 @@ enum Syscall
     SYSCALL_OPEN,
     SYSCALL_CLOSE,
     SYSCALL_WRITE,
+    SYSCALL_READ,
+    SYSCALL_SBRK,
+    SYSCALL_KILL,
+    SYSCALL_EXIT
 };
 
 static inline int __syscall(Syscall syscall, int p1, int p2, int p3, int p4, int p5)

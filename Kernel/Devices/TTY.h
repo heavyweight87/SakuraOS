@@ -23,7 +23,7 @@ class TTY : public Device {
         void updateCursor(int x, int y);
         int vgaRead(int address);
         int getBufferIndex(int x, int y) { return (y * VGA_WIDTH) + x; }
-
+        void scroll();
         void writeChar(char c) ;
         void writeChar(char c, uint8_t color, int x, int y);
         static void tty_process(void *arg);

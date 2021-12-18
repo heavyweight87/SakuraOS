@@ -31,12 +31,13 @@ std::uint32_t Handle(Syscall syscall, std::uint32_t p1, std::uint32_t p2, std::u
     {
         case SYSCALL_OPEN:
             return SyscallOpen((char*)p1, p2);
-            break;
         case SYSCALL_WRITE:
             return SyscallWrite(p1, (char*)p2, p3);
-            break;
         case SYSCALL_CLOSE:
             return SyscallClose(p1);
+        case SYSCALL_SBRK:
+            Libk::printk("sbrk %d\r", p1);
+            return 0;
         default: 
             Libk::printk("Unknown syscall %d\r\n", syscall);
             return 1;        
