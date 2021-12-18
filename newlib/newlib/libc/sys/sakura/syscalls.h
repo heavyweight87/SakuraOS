@@ -6,7 +6,7 @@ typedef enum
     SYSCALL_CLOSE,
     SYSCALL_WRITE,
     SYSCALL_READ,
-    SYSCALL_SRBK,
+    SYSCALL_SBRK,
     SYSCALL_KILL,
     SYSCALL_EXIT
 }Syscall;

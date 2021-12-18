@@ -21,6 +21,7 @@ int _write(int file, char *ptr, int len)
 
 int isatty(int file)
 {
+	syscall(50, 0, 0, 33, 44, 55);
 	return 1;
 }
 
@@ -32,6 +33,7 @@ int _isatty(int file)
 int fstat(int file, struct stat *st)
 {
 	st->st_mode = S_IFCHR;
+	syscall(50, 0, 0, 33, 44, 55);
 	return 0;
 }
 
@@ -57,6 +59,11 @@ int open(const char *name, int flags, ...)
 	return 0;
 }
 
+int _open(const char *name, int flags)
+{
+	return open(name, flags);
+}
+
 int close(int file)
 {
 	syscall(SYSCALL_CLOSE, file, 0, 0, 0, 6);
@@ -70,6 +77,7 @@ int _close(int file)
 
 int lseek(int file, int ptr, int dir)
 {
+	syscall(50, 0, 0, 33, 44, 55);
 }
 
 int _lseek(int file, int ptr, int dir)
@@ -79,7 +87,7 @@ int _lseek(int file, int ptr, int dir)
 
 caddr_t sbrk(int incr)
 {
-    syscall(SYSCALL_SRBK, incr, 0, 0, 0, 6);
+    syscall(SYSCALL_SBRK, incr, 0, 0, 0, 7);
 	return 0;
 }
 
@@ -95,6 +103,7 @@ void _exit()
 
 int getpid()
 {
+	syscall(50, 0, 0, 33, 44, 55);
 	return 0;
 }
 
